@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { Toaster } from "sonner";
 
 export interface MyRouterContext {
   queryClient: QueryClient;
@@ -15,6 +16,15 @@ function Root() {
     <>
       <Outlet />
       <TanStackRouterDevtools />
+      <Toaster
+        richColors
+        toastOptions={{
+          unstyled: true,
+          style: {
+            paddingBlock: "20px",
+          },
+        }}
+      />
     </>
   );
 }

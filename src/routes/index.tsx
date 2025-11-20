@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Header from "./-components/header";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -10,11 +11,8 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const handleClik = () => {
-    return (
-      <div className="toast toast-end">
-        <div className="alert alert-info">
-          <span>New mail arrived.</span>
-        </div>
+    return toast(
+      <div className="toast toast-end ">
         <div className="alert alert-success">
           <span>Message sent successfully.</span>
         </div>
