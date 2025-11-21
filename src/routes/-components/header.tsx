@@ -1,4 +1,6 @@
 import { Link } from "@tanstack/react-router";
+import { signOut } from "firebase/auth";
+import { auth } from "../../lib/firebase/auth";
 
 export default function Header() {
   return (
@@ -27,7 +29,7 @@ export default function Header() {
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
             <li>
-              <Link to="/home">Protected</Link>
+              <Link to="/feed">Protected</Link>
             </li>
             <li>
               <a>This is link</a>
@@ -50,7 +52,7 @@ export default function Header() {
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
           <li>
-            <Link to="/home">What</Link>
+            <Link to="/feed">What</Link>
           </li>
           <li>
             <details className="">
@@ -71,7 +73,9 @@ export default function Header() {
         </ul>
       </div>
       <div className="navbar-end">
-        <a className="btn">Button</a>
+        <button onClick={async () => signOut(auth)} className="btn">
+          Logout
+        </button>
       </div>
     </div>
   );

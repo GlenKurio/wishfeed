@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProtectedhomeHomeRouteImport } from './routes/_protected/(home)/home'
+import { Route as AuthIndexRouteImport } from './routes/auth/index'
+import { Route as AuthFinishSignUpRouteImport } from './routes/auth/finish-sign-up'
+import { Route as ProtectedfeedFeedRouteImport } from './routes/_protected/(feed)/feed'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
@@ -28,41 +30,63 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProtectedhomeHomeRoute = ProtectedhomeHomeRouteImport.update({
-  id: '/(home)/home',
-  path: '/home',
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthFinishSignUpRoute = AuthFinishSignUpRouteImport.update({
+  id: '/finish-sign-up',
+  path: '/finish-sign-up',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const ProtectedfeedFeedRoute = ProtectedfeedFeedRouteImport.update({
+  id: '/(feed)/feed',
+  path: '/feed',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteRoute
-  '/home': typeof ProtectedhomeHomeRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/auth/finish-sign-up': typeof AuthFinishSignUpRoute
+  '/auth/': typeof AuthIndexRoute
+  '/feed': typeof ProtectedfeedFeedRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteRoute
-  '/home': typeof ProtectedhomeHomeRoute
+  '/auth/finish-sign-up': typeof AuthFinishSignUpRoute
+  '/auth': typeof AuthIndexRoute
+  '/feed': typeof ProtectedfeedFeedRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteRouteWithChildren
-  '/auth': typeof AuthRouteRoute
-  '/_protected/(home)/home': typeof ProtectedhomeHomeRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/auth/finish-sign-up': typeof AuthFinishSignUpRoute
+  '/auth/': typeof AuthIndexRoute
+  '/_protected/(feed)/feed': typeof ProtectedfeedFeedRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/home'
+  fullPaths: '/' | '/auth' | '/auth/finish-sign-up' | '/auth/' | '/feed'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/home'
-  id: '__root__' | '/' | '/_protected' | '/auth' | '/_protected/(home)/home'
+  to: '/' | '/auth/finish-sign-up' | '/auth' | '/feed'
+  id:
+    | '__root__'
+    | '/'
+    | '/_protected'
+    | '/auth'
+    | '/auth/finish-sign-up'
+    | '/auth/'
+    | '/_protected/(feed)/feed'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRouteRoute: typeof ProtectedRouteRouteWithChildren
-  AuthRouteRoute: typeof AuthRouteRoute
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -88,32 +112,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_protected/(home)/home': {
-      id: '/_protected/(home)/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof ProtectedhomeHomeRouteImport
+    '/auth/': {
+      id: '/auth/'
+      path: '/'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/finish-sign-up': {
+      id: '/auth/finish-sign-up'
+      path: '/finish-sign-up'
+      fullPath: '/auth/finish-sign-up'
+      preLoaderRoute: typeof AuthFinishSignUpRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_protected/(feed)/feed': {
+      id: '/_protected/(feed)/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof ProtectedfeedFeedRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
   }
 }
 
 interface ProtectedRouteRouteChildren {
-  ProtectedhomeHomeRoute: typeof ProtectedhomeHomeRoute
+  ProtectedfeedFeedRoute: typeof ProtectedfeedFeedRoute
 }
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
-  ProtectedhomeHomeRoute: ProtectedhomeHomeRoute,
+  ProtectedfeedFeedRoute: ProtectedfeedFeedRoute,
 }
 
 const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(
   ProtectedRouteRouteChildren,
 )
 
+interface AuthRouteRouteChildren {
+  AuthFinishSignUpRoute: typeof AuthFinishSignUpRoute
+  AuthIndexRoute: typeof AuthIndexRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthFinishSignUpRoute: AuthFinishSignUpRoute,
+  AuthIndexRoute: AuthIndexRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRouteRoute: ProtectedRouteRouteWithChildren,
-  AuthRouteRoute: AuthRouteRoute,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
