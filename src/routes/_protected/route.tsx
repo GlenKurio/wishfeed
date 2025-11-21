@@ -1,6 +1,18 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { authQueryOptions } from "../../lib/firebase/auth";
 
 export const Route = createFileRoute("/_protected")({
+  beforeLoad: async ({ context, location }) => {
+    const user = await context.queryClient.ensureQueryData(authQueryOptions);
+    if (!user) {
+      throw redirect({
+        to: "/auth",
+        search: {
+          redirect: location.href,
+        },
+      });
+    }
+  },
   component: ProtectedLayout,
 });
 
