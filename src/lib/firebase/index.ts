@@ -1,13 +1,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCPLBXBlUwBv16Q-b1pdya4Yabz1mjdd1U",
-  authDomain: "wishfeed-18119.firebaseapp.com",
-  projectId: "wishfeed-18119",
-  storageBucket: "wishfeed-18119.firebasestorage.app",
-  messagingSenderId: "147236387248",
-  appId: "1:147236387248:web:9fea2c290a4b8cae877e75",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
