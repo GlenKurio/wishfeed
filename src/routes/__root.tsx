@@ -20,11 +20,12 @@ function Root() {
       <TanStackRouterDevtools />
 
       <Toaster
+        position="top-center"
         richColors
         toastOptions={{
-          unstyled: true,
+          // unstyled: true,
           style: {
-            paddingBlock: "20px",
+            borderRadius: "100px",
           },
         }}
       />

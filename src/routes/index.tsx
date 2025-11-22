@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Header from "./-components/header";
-import { toast } from "sonner";
+import { toast } from "../components/toast/toast";
+
+// import { toast } from "sonner";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -11,13 +13,11 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const handleClik = () => {
-    return toast(
-      <div className="toast toast-end ">
-        <div className="alert alert-success">
-          <span>Message sent successfully.</span>
-        </div>
-      </div>
-    );
+    return toast.error({
+      title: "This is a headless toast",
+      description:
+        "You have full control of styles and jsx, while still having the animations.",
+    });
   };
 
   return (
