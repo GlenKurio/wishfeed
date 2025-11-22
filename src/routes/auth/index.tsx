@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import LoginForm from "./-components/login";
 import z from "zod";
-import RegisterFrom from "./-components/register";
+import AuthForm from "./-components/auth-form";
 export const Route = createFileRoute("/auth/")({
   validateSearch: z.object({
     tab: z.enum(["login", "register"]).optional(),
@@ -19,7 +18,7 @@ function RouteComponent() {
         backgroundSize: "cover",
       }}
     >
-      {tab === "register" ? <RegisterFrom /> : <LoginForm />}
+      <AuthForm mode={tab} />
     </section>
   );
 }

@@ -13,7 +13,8 @@ import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthIndexRouteImport } from './routes/auth/index'
-import { Route as AuthFinishSignUpRouteImport } from './routes/auth/finish-sign-up'
+import { Route as LegalTermsRouteImport } from './routes/legal/terms'
+import { Route as AuthFinishRouteImport } from './routes/auth/finish'
 import { Route as ProtectedfeedFeedRouteImport } from './routes/_protected/(feed)/feed'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
@@ -35,9 +36,14 @@ const AuthIndexRoute = AuthIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthRouteRoute,
 } as any)
-const AuthFinishSignUpRoute = AuthFinishSignUpRouteImport.update({
-  id: '/finish-sign-up',
-  path: '/finish-sign-up',
+const LegalTermsRoute = LegalTermsRouteImport.update({
+  id: '/legal/terms',
+  path: '/legal/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthFinishRoute = AuthFinishRouteImport.update({
+  id: '/finish',
+  path: '/finish',
   getParentRoute: () => AuthRouteRoute,
 } as any)
 const ProtectedfeedFeedRoute = ProtectedfeedFeedRouteImport.update({
@@ -49,13 +55,15 @@ const ProtectedfeedFeedRoute = ProtectedfeedFeedRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
-  '/auth/finish-sign-up': typeof AuthFinishSignUpRoute
+  '/auth/finish': typeof AuthFinishRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/auth/': typeof AuthIndexRoute
   '/feed': typeof ProtectedfeedFeedRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth/finish-sign-up': typeof AuthFinishSignUpRoute
+  '/auth/finish': typeof AuthFinishRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/auth': typeof AuthIndexRoute
   '/feed': typeof ProtectedfeedFeedRoute
 }
@@ -64,21 +72,29 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteRouteWithChildren
   '/auth': typeof AuthRouteRouteWithChildren
-  '/auth/finish-sign-up': typeof AuthFinishSignUpRoute
+  '/auth/finish': typeof AuthFinishRoute
+  '/legal/terms': typeof LegalTermsRoute
   '/auth/': typeof AuthIndexRoute
   '/_protected/(feed)/feed': typeof ProtectedfeedFeedRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/auth/finish-sign-up' | '/auth/' | '/feed'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/auth/finish'
+    | '/legal/terms'
+    | '/auth/'
+    | '/feed'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/finish-sign-up' | '/auth' | '/feed'
+  to: '/' | '/auth/finish' | '/legal/terms' | '/auth' | '/feed'
   id:
     | '__root__'
     | '/'
     | '/_protected'
     | '/auth'
-    | '/auth/finish-sign-up'
+    | '/auth/finish'
+    | '/legal/terms'
     | '/auth/'
     | '/_protected/(feed)/feed'
   fileRoutesById: FileRoutesById
@@ -87,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRouteRoute: typeof ProtectedRouteRouteWithChildren
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  LegalTermsRoute: typeof LegalTermsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -119,11 +136,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthIndexRouteImport
       parentRoute: typeof AuthRouteRoute
     }
-    '/auth/finish-sign-up': {
-      id: '/auth/finish-sign-up'
-      path: '/finish-sign-up'
-      fullPath: '/auth/finish-sign-up'
-      preLoaderRoute: typeof AuthFinishSignUpRouteImport
+    '/legal/terms': {
+      id: '/legal/terms'
+      path: '/legal/terms'
+      fullPath: '/legal/terms'
+      preLoaderRoute: typeof LegalTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/finish': {
+      id: '/auth/finish'
+      path: '/finish'
+      fullPath: '/auth/finish'
+      preLoaderRoute: typeof AuthFinishRouteImport
       parentRoute: typeof AuthRouteRoute
     }
     '/_protected/(feed)/feed': {
@@ -149,12 +173,12 @@ const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(
 )
 
 interface AuthRouteRouteChildren {
-  AuthFinishSignUpRoute: typeof AuthFinishSignUpRoute
+  AuthFinishRoute: typeof AuthFinishRoute
   AuthIndexRoute: typeof AuthIndexRoute
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
-  AuthFinishSignUpRoute: AuthFinishSignUpRoute,
+  AuthFinishRoute: AuthFinishRoute,
   AuthIndexRoute: AuthIndexRoute,
 }
 
@@ -166,6 +190,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRouteRoute: ProtectedRouteRouteWithChildren,
   AuthRouteRoute: AuthRouteRouteWithChildren,
+  LegalTermsRoute: LegalTermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

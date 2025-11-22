@@ -14,9 +14,15 @@ const signInSchema = z.object({
     .max(100, { message: "Email cannot be longer than 100 characters." }),
 });
 
-export default function LoginForm() {
+interface AuthFormProps {
+  mode?: "login" | "register";
+}
+
+export default function AuthForm({ mode = "login" }: AuthFormProps) {
   const [linkSent, setLinkSent] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  const isRegister = mode === "register";
 
   const form = useForm({
     defaultValues: {
@@ -30,7 +36,7 @@ export default function LoginForm() {
     onSubmit: async ({ value }) => {
       setSubmitError("");
       const actionCodeSettings = {
-        url: window.location.origin + "/auth/finish-sign-up",
+        url: window.location.origin + "/auth/finish",
         handleCodeInApp: true,
       };
 
@@ -65,7 +71,10 @@ export default function LoginForm() {
               will expire in 60 minutes.
             </p>
             <button
-              onClick={() => setLinkSent(false)}
+              onClick={() => {
+                setLinkSent(false);
+                form.reset();
+              }}
               className="btn btn-ghost btn-sm mt-6"
             >
               Send to a different email
@@ -78,10 +87,15 @@ export default function LoginForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="card bg-base-100 border-base-200 w-full max-w-100 border p-12 shadow-lg">
-        <h1 className="mb-2 text-center text-3xl font-bold">Welcome</h1>
-        <p className="text-base-content/70 mb-6 text-center">
-          Sign in to your account to continue
+      <div className="card bg-base-100 border-base-200 w-full max-w-110 border p-10 md:p-12 shadow-lg">
+        <h1 className="mb-2 text-center text-3xl font-bold">
+          {" "}
+          {isRegister ? "Create account" : "Welcome"}
+        </h1>
+        <p className="text-base-content/70 mb-6 text-sm text-center">
+          {isRegister
+            ? "Join thousands of people who already sharing their wishlists with friends"
+            : "Sign in to your account to continue"}
         </p>
 
         <div className="grid gap-2">
@@ -120,7 +134,7 @@ export default function LoginForm() {
         <div className="my-4 flex items-center">
           <div className="bg-base-200 h-px flex-1"></div>
           <span className="text-base-content/60 px-3 text-sm">
-            Or continue with email
+            {isRegister ? "Or sign up with email" : "Or continue with email"}
           </span>
           <div className="bg-base-200 h-px flex-1"></div>
         </div>
@@ -149,7 +163,7 @@ export default function LoginForm() {
               return (
                 <div>
                   <label
-                    className={`input input-bordered ${hasError ? "input-error border-error" : ""}`}
+                    className={`input input-bordered w-full ${hasError ? "input-error border-error" : ""}`}
                   >
                     <IconMail
                       width="20"
@@ -186,6 +200,15 @@ export default function LoginForm() {
             </div>
           )}
 
+          {isRegister && (
+            <p className="text-xs cursor-pointer text-base-content/70">
+              <span>By registering you agree to </span>
+              <Link to="/legal/terms" className="link link-info font-medium">
+                Terms & Conditions
+              </Link>
+            </p>
+          )}
+
           <form.Subscribe
             selector={(state) => [
               state.canSubmit,
@@ -193,8 +216,13 @@ export default function LoginForm() {
               state.isTouched,
               state.isDefaultValue,
             ]}
-            children={([canSubmit, isSubmitting, isTouched]) => {
-              const disabledSubmit = !canSubmit || !isTouched;
+            children={([
+              canSubmit,
+              isSubmitting,
+              isTouched,
+              isDefaultValue,
+            ]) => {
+              const disabledSubmit = !canSubmit || !isTouched || isDefaultValue;
 
               return (
                 <div className="flex w-full flex-col gap-2">
@@ -209,6 +237,8 @@ export default function LoginForm() {
                         <span className="loading loading-spinner loading-sm"></span>
                         Sending link...
                       </>
+                    ) : isRegister ? (
+                      "Create account"
                     ) : (
                       "Sign in"
                     )}
@@ -220,15 +250,29 @@ export default function LoginForm() {
         </div>
 
         <div className="text-base-content/70 mt-6 text-center text-xs">
-          Don't have an account?
-          <Link
-            to="/auth"
-            search={{ tab: "register" }}
-            className="link link-info font-medium"
-          >
-            {" "}
-            Sign up
-          </Link>
+          {isRegister ? (
+            <>
+              Already have an account?{" "}
+              <Link
+                to="/auth"
+                search={{ tab: "login" }}
+                className="link link-info font-medium"
+              >
+                Sign in
+              </Link>
+            </>
+          ) : (
+            <>
+              Don't have an account?{" "}
+              <Link
+                to="/auth"
+                search={{ tab: "register" }}
+                className="link link-info font-medium"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

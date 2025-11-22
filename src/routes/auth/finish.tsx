@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import { IconCheck, IconX, IconLoader2 } from "@tabler/icons-react";
 
-export const Route = createFileRoute("/auth/finish-sign-up")({
+export const Route = createFileRoute("/auth/finish")({
   component: RouteComponent,
 });
 
@@ -50,8 +50,8 @@ function RouteComponent() {
 
         // Redirect to home or dashboard after 2 seconds
         setTimeout(() => {
-          navigate({ to: "/" });
-        }, 2000);
+          navigate({ to: "/feed" });
+        }, 1000);
       } catch (err: any) {
         console.error("Sign-in error:", err);
         setStatus("error");
@@ -109,7 +109,7 @@ function RouteComponent() {
       // Redirect to home or dashboard after 2 seconds
       setTimeout(() => {
         navigate({ to: "/feed" });
-      }, 2000);
+      }, 1000);
     } catch (err: any) {
       console.error("Sign-in error:", err);
       setStatus("error");
