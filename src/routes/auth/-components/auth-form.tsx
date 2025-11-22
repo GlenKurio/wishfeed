@@ -1,10 +1,11 @@
 import { IconCheck, IconMail } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
-import { Link } from "@tanstack/react-router";
-import { sendSignInLinkToEmail } from "firebase/auth";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { sendSignInLinkToEmail, signInWithPopup } from "firebase/auth";
 import { useState } from "react";
+import { toast } from "sonner";
 import z from "zod";
-import { auth } from "../../../lib/firebase/auth";
+import { auth, googleProvider } from "../../../lib/firebase/auth";
 
 const signInSchema = z.object({
   email: z
@@ -21,6 +22,7 @@ interface AuthFormProps {
 export default function AuthForm({ mode = "login" }: AuthFormProps) {
   const [linkSent, setLinkSent] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const navigate = useNavigate();
 
   const isRegister = mode === "register";
 
@@ -49,6 +51,29 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
       }
     },
   });
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      toast(
+        <div className="toast toast-end ">
+          <div className="alert alert-success">
+            <span>Signed in with Google.</span>
+          </div>
+        </div>
+      );
+      navigate({ to: "/feed" });
+    } catch (error) {
+      console.log("Error occured when signing in with Google: ", error);
+      toast(
+        <div className="toast toast-end ">
+          <div className="alert alert-error">
+            <span>There was an error signing in with Google.</span>
+          </div>
+        </div>
+      );
+    }
+  };
 
   const isSubmitting = form.state.isSubmitting;
 
@@ -88,7 +113,12 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
   return (
     <div className="flex min-h-screen items-center justify-center p-4 font-family-sans">
       <div className="card bg-base-100 border-base-200 w-full max-w-110 border p-6  md:p-12 md:pt-8 shadow-lg">
-        <img src="/public/wishfeed-logo.svg" className="size-14 mx-auto mb-4" />
+        <Link
+          to="/"
+          className=" flex items-center justify-center  mx-auto mb-4"
+        >
+          <img src="/wishfeed-logo.svg" className="size-14" />
+        </Link>
 
         <h1 className="mb-2 text-center text-3xl font-bold">
           {" "}
@@ -101,7 +131,10 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
         </p>
 
         <div className="grid gap-2">
-          <button className="btn border-[#e5e5e5] bg-white text-black">
+          <button
+            onClick={handleGoogleSignIn}
+            className="btn border-[#e5e5e5] bg-white text-black"
+          >
             <svg
               aria-label="Google logo"
               width="18"

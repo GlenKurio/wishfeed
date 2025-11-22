@@ -1,8 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 import { firebaseApp } from ".";
 
 export const auth = getAuth(firebaseApp);
+export const googleProvider = new GoogleAuthProvider();
 
 export const authQueryOptions = queryOptions({
   queryKey: ["auth"],

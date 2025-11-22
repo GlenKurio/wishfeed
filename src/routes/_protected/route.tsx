@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_protected")({
       throw redirect({
         to: "/auth",
         search: {
-          redirect: location.href,
+          tab: "login",
         },
       });
     }
