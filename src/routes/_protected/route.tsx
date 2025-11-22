@@ -1,5 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { authQueryOptions } from "../../lib/firebase/auth";
+import AppHeader from "./-components/app-header";
+import Dock from "./-components/dock";
 
 export const Route = createFileRoute("/_protected")({
   beforeLoad: async ({ context }) => {
@@ -19,7 +21,9 @@ export const Route = createFileRoute("/_protected")({
 function ProtectedLayout() {
   return (
     <>
+      <AppHeader />
       <Outlet />
+      <Dock />
     </>
   );
 }

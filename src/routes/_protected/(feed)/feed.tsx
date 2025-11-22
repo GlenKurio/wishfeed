@@ -5,5 +5,5 @@ export const Route = createFileRoute("/_protected/(feed)/feed")({
 });
 
 function RouteComponent() {
-  return <div>Hello "/_protected/(home)/home"!</div>;
+  return <main className="relative">This is feed page</main>;
 }

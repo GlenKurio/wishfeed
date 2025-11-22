@@ -60,7 +60,7 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
           <div className="alert alert-success">
             <span>Signed in with Google.</span>
           </div>
-        </div>
+        </div>,
       );
       navigate({ to: "/feed" });
     } catch (error) {
@@ -70,7 +70,7 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
           <div className="alert alert-error">
             <span>There was an error signing in with Google.</span>
           </div>
-        </div>
+        </div>,
       );
     }
   };

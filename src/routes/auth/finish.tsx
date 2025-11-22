@@ -58,11 +58,11 @@ function RouteComponent() {
 
         if (err.code === "auth/email-already-in-use") {
           setError(
-            "This email is already registered. The email link sign-in might be misconfigured. Please contact support or try a different sign-in method."
+            "This email is already registered. The email link sign-in might be misconfigured. Please contact support or try a different sign-in method.",
           );
         } else if (err.code === "auth/invalid-action-code") {
           setError(
-            "This sign-in link has expired or has already been used. Please request a new one."
+            "This sign-in link has expired or has already been used. Please request a new one.",
           );
         } else if (err.code === "auth/invalid-email") {
           setError("The email address is invalid. Please check and try again.");
@@ -116,11 +116,11 @@ function RouteComponent() {
 
       if (err.code === "auth/email-already-in-use") {
         setError(
-          "This email is already registered. The email link sign-in might be misconfigured. Please contact support or try a different sign-in method."
+          "This email is already registered. The email link sign-in might be misconfigured. Please contact support or try a different sign-in method.",
         );
       } else if (err.code === "auth/invalid-action-code") {
         setError(
-          "This sign-in link has expired or has already been used. Please request a new one."
+          "This sign-in link has expired or has already been used. Please request a new one.",
         );
       } else if (err.code === "auth/invalid-email") {
         setError("The email address is invalid. Please check and try again.");
