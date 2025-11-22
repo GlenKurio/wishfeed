@@ -87,7 +87,9 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4 font-family-sans">
-      <div className="card bg-base-100 border-base-200 w-full max-w-110 border p-10 md:p-12 shadow-lg">
+      <div className="card bg-base-100 border-base-200 w-full max-w-110 border p-6  md:p-12 md:pt-8 shadow-lg">
+        <img src="/public/wishfeed-logo.svg" className="size-14 mx-auto mb-4" />
+
         <h1 className="mb-2 text-center text-3xl font-bold">
           {" "}
           {isRegister ? "Create account" : "Welcome"}

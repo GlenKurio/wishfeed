@@ -21,10 +21,10 @@ function Index() {
   };
 
   return (
-    <main className="bg-base-200 min-h-screen font-family-sans">
+    <main className="bg-base-100 min-h-screen font-family-sans">
       <Header />
       <h3 className="text-3xl font-thin">Welcome Home!</h3>
-      <button className="btn btn-primary" onClick={handleClik}>
+      <button className="btn btn-primary font-bold " onClick={handleClik}>
         Hello, ShadcnUI!
       </button>
     </main>
