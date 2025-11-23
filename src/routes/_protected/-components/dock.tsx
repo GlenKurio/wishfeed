@@ -1,21 +1,22 @@
-import { IconHome, IconPlus, IconSearch, IconUser } from "@tabler/icons-react";
+import { IconHome, IconSearch, IconUser } from "@tabler/icons-react";
 import { Icons } from "../../../components/icons";
+import { Link } from "@tanstack/react-router";
 
 export default function Dock() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-md ">
       <div className="container mx-auto flex max-w-2xl items-center justify-around p-2">
-        <div className="lg:tooltip" data-tip="Home">
-          <button className="btn btn-ghost rounded-full p-2.5">
+        <div className="lg:tooltip" data-tip="Feed">
+          <Link to="/feed" className="btn btn-ghost rounded-full p-2.5">
             <IconHome className="size-5" />
-            <span className="sr-only">Home</span>
-          </button>
+            <span className="sr-only">Feed</span>
+          </Link>
         </div>
         <div className="lg:tooltip" data-tip="Explore">
-          <button className="btn btn-ghost rounded-full p-2.5">
+          <Link to="/search" className="btn btn-ghost rounded-full p-2.5">
             <IconSearch className="size-5" />
             <span className="sr-only">Explore</span>
-          </button>
+          </Link>
         </div>
 
         <div className="lg:tooltip" data-tip="Create wish">
@@ -26,16 +27,16 @@ export default function Dock() {
         </div>
 
         <div className="lg:tooltip " data-tip="Wishlists">
-          <button className="btn btn-ghost rounded-full p-2.5">
+          <Link to="/wishlists" className="btn btn-ghost rounded-full p-2.5">
             <Icons.wishlist className="size-5" />
             <span className="sr-only">Wishlists</span>
-          </button>
+          </Link>
         </div>
         <div className="lg:tooltip" data-tip="Profile">
-          <button className="btn btn-ghost rounded-full p-2.5">
+          <Link to="/profile" className="btn btn-ghost rounded-full p-2.5">
             <IconUser className="size-5" />
             <span className="sr-only">Profile</span>
-          </button>
+          </Link>
         </div>
       </div>
     </nav>

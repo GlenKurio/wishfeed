@@ -15,6 +15,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthIndexRouteImport } from './routes/auth/index'
 import { Route as LegalTermsRouteImport } from './routes/legal/terms'
 import { Route as AuthFinishRouteImport } from './routes/auth/finish'
+import { Route as ProtectedwishlistsWishlistsRouteImport } from './routes/_protected/(wishlists)/wishlists'
+import { Route as ProtectedsearchSearchRouteImport } from './routes/_protected/(search)/search'
+import { Route as ProtectedprofileProfileRouteImport } from './routes/_protected/(profile)/profile'
 import { Route as ProtectedfeedFeedRouteImport } from './routes/_protected/(feed)/feed'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
@@ -46,6 +49,22 @@ const AuthFinishRoute = AuthFinishRouteImport.update({
   path: '/finish',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const ProtectedwishlistsWishlistsRoute =
+  ProtectedwishlistsWishlistsRouteImport.update({
+    id: '/(wishlists)/wishlists',
+    path: '/wishlists',
+    getParentRoute: () => ProtectedRouteRoute,
+  } as any)
+const ProtectedsearchSearchRoute = ProtectedsearchSearchRouteImport.update({
+  id: '/(search)/search',
+  path: '/search',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
+const ProtectedprofileProfileRoute = ProtectedprofileProfileRouteImport.update({
+  id: '/(profile)/profile',
+  path: '/profile',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
 const ProtectedfeedFeedRoute = ProtectedfeedFeedRouteImport.update({
   id: '/(feed)/feed',
   path: '/feed',
@@ -59,6 +78,9 @@ export interface FileRoutesByFullPath {
   '/legal/terms': typeof LegalTermsRoute
   '/auth/': typeof AuthIndexRoute
   '/feed': typeof ProtectedfeedFeedRoute
+  '/profile': typeof ProtectedprofileProfileRoute
+  '/search': typeof ProtectedsearchSearchRoute
+  '/wishlists': typeof ProtectedwishlistsWishlistsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -66,6 +88,9 @@ export interface FileRoutesByTo {
   '/legal/terms': typeof LegalTermsRoute
   '/auth': typeof AuthIndexRoute
   '/feed': typeof ProtectedfeedFeedRoute
+  '/profile': typeof ProtectedprofileProfileRoute
+  '/search': typeof ProtectedsearchSearchRoute
+  '/wishlists': typeof ProtectedwishlistsWishlistsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -76,6 +101,9 @@ export interface FileRoutesById {
   '/legal/terms': typeof LegalTermsRoute
   '/auth/': typeof AuthIndexRoute
   '/_protected/(feed)/feed': typeof ProtectedfeedFeedRoute
+  '/_protected/(profile)/profile': typeof ProtectedprofileProfileRoute
+  '/_protected/(search)/search': typeof ProtectedsearchSearchRoute
+  '/_protected/(wishlists)/wishlists': typeof ProtectedwishlistsWishlistsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,8 +114,19 @@ export interface FileRouteTypes {
     | '/legal/terms'
     | '/auth/'
     | '/feed'
+    | '/profile'
+    | '/search'
+    | '/wishlists'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth/finish' | '/legal/terms' | '/auth' | '/feed'
+  to:
+    | '/'
+    | '/auth/finish'
+    | '/legal/terms'
+    | '/auth'
+    | '/feed'
+    | '/profile'
+    | '/search'
+    | '/wishlists'
   id:
     | '__root__'
     | '/'
@@ -97,6 +136,9 @@ export interface FileRouteTypes {
     | '/legal/terms'
     | '/auth/'
     | '/_protected/(feed)/feed'
+    | '/_protected/(profile)/profile'
+    | '/_protected/(search)/search'
+    | '/_protected/(wishlists)/wishlists'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -150,6 +192,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthFinishRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_protected/(wishlists)/wishlists': {
+      id: '/_protected/(wishlists)/wishlists'
+      path: '/wishlists'
+      fullPath: '/wishlists'
+      preLoaderRoute: typeof ProtectedwishlistsWishlistsRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
+    '/_protected/(search)/search': {
+      id: '/_protected/(search)/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof ProtectedsearchSearchRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
+    '/_protected/(profile)/profile': {
+      id: '/_protected/(profile)/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProtectedprofileProfileRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
     '/_protected/(feed)/feed': {
       id: '/_protected/(feed)/feed'
       path: '/feed'
@@ -162,10 +225,16 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedRouteRouteChildren {
   ProtectedfeedFeedRoute: typeof ProtectedfeedFeedRoute
+  ProtectedprofileProfileRoute: typeof ProtectedprofileProfileRoute
+  ProtectedsearchSearchRoute: typeof ProtectedsearchSearchRoute
+  ProtectedwishlistsWishlistsRoute: typeof ProtectedwishlistsWishlistsRoute
 }
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
   ProtectedfeedFeedRoute: ProtectedfeedFeedRoute,
+  ProtectedprofileProfileRoute: ProtectedprofileProfileRoute,
+  ProtectedsearchSearchRoute: ProtectedsearchSearchRoute,
+  ProtectedwishlistsWishlistsRoute: ProtectedwishlistsWishlistsRoute,
 }
 
 const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(
