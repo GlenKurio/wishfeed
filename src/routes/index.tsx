@@ -13,10 +13,8 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const handleClik = () => {
-    return toast.error({
+    return toast.success({
       title: "This is a headless toast",
-      description:
-        "You have full control of styles and jsx, while still having the animations.",
     });
   };
 

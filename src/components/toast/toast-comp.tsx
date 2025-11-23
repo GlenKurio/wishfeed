@@ -44,12 +44,14 @@ export default function Toast({ title, description, variant }: ToastProps) {
     <div
       className={`flex rounded-3xl ${styles.bg} shadow-lg ring-1 ring-black/5 w-full md:max-w-[364px] items-center gap-3 p-4`}
     >
-      <Icon className={`${styles.text} shrink-0`} size={24} />
+      <Icon className={`${styles.text} shrink-0`} size={20} />
       <div className="flex-1">
         <p className={`text-sm font-medium ${styles.text}`}>{title}</p>
-        <p className={`mt-1 text-sm ${styles.text} opacity-70`}>
-          {description}
-        </p>
+        {description && (
+          <p className={`mt-1 text-sm ${styles.text} opacity-70`}>
+            {description}
+          </p>
+        )}
       </div>
     </div>
   );
