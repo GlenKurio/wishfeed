@@ -1,5 +1,5 @@
 import { IconBellRinging2 } from "@tabler/icons-react";
-import { useRouter } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 export default function AppHeader() {
   const router = useRouter();
 
@@ -8,12 +8,18 @@ export default function AppHeader() {
   const renderHeader = () => {
     if (location.pathname.startsWith("/feed")) {
       return (
-        <div className=" w-full p-4 flex items-center justify-between ">
+        <div className=" w-full p-2 flex items-center justify-between ">
           <figure>
             <img src="/logo-full.png" className="h-8" />
           </figure>
-          <div>
-            <IconBellRinging2 />
+          <div className="lg:tooltip tooltip-bottom" data-tip="Explore">
+            <Link
+              to="/notifications"
+              className="btn btn-ghost rounded-full p-2.5"
+            >
+              <IconBellRinging2 className="size-5" />
+              <span className="sr-only">Explore</span>
+            </Link>
           </div>
         </div>
       );

@@ -18,6 +18,7 @@ import { Route as AuthFinishRouteImport } from './routes/auth/finish'
 import { Route as ProtectedwishlistsWishlistsRouteImport } from './routes/_protected/(wishlists)/wishlists'
 import { Route as ProtectedsearchSearchRouteImport } from './routes/_protected/(search)/search'
 import { Route as ProtectedprofileProfileRouteImport } from './routes/_protected/(profile)/profile'
+import { Route as ProtectednotificationsNotificationsRouteImport } from './routes/_protected/(notifications)/notifications'
 import { Route as ProtectedfeedFeedRouteImport } from './routes/_protected/(feed)/feed'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
@@ -65,6 +66,12 @@ const ProtectedprofileProfileRoute = ProtectedprofileProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
+const ProtectednotificationsNotificationsRoute =
+  ProtectednotificationsNotificationsRouteImport.update({
+    id: '/(notifications)/notifications',
+    path: '/notifications',
+    getParentRoute: () => ProtectedRouteRoute,
+  } as any)
 const ProtectedfeedFeedRoute = ProtectedfeedFeedRouteImport.update({
   id: '/(feed)/feed',
   path: '/feed',
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/legal/terms': typeof LegalTermsRoute
   '/auth/': typeof AuthIndexRoute
   '/feed': typeof ProtectedfeedFeedRoute
+  '/notifications': typeof ProtectednotificationsNotificationsRoute
   '/profile': typeof ProtectedprofileProfileRoute
   '/search': typeof ProtectedsearchSearchRoute
   '/wishlists': typeof ProtectedwishlistsWishlistsRoute
@@ -88,6 +96,7 @@ export interface FileRoutesByTo {
   '/legal/terms': typeof LegalTermsRoute
   '/auth': typeof AuthIndexRoute
   '/feed': typeof ProtectedfeedFeedRoute
+  '/notifications': typeof ProtectednotificationsNotificationsRoute
   '/profile': typeof ProtectedprofileProfileRoute
   '/search': typeof ProtectedsearchSearchRoute
   '/wishlists': typeof ProtectedwishlistsWishlistsRoute
@@ -101,6 +110,7 @@ export interface FileRoutesById {
   '/legal/terms': typeof LegalTermsRoute
   '/auth/': typeof AuthIndexRoute
   '/_protected/(feed)/feed': typeof ProtectedfeedFeedRoute
+  '/_protected/(notifications)/notifications': typeof ProtectednotificationsNotificationsRoute
   '/_protected/(profile)/profile': typeof ProtectedprofileProfileRoute
   '/_protected/(search)/search': typeof ProtectedsearchSearchRoute
   '/_protected/(wishlists)/wishlists': typeof ProtectedwishlistsWishlistsRoute
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/legal/terms'
     | '/auth/'
     | '/feed'
+    | '/notifications'
     | '/profile'
     | '/search'
     | '/wishlists'
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '/legal/terms'
     | '/auth'
     | '/feed'
+    | '/notifications'
     | '/profile'
     | '/search'
     | '/wishlists'
@@ -136,6 +148,7 @@ export interface FileRouteTypes {
     | '/legal/terms'
     | '/auth/'
     | '/_protected/(feed)/feed'
+    | '/_protected/(notifications)/notifications'
     | '/_protected/(profile)/profile'
     | '/_protected/(search)/search'
     | '/_protected/(wishlists)/wishlists'
@@ -213,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedprofileProfileRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
+    '/_protected/(notifications)/notifications': {
+      id: '/_protected/(notifications)/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof ProtectednotificationsNotificationsRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
     '/_protected/(feed)/feed': {
       id: '/_protected/(feed)/feed'
       path: '/feed'
@@ -225,6 +245,7 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedRouteRouteChildren {
   ProtectedfeedFeedRoute: typeof ProtectedfeedFeedRoute
+  ProtectednotificationsNotificationsRoute: typeof ProtectednotificationsNotificationsRoute
   ProtectedprofileProfileRoute: typeof ProtectedprofileProfileRoute
   ProtectedsearchSearchRoute: typeof ProtectedsearchSearchRoute
   ProtectedwishlistsWishlistsRoute: typeof ProtectedwishlistsWishlistsRoute
@@ -232,6 +253,8 @@ interface ProtectedRouteRouteChildren {
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
   ProtectedfeedFeedRoute: ProtectedfeedFeedRoute,
+  ProtectednotificationsNotificationsRoute:
+    ProtectednotificationsNotificationsRoute,
   ProtectedprofileProfileRoute: ProtectedprofileProfileRoute,
   ProtectedsearchSearchRoute: ProtectedsearchSearchRoute,
   ProtectedwishlistsWishlistsRoute: ProtectedwishlistsWishlistsRoute,
