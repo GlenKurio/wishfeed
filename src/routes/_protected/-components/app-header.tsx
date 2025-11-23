@@ -8,7 +8,7 @@ export default function AppHeader() {
   const renderHeader = () => {
     if (location.pathname.startsWith("/feed")) {
       return (
-        <div className="w-full p-2 flex items-center justify-between ">
+        <div className="w-full p-2 flex items-center justify-between border-b border-neutral/20">
           <figure>
             <img src="/logo-full.png" className="h-8" />
           </figure>

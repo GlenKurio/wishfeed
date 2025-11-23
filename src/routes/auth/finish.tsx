@@ -50,7 +50,7 @@ function RouteComponent() {
 
         // Redirect to home or dashboard after 2 seconds
         setTimeout(() => {
-          navigate({ to: "/feed" });
+          navigate({ to: "/home" });
         }, 1000);
       } catch (err: any) {
         console.error("Sign-in error:", err);
@@ -108,7 +108,7 @@ function RouteComponent() {
 
       // Redirect to home or dashboard after 2 seconds
       setTimeout(() => {
-        navigate({ to: "/feed" });
+        navigate({ to: "/home" });
       }, 1000);
     } catch (err: any) {
       console.error("Sign-in error:", err);

@@ -57,7 +57,7 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
     try {
       await signInWithPopup(auth, googleProvider);
       toast.success({ title: "Signed in with Google." });
-      navigate({ to: "/feed" });
+      navigate({ to: "/home" });
     } catch (error) {
       console.log("Error occured when signing in with Google: ", error);
       toast.error({ title: "There was an error signing in with Google." });

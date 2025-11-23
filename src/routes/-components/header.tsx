@@ -15,7 +15,7 @@ export default function Header() {
       <nav>
         <ul>
           <li>
-            <Link to="/feed">Home</Link>
+            <Link to="/home">Home</Link>
           </li>
         </ul>
       </nav>

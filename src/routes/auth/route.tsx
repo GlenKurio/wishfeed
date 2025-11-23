@@ -6,7 +6,7 @@ export const Route = createFileRoute("/auth")({
     const user = await context.queryClient.ensureQueryData(authQueryOptions);
     if (user) {
       throw redirect({
-        to: "/feed",
+        to: "/home",
         search: {
           redirect: location.href,
         },

@@ -1,9 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/_protected/(wishlists)/wishlists')({
+export const Route = createFileRoute("/_protected/(wishlists)/wishlists")({
   component: RouteComponent,
-})
+});
 
 function RouteComponent() {
-  return <div>Hello "/_protected/(wishlists)/wishlists"!</div>
+  return <div className="">Hello "/_protected/(wishlists)/wishlists"!</div>;
 }

@@ -4,10 +4,10 @@ import { Link } from "@tanstack/react-router";
 
 export default function Dock() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-md ">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-neutral/10 bg-background/95 backdrop-blur-md ">
       <div className="container mx-auto flex max-w-2xl items-center justify-around p-2">
         <div className="lg:tooltip tooltip-primary" data-tip="Feed">
-          <Link to="/feed" className="btn btn-ghost rounded-full p-2.5">
+          <Link to="/home" className="btn btn-ghost rounded-full p-2.5">
             <IconHome className="size-5" />
             <span className="sr-only">Feed</span>
           </Link>
