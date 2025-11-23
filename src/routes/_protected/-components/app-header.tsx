@@ -6,7 +6,7 @@ export default function AppHeader() {
   const location = router.state.location;
 
   const renderHeader = () => {
-    if (location.pathname.startsWith("/feed")) {
+    if (location.pathname.startsWith("/home")) {
       return (
         <div className="w-full p-2 flex items-center justify-between border-b border-neutral/20">
           <figure>
