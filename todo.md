@@ -3,7 +3,7 @@
 
 - Connect domain to Firbase and make initial deployment to Fiebase;
 
-- Design:
-  -- Remove DaisyUI and connect ShadcnUI;
-  -- Move colors;
-  -- Redesign the auth form;
+- Create wish post design;
+- Create a form to create a wish
+- Show wishes in feed; make intersitng layout like pinterest?
+- Allow to make a post

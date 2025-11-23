@@ -8,11 +8,14 @@ export default function AppHeader() {
   const renderHeader = () => {
     if (location.pathname.startsWith("/feed")) {
       return (
-        <div className=" w-full p-2 flex items-center justify-between ">
+        <div className="w-full p-2 flex items-center justify-between ">
           <figure>
             <img src="/logo-full.png" className="h-8" />
           </figure>
-          <div className="lg:tooltip tooltip-bottom" data-tip="Explore">
+          <div
+            className="tooltip tooltip-left tooltip-primary"
+            data-tip="Notifications"
+          >
             <Link
               to="/notifications"
               className="btn btn-ghost rounded-full p-2.5"
@@ -26,5 +29,5 @@ export default function AppHeader() {
     }
   };
 
-  return <div className="">{renderHeader()}</div>;
+  return <>{renderHeader()}</>;
 }

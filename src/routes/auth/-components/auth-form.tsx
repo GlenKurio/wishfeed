@@ -89,7 +89,7 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
                 setLinkSent(false);
                 form.reset();
               }}
-              className="btn btn-ghost btn-sm mt-6"
+              className="btn btn-ghost btn-sm mt-6 text-primary"
             >
               Send to a different email
             </button>
