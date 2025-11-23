@@ -4,31 +4,39 @@ import { Icons } from "../../../components/icons";
 export default function Dock() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-md ">
-      <div className="container mx-auto flex max-w-2xl items-center justify-around p-4">
-        <button className="btn btn-ghost rounded-full p-2.5">
-          <IconHome className="size-5" />
-          <span className="sr-only">Home</span>
-        </button>
+      <div className="container mx-auto flex max-w-2xl items-center justify-around p-2">
+        <div className="lg:tooltip" data-tip="Home">
+          <button className="btn btn-ghost rounded-full p-2.5">
+            <IconHome className="size-5" />
+            <span className="sr-only">Home</span>
+          </button>
+        </div>
+        <div className="lg:tooltip" data-tip="Explore">
+          <button className="btn btn-ghost rounded-full p-2.5">
+            <IconSearch className="size-5" />
+            <span className="sr-only">Explore</span>
+          </button>
+        </div>
 
-        <button className="text-muted-foreground hover:text-foreground">
-          <IconSearch className="size-5" />
-          <span className="sr-only">Explore</span>
-        </button>
+        <div className="lg:tooltip" data-tip="Create wish">
+          <button className="btn btn-ghost rounded-full p-1 flex items-center justify-center">
+            <img src="/add-icon.svg" className="size-8 " />
+            <span className="sr-only">Create wish</span>
+          </button>
+        </div>
 
-        <button className="btn btn-ghost rounded-full p-1">
-          <img src="/add-icon.svg" className="size-12 " />
-          <span className="sr-only">Add wish</span>
-        </button>
-
-        <button className="text-muted-foreground hover:text-foreground">
-          <Icons.wishlist className="size-5" />
-          <span className="sr-only">Notifications</span>
-        </button>
-
-        <button className="text-muted-foreground hover:text-foreground">
-          <IconUser className="size-5" />
-          <span className="sr-only">Profile</span>
-        </button>
+        <div className="lg:tooltip " data-tip="Wishlists">
+          <button className="btn btn-ghost rounded-full p-2.5">
+            <Icons.wishlist className="size-5" />
+            <span className="sr-only">Wishlists</span>
+          </button>
+        </div>
+        <div className="lg:tooltip" data-tip="Profile">
+          <button className="btn btn-ghost rounded-full p-2.5">
+            <IconUser className="size-5" />
+            <span className="sr-only">Profile</span>
+          </button>
+        </div>
       </div>
     </nav>
   );

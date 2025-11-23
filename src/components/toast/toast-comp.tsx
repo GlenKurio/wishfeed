@@ -9,7 +9,7 @@ import type { ToastVariant } from "./toast";
 interface ToastProps {
   id: string | number;
   title: string;
-  description: string;
+  description?: string;
   variant: ToastVariant;
 }
 

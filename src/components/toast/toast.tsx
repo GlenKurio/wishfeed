@@ -5,7 +5,7 @@ export type ToastVariant = "success" | "warning" | "error" | "info";
 
 interface ToastConfig {
   title: string;
-  description: string;
+  description?: string;
   variant?: ToastVariant;
 }
 

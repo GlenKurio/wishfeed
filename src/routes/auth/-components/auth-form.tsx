@@ -3,9 +3,10 @@ import { useForm } from "@tanstack/react-form";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { sendSignInLinkToEmail, signInWithPopup } from "firebase/auth";
 import { useState } from "react";
-import { toast } from "sonner";
+
 import z from "zod";
 import { auth, googleProvider } from "../../../lib/firebase/auth";
+import { toast } from "../../../components/toast/toast";
 
 const signInSchema = z.object({
   email: z
@@ -55,23 +56,11 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-      toast(
-        <div className="toast toast-end ">
-          <div className="alert alert-success">
-            <span>Signed in with Google.</span>
-          </div>
-        </div>,
-      );
+      toast.success({ title: "Signed in with Google." });
       navigate({ to: "/feed" });
     } catch (error) {
       console.log("Error occured when signing in with Google: ", error);
-      toast(
-        <div className="toast toast-end ">
-          <div className="alert alert-error">
-            <span>There was an error signing in with Google.</span>
-          </div>
-        </div>,
-      );
+      toast.error({ title: "There was an error signing in with Google." });
     }
   };
 
