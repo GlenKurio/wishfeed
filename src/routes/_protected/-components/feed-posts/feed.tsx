@@ -4,12 +4,14 @@ const wishes: PostType[] = [
   {
     id: "1",
     brand: "APPLE",
-    title: "Apple Watch Series 9 (GPS 41mm) Smartwatch with Pink Sport Band",
+    title:
+      "Apple Watch Series 9 (GPS 41mm) Smartwatch with Pink Sport Band Apple Watch Series 9 (GPS 41mm) Smartwatch with Pink Sport Band",
     price: "$452.99",
+    productUrl: "https://www.apple.com/ca/shop/buy-watch/apple-watch",
     image:
       "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=600&q=80",
     description:
-      "Been eyeing this for my morning runs! The pink band would match my running gear perfectly 🏃‍♀️",
+      "Been eyeing this for my morning runs! The pink band would match my running gear perfectly 🏃‍♀️. Been eyeing this for my morning runs! The pink band would match my running gear perfectly 🏃‍♀️ Been eyeing this for my morning runs! The pink band would match my running gear perfectly 🏃‍♀️",
     likes: ["1"],
     saves: [],
     gifted: false,

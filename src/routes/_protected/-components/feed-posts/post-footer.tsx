@@ -1,6 +1,7 @@
 import {
   IconBookmarkPlus,
   IconCheck,
+  IconExternalLink,
   IconGift,
   IconHeart,
   IconHeartFilled,
@@ -8,6 +9,7 @@ import {
 import type { PostType } from "./post";
 import { useAuth } from "../../../../hooks/use-auth";
 import { useLikePost } from "../../../../hooks/use-like-post";
+import { Link } from "@tanstack/react-router";
 
 export default function PostFooter(post: PostType) {
   const user = useAuth();
@@ -35,16 +37,31 @@ export default function PostFooter(post: PostType) {
           <span className="text-[11px] font-medium">{post.saves.length}</span>
         </button>
       </div>
-      {user?.uid !== post?.userUid ? (
-        <button className="btn btn-primary btn-xs lg:btn-sm transition-colors flex items-center gap-1">
-          <IconGift className="size-4" /> <span>Gift</span>
-        </button>
-      ) : (
-        // TODO: if gifted change color to green and remove text; Improve cta;
-        <button className="btn  btn-xs lg:btn-sm transition-colors flex items-center gap-1">
-          <IconCheck className="size-4" /> <span>Mark as Gifted</span>
-        </button>
-      )}
+      <div className="flex items-center gap-2">
+        {post.price && (
+          <Link
+            to={post.productUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-xs btn-dash border lg:btn-sm transition-colors flex items-center gap-1.5 text-info hover:bg-info/10 hover:border-info/50"
+          >
+            <IconExternalLink className="size-4" />
+            <span className="text-[11px] font-medium leading-0">
+              {post.price}
+            </span>
+          </Link>
+        )}
+        {user?.uid !== post?.userUid ? (
+          <button className="btn btn-primary btn-xs lg:btn-sm transition-colors flex items-center gap-1.5">
+            <IconGift className="size-4" /> <span>Gift</span>
+          </button>
+        ) : (
+          // TODO: if gifted change color to green and remove text; Improve cta;
+          <button className="btn  btn-xs lg:btn-sm transition-colors flex items-center gap-1">
+            <IconCheck className="size-4" /> <span>Mark as Gifted</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }
