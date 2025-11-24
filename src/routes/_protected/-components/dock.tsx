@@ -1,7 +1,6 @@
-import { IconHome, IconSearch, IconUser } from "@tabler/icons-react";
-import { Icons } from "../../../components/icons";
+import { IconGift, IconHome, IconSearch, IconUser } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
-
+// TODO: make the active tab highlighted!
 export default function Dock() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-neutral/10 bg-background/95 backdrop-blur-md ">
@@ -26,12 +25,18 @@ export default function Dock() {
           </button>
         </div>
 
-        <div className="lg:tooltip tooltip-primary" data-tip="Wishlists">
+        <div className="lg:tooltip tooltip-primary" data-tip="Gifts">
+          <Link to="/gifts" className="btn btn-ghost rounded-full p-2.5">
+            <IconGift className="size-5" />
+            <span className="sr-only">Gifts</span>
+          </Link>
+        </div>
+        {/* <div className="lg:tooltip tooltip-primary" data-tip="Wishlists">
           <Link to="/wishlists" className="btn btn-ghost rounded-full p-2.5">
             <Icons.wishlist className="size-5" />
             <span className="sr-only">Wishlists</span>
           </Link>
-        </div>
+        </div> */}
         <div className="lg:tooltip tooltip-primary" data-tip="Profile">
           <Link to="/profile" className="btn btn-ghost rounded-full p-2.5">
             <IconUser className="size-5" />
