@@ -1,48 +1,87 @@
 import { IconGift, IconHome, IconSearch, IconUser } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
-// TODO: make the active tab highlighted!
+import { Link, useMatches } from "@tanstack/react-router";
+
+const navLinks = [
+  {
+    to: "/home",
+    icon: IconHome,
+    label: "Feed",
+    tooltip: "Feed",
+  },
+  {
+    to: "/search",
+    icon: IconSearch,
+    label: "Explore",
+    tooltip: "Explore",
+  },
+  {
+    to: "/gifts",
+    icon: IconGift,
+    label: "Gifts",
+    tooltip: "Gifts",
+  },
+  {
+    to: "/profile",
+    icon: IconUser,
+    label: "Profile",
+    tooltip: "Profile",
+  },
+];
+
 export default function Dock() {
+  const { pathname } = useMatches().at(-1)!;
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-neutral/10 bg-background/95 backdrop-blur-md ">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-neutral/10 bg-base-300 backdrop-blur-md ">
       <div className="container mx-auto flex max-w-2xl items-center justify-around p-2">
-        <div className="lg:tooltip tooltip-primary" data-tip="Feed">
-          <Link to="/home" className="btn btn-ghost rounded-full p-2.5">
-            <IconHome className="size-5" />
-            <span className="sr-only">Feed</span>
-          </Link>
-        </div>
-        <div className="lg:tooltip tooltip-primary" data-tip="Explore">
-          <Link to="/search" className="btn btn-ghost rounded-full p-2.5">
-            <IconSearch className="size-5" />
-            <span className="sr-only">Explore</span>
-          </Link>
-        </div>
+        {navLinks.slice(0, 2).map((link) => {
+          const Icon = link.icon;
+          const isActive = pathname === link.to;
+          return (
+            <div
+              key={link.to}
+              className="lg:tooltip tooltip-primary"
+              data-tip={link.tooltip}
+            >
+              <Link to={link.to} className="btn btn-ghost rounded-full p-2.5">
+                <Icon className={`size-5 ${isActive ? "text-primary" : ""}`} />
+                <span className="sr-only">{link.label}</span>
+              </Link>
+            </div>
+          );
+        })}
 
+        {/* Create wish button stays in the middle */}
         <div className="lg:tooltip tooltip-primary" data-tip="Create wish">
-          <button className="btn btn-ghost rounded-full p-1 flex items-center justify-center">
-            <img src="/add-icon.svg" className="size-8 " />
+          <Link
+            to="/new-wish"
+            className="btn btn-ghost rounded-full p-1 flex items-center justify-center"
+          >
+            {pathname === "/new-wish" ? (
+              <img src="/add-icon-active.svg" className="size-8 " />
+            ) : (
+              <img src="/add-icon.svg" className="size-8 " />
+            )}
             <span className="sr-only">Create wish</span>
-          </button>
+          </Link>
         </div>
 
-        <div className="lg:tooltip tooltip-primary" data-tip="Gifts">
-          <Link to="/gifts" className="btn btn-ghost rounded-full p-2.5">
-            <IconGift className="size-5" />
-            <span className="sr-only">Gifts</span>
-          </Link>
-        </div>
-        {/* <div className="lg:tooltip tooltip-primary" data-tip="Wishlists">
-          <Link to="/wishlists" className="btn btn-ghost rounded-full p-2.5">
-            <Icons.wishlist className="size-5" />
-            <span className="sr-only">Wishlists</span>
-          </Link>
-        </div> */}
-        <div className="lg:tooltip tooltip-primary" data-tip="Profile">
-          <Link to="/profile" className="btn btn-ghost rounded-full p-2.5">
-            <IconUser className="size-5" />
-            <span className="sr-only">Profile</span>
-          </Link>
-        </div>
+        {navLinks.slice(2).map((link) => {
+          const Icon = link.icon;
+          const isActive = pathname === link.to;
+          return (
+            <div
+              key={link.to}
+              className="lg:tooltip tooltip-primary"
+              data-tip={link.tooltip}
+            >
+              <Link to={link.to} className="btn btn-ghost rounded-full p-2.5">
+                <Icon className={`size-5 ${isActive ? "text-primary" : ""}`} />
+                <span className="sr-only">{link.label}</span>
+              </Link>
+            </div>
+          );
+        })}
       </div>
     </nav>
   );

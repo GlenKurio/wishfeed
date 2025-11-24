@@ -20,10 +20,16 @@ export const Route = createFileRoute("/_protected")({
 
 function ProtectedLayout() {
   return (
-    <>
-      <AppHeader />
-      <Outlet />
-      <Dock />
-    </>
+    <div className="flex flex-col h-screen overflow-hidden py-16">
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <AppHeader />
+      </div>
+      <main className="flex-1 overflow-y-auto">
+        <Outlet />
+      </main>
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        <Dock />
+      </div>
+    </div>
   );
 }

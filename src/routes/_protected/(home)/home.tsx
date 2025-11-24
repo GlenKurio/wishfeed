@@ -7,8 +7,8 @@ export const Route = createFileRoute("/_protected/(home)/home")({
 
 function RouteComponent() {
   return (
-    <main className="container mx-auto pt-8 pb-24 px-4  flex items-center justify-center relative">
+    <div className="container mx-auto py-12 px-4 flex items-center justify-center">
       <Feed />
-    </main>
+    </div>
   );
 }
