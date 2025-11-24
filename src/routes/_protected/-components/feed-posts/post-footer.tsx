@@ -32,6 +32,7 @@ export default function PostFooter(post: PostType) {
 
           <span className="text-[11px] font-medium">{likes}</span>
         </button>
+
         <button className="btn btn-xs lg:btn-sm transition-colors flex items-center gap-1.5">
           <IconBookmarkPlus className="size-4" />
           <span className="text-[11px] font-medium">{post.saves.length}</span>
