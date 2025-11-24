@@ -6,7 +6,7 @@ export default function AppHeader() {
   const renderHeader = () => {
     if (pathname.startsWith("/home")) {
       return (
-        <div className="w-full md:p-2 flex items-center justify-between border-b border-neutral/20 bg-base-300 ">
+        <div className="w-full md:p-1 flex items-center justify-between border-b border-neutral/20 bg-base-300 ">
           <figure>
             <img src="/logo-full.png" className="h-8" />
           </figure>
