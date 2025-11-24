@@ -1,7 +1,10 @@
 - Create wish:
   -- Allow to create post by simply pasting the link to the product page;
-  -- Allow to share the product to the app from the product page website;
-  -- Add drawer or use separate page to create wish?
+  -- Setup firebase functions and test simple one to understand how it works;
+  -- Add firebase hosting and test how it works;
+  -- Write simple scraper to get infro from the product page;
+  -- Replace the link with affiliated link;
+  -- Allow to share the product to the app from the product page website - Bookmarklet for desktop browser, Web Share Target API (PWA feature);
   -- Create first wisher in Firestore and fetch them into feed
 
 - Finish post design:
