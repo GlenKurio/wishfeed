@@ -32,8 +32,8 @@ export default function Dock() {
   const { pathname } = useMatches().at(-1)!;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-neutral/10 bg-base-300 backdrop-blur-md ">
-      <div className="container mx-auto flex max-w-2xl items-center justify-around p-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-neutral/10 bg-base-300 backdrop-blur-md">
+      <div className="container mx-auto flex max-w-2xl items-center justify-around md:p-1">
         {navLinks.slice(0, 2).map((link) => {
           const Icon = link.icon;
           const isActive = pathname === link.to;
@@ -44,7 +44,9 @@ export default function Dock() {
               data-tip={link.tooltip}
             >
               <Link to={link.to} className="btn btn-ghost rounded-full p-2.5">
-                <Icon className={`size-5 ${isActive ? "text-primary" : ""}`} />
+                <Icon
+                  className={`size-4 md:size-5 ${isActive ? "text-primary" : ""}`}
+                />
                 <span className="sr-only">{link.label}</span>
               </Link>
             </div>
@@ -76,7 +78,9 @@ export default function Dock() {
               data-tip={link.tooltip}
             >
               <Link to={link.to} className="btn btn-ghost rounded-full p-2.5">
-                <Icon className={`size-5 ${isActive ? "text-primary" : ""}`} />
+                <Icon
+                  className={`size-4 md:size-5 ${isActive ? "text-primary" : ""}`}
+                />
                 <span className="sr-only">{link.label}</span>
               </Link>
             </div>

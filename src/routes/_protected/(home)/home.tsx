@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_protected/(home)/home")({
 
 function RouteComponent() {
   return (
-    <div className="container mx-auto py-12 px-4 flex items-center justify-center">
+    <div className="container mx-auto py-6 lg:py-10 px-4 flex items-center justify-center">
       <Feed />
     </div>
   );

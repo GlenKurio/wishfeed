@@ -1,12 +1,12 @@
 import { IconBellRinging2 } from "@tabler/icons-react";
-import { Link, useMatches, useRouter } from "@tanstack/react-router";
+import { Link, useMatches } from "@tanstack/react-router";
 export default function AppHeader() {
   const { pathname } = useMatches().at(-1)!;
 
   const renderHeader = () => {
     if (pathname.startsWith("/home")) {
       return (
-        <div className="w-full p-2 flex items-center justify-between border-b border-neutral/20 bg-base-300 ">
+        <div className="w-full md:p-2 flex items-center justify-between border-b border-neutral/20 bg-base-300 ">
           <figure>
             <img src="/logo-full.png" className="h-8" />
           </figure>
