@@ -2,6 +2,7 @@
   -- Allow to create post by simply pasting the link to the product page;
   -- Allow to share the product to the app from the product page website;
   -- Add drawer or use separate page to create wish?
+  -- Create first wisher in Firestore and fetch them into feed
 
 - Finish post design:
   -- Should I use tanstacQuery to update the post likes and saves using optimistic updates?
