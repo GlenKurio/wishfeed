@@ -4,7 +4,6 @@
 // - Make like change the fill when active
 // - Make all the actions to work
 // - Make gift CTA work
-// - Add the link as CTA 'see the product or get the product'
 // - Show the date
 // - Make actions work
 
