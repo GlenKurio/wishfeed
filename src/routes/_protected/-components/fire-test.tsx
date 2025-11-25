@@ -9,12 +9,14 @@ function FireTest() {
   const handleCallFunction = async () => {
     try {
       // 'sayHello' must match the export name in functions/src/index.ts
-      const sayHelloFunction = httpsCallable(functions, "sayHello");
+      const createWishFunction = httpsCallable(functions, "createWish");
 
       // Call the function and pass data
-      const result: any = await sayHelloFunction({ name: "Shmekel" });
-
-      setResponseMsg(result.data.message);
+      const result: any = await createWishFunction({
+        url: "https://ca.manscaped.com/products/the-pro-beard-kit",
+      });
+      console.log("RESULT: ", result);
+      setResponseMsg("Done!");
     } catch (error) {
       console.error("Error calling function:", error);
     }
