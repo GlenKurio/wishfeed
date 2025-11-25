@@ -1,8 +1,6 @@
 - Create wish:
 
   -- Setup firebase functions and test simple one to understand how it works;
-  -- Refactor my createWish function into separate modules (scrape, replace link, etc);
-  -- Create types file in Functions;
   -- How do I type the function? Both arguments and response so I can use it typed in react app?
   -- Get the right image from the proudct page? Or several?
 

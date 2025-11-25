@@ -1,9 +1,9 @@
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import FirecrawlApp from "@mendable/firecrawl-js";
 import * as logger from "firebase-functions/logger";
-import { z } from "zod";
+import z from "zod";
 
-const wishSchema = z.object({
+export const scrapedProductSchema = z.object({
   product_title: z.string(),
   product_price: z.string(),
   product_description: z.string(),
@@ -11,7 +11,19 @@ const wishSchema = z.object({
   product_image_url: z.string(),
 });
 
-export const createWish = onCall(
+export type scrapedProductType = z.infer<typeof scrapedProductSchema>;
+
+export interface ScrapeProductInput {
+  url: string;
+}
+
+// What the function returns
+export interface ScrapeProductOutput {
+  message?: string;
+  scrapeResult?: scrapedProductType;
+}
+
+export const scrapeProduct = onCall<ScrapeProductInput, ScrapeProductOutput>(
   { secrets: ["FIRECRAWL_API_KEY"], timeoutSeconds: 60, memory: "512MiB" },
   async (request) => {
     if (!request.auth) {
@@ -35,7 +47,7 @@ export const createWish = onCall(
         formats: [
           {
             type: "json",
-            schema: wishSchema,
+            schema: scrapedProductSchema,
           },
           { type: "images" },
         ],

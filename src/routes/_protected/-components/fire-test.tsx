@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { httpsCallable } from "firebase/functions";
-import { functions } from "../../../lib/firebase";
+import { scrapeProductUrl } from "../../../lib/firebase/functions";
 // Import from the file we created in Step 5
 
 function FireTest() {
@@ -8,11 +7,7 @@ function FireTest() {
 
   const handleCallFunction = async () => {
     try {
-      // 'sayHello' must match the export name in functions/src/index.ts
-      const createWishFunction = httpsCallable(functions, "createWish");
-
-      // Call the function and pass data
-      const result: any = await createWishFunction({
+      const result = await scrapeProductUrl({
         url: "https://ca.manscaped.com/products/the-pro-beard-kit",
       });
       console.log("RESULT: ", result);
