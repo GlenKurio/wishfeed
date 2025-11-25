@@ -1,8 +1,6 @@
 - Create wish:
 
-  -- Setup firebase functions and test simple one to understand how it works;
-  -- How do I type the function? Both arguments and response so I can use it typed in react app?
-  -- Get the right image from the proudct page? Or several?
+  -- Finish the scrapeProductUrl function - finish the logic, Get the right image from the proudct page, type it properly and copy types into react app;
 
   -- Add firebase hosting and test how it works;
   -- Write simple scraper to get infro from the product page (using puppeteer, cheerio, and googleAI or openAI?); - Use Firecrawl!
