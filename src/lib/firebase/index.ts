@@ -13,6 +13,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const firebaseApp = initializeApp(firebaseConfig);
+
 export const functions = getFunctions(firebaseApp);
 if (window.location.hostname === "localhost") {
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);

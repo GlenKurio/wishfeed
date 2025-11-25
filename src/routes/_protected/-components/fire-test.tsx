@@ -12,7 +12,7 @@ function FireTest() {
       const sayHelloFunction = httpsCallable(functions, "sayHello");
 
       // Call the function and pass data
-      const result: any = await sayHelloFunction({ name: "Oleh" });
+      const result: any = await sayHelloFunction({ name: "Shmekel" });
 
       setResponseMsg(result.data.message);
     } catch (error) {
