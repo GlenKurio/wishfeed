@@ -11,7 +11,10 @@ export const scrapeProductSchema = z.object({
   product_title: z.string().describe("Title of the product"),
   product_description: z
     .string()
-    .describe("Product description including specifications"),
+    .max(250)
+    .describe(
+      "Product description including specifications. Keep it short and sweet. Maximum length is 250 charachters",
+    ),
   product_price: z.string().describe("Product price"),
   brand: z.string().describe("Product brand"),
 });
@@ -54,6 +57,9 @@ export const scrapeProduct = onCall<
       if (!scrapedProduct?.json) {
         throw new HttpsError("internal", "No data returned from scraper");
       }
+      // TODO:
+      // - Check returned data using AI (checkScrapingResult)
+      // - If some data is lacking fire a web search to find it
 
       // Return the typed data directly
       return scrapedProduct.json as ScrapeProductOutput;
