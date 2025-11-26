@@ -35,9 +35,9 @@ function RouteComponent() {
   });
 
   return (
-    <div className="flex h-full w-full flex-col justify-center gap-4">
-      <picture className="aspect-square size-32">
-        <img src="/circle-heart.png" className="h-full w-full" />
+    <div className="flex h-full w-full flex-col gap-8 lg:gap-4">
+      <picture className="mx-auto mb-4 max-w-[150px] lg:mb-12 lg:max-w-[300px]">
+        <img src="/create-wish/step-1.png" className="h-full w-full" />
       </picture>
       <form.Field
         name="url"
@@ -56,7 +56,7 @@ function RouteComponent() {
           return (
             <div>
               <label
-                className={`input input-bordered w-full ${hasError ? "input-error border-error" : ""}`}
+                className={`input input-bordered border-base-content w-full ${hasError ? "input-error border-error" : ""}`}
               >
                 <IconLink
                   width="20"
@@ -86,7 +86,7 @@ function RouteComponent() {
           );
         }}
       />
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col lg:gap-4">
         <form.Subscribe
           selector={(state) => [
             state.canSubmit,
@@ -97,20 +97,18 @@ function RouteComponent() {
             const disabledSubmit = !canSubmit || !isTouched || isDefaultValue;
 
             return (
-              <div className="flex w-full flex-col gap-2">
-                <button
-                  type="submit"
-                  className="btn btn-block btn-primary mt-2 h-10 text-[14px] font-semibold"
-                  disabled={isPending || disabledSubmit}
-                  onClick={() => form.handleSubmit()}
-                >
-                  {isPending ? "Creating wish..." : "Create wish  🪄"}
-                </button>
-              </div>
+              <button
+                type="submit"
+                className="btn btn-block btn-primary h-10 text-[14px] font-semibold"
+                disabled={isPending || disabledSubmit}
+                onClick={() => form.handleSubmit()}
+              >
+                {isPending ? "Creating wish..." : "Create wish  🪄"}
+              </button>
             );
           }}
         />
-        <div className="divider text-neutral/70">or</div>
+        <div className="divider text-neutral/70 my-2 text-xs">or</div>
         <Link to="/preview" className="btn">
           Create wish by hand
         </Link>
