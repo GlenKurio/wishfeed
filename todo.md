@@ -1,10 +1,15 @@
 - Create wish:
 
   -- Finish the scrapeProductUrl function - finish the logic, Get the right image from the proudct page, type it properly and copy types into react app;
+  -- Add create wish ui and functionality to frontend;
+
+- Replace the link with affiliated link:
+  -- Register on most popular plaforms, brands websites and add their affiliate links to the function;
+  -- State that app uses affiliate links; Show original url somewhere;
 
   -- Add firebase hosting and test how it works;
   -- Write simple scraper to get infro from the product page (using puppeteer, cheerio, and googleAI or openAI?); - Use Firecrawl!
-  -- Replace the link with affiliated link;
+
   -- Allow to create post by simply pasting the link to the product page;
   -- Allow to share the product to the app from the product page website - Bookmarklet for desktop browser, Web Share Target API (PWA feature);
   -- Create first wisher in Firestore and fetch them into feed

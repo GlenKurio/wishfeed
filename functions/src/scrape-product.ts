@@ -3,12 +3,13 @@ import FirecrawlApp from "@mendable/firecrawl-js";
 import * as logger from "firebase-functions/logger";
 import z from "zod";
 
+// TODO: construct the response I can type; Use ogImage from response or image from metadata.ogImage (can be string or string[])
 export const scrapedProductSchema = z.object({
   product_title: z.string(),
   product_price: z.string(),
   product_description: z.string(),
   brand: z.string(),
-  product_image_url: z.string(),
+  ogImage: z.string(),
 });
 
 export type scrapedProductType = z.infer<typeof scrapedProductSchema>;
@@ -23,7 +24,7 @@ export interface ScrapeProductOutput {
   scrapeResult?: scrapedProductType;
 }
 
-export const scrapeProduct = onCall<ScrapeProductInput, ScrapeProductOutput>(
+export const scrapeProduct = onCall<ScrapeProductInput>(
   { secrets: ["FIRECRAWL_API_KEY"], timeoutSeconds: 60, memory: "512MiB" },
   async (request) => {
     if (!request.auth) {
@@ -48,8 +49,10 @@ export const scrapeProduct = onCall<ScrapeProductInput, ScrapeProductOutput>(
           {
             type: "json",
             schema: scrapedProductSchema,
+            prompt:
+              "You scraping product page. For ogImage use first image in the carousel on the page.",
           },
-          { type: "images" },
+          // { type: "images" },
         ],
       });
 
@@ -64,6 +67,7 @@ export const scrapeProduct = onCall<ScrapeProductInput, ScrapeProductOutput>(
           proxy: "stealth",
         });
       }
+      console.log("SCRAPE RESULT: ", scrapeResult);
 
       return scrapeResult;
     } catch (error) {

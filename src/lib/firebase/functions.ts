@@ -20,7 +20,7 @@ export async function scrapeProductUrl({ url }: ScrapeProductInput) {
 
   const result: HttpsCallableResult<ScrapeProductOutput> =
     await createWishFunction({
-      url: "https://ca.manscaped.com/products/the-pro-beard-kit",
+      url,
     });
 
   return result;
