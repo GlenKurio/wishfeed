@@ -10,6 +10,7 @@ const createWishSchema = z.object({
   }),
 });
 
+// TODO: check if we have a product in the local storage and rdirect user to finsih that post. User can discard (delete) the product from step 2 and return here to scrape new one.
 export const Route = createFileRoute("/_protected/(new-wish)/new-wish")({
   component: RouteComponent,
 });
@@ -33,9 +34,10 @@ function RouteComponent() {
       scrapeProduct({ url: value.url });
     },
   });
+  // TODO: while pending show the loading overlay before redirecting to next step;
 
   return (
-    <div className="flex h-full w-full flex-col gap-8 lg:gap-4">
+    <div className="flex h-full w-full flex-col gap-8 lg:gap-8">
       <picture className="mx-auto mb-4 max-w-[150px] lg:mb-12 lg:max-w-[300px]">
         <img src="/create-wish/step-1.png" className="h-full w-full" />
       </picture>
@@ -86,7 +88,7 @@ function RouteComponent() {
           );
         }}
       />
-      <div className="flex flex-col lg:gap-4">
+      <div className="flex flex-col lg:gap-2">
         <form.Subscribe
           selector={(state) => [
             state.canSubmit,
