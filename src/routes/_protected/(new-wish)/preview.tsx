@@ -21,7 +21,5 @@ export const Route = createFileRoute("/_protected/(new-wish)/preview")({
 });
 
 function RouteComponent() {
-  return (
-    <div className="h-screen">Hello "/_protected/(new-wish)/preview"!</div>
-  );
+  return <div className="">Hello "/_protected/(new-wish)/preview"!</div>;
 }
