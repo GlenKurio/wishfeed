@@ -1,7 +1,7 @@
 - Create wish:
 
-  -- Finish the scrapeProductUrl function - finish the logic, Get the right image from the proudct page, type it properly and copy types into react app;
   -- Add create wish ui and functionality to frontend;
+  -- Add bg to the app, some pattern;
 
 - Replace the link with affiliated link:
   -- Register on most popular plaforms, brands websites and add their affiliate links to the function;

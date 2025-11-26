@@ -13,7 +13,7 @@ export function useScrapeProduct() {
     onSuccess: (data) => {
       // 1. Put scraped product into cache
       queryClient.setQueryData(["scraped-product"], data);
-
+      //  Save scraped product data to localStorage so i can reuse it wif page refreshes, etc; Can also use redis or smth here.
       saveScrapedProduct(data);
 
       toast.success({ title: "Product scraped!" });
