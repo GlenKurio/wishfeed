@@ -1,20 +1,21 @@
 import z from "zod";
 
-export const scrapedProductSchema = z.object({
-  product_title: z.string(),
-  product_price: z.string(),
-  product_description: z.string(),
-  brand: z.string(),
-  product_image_url: z.string(),
+export const scrapeProductSchema = z.object({
+  product_image: z
+    .string()
+    .describe("For product_image use first image in the carousel on the page"),
+  product_title: z.string().describe("Title of the product"),
+  product_description: z
+    .string()
+    .describe("Product description including specifications"),
+  product_price: z.string().describe("Product price"),
+  brand: z.string().describe("Product brand"),
 });
 
-export type scrapedProductType = z.infer<typeof scrapedProductSchema>;
+export type ScrapeProductData = z.infer<typeof scrapeProductSchema>;
 
-export interface ScrapeProductInput {
+export type ScrapeProductInput = {
   url: string;
-}
+};
 
-export interface ScrapeProductOutput {
-  message?: string;
-  scrapeResult?: scrapedProductType;
-}
+export type ScrapeProductOutput = ScrapeProductData;

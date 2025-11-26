@@ -1,1 +1,1 @@
-export * from "./scrape-product";
+export * from "./scrape-product/index";

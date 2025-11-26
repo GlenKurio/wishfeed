@@ -23,7 +23,7 @@ export async function scrapeProductUrl({ url }: ScrapeProductInput) {
       url,
     });
 
-  return result;
+  return result.data;
 }
 
-export async function swapUrl({ url }: { url: string }) {}
+// export async function swapUrl({ url }: { url: string }) {}
