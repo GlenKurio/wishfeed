@@ -1,7 +1,12 @@
+- Auth:
+  -- Create user doc in firestore on auth, create handle automatically;
+  -- Update user function to update user info in auth and firestore;
+  -- Create a function to update posts when user updates the profile doc in firestore; (Name, handle, or avatar)
+  -- Improve magic link email design;
+
 - Create wish:
 
   -- Add create wish ui and functionality to frontend;
-  -- Add bg to the app, some pattern;
 
 - Replace the link with affiliated link:
   -- Register on most popular plaforms, brands websites and add their affiliate links to the function;
@@ -28,9 +33,6 @@
 # Finishing
 
 - Make sure images are optimized, do not cause layout shifts, accessible or hidden from screen readers;
-
-- Finish Auth setup:
-  -- Improve magic link email design;
 
 - Connect domain to Firbase and make initial deployment to Fiebase;
 
