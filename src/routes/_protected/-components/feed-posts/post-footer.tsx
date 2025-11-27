@@ -42,7 +42,7 @@ export default function PostFooter(post: PostType) {
       <div className="flex items-center gap-2">
         {post.price && (
           <Link
-            to={post.wishUrl}
+            to={post.wishUrlAffiliate}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-xs btn-dash lg:btn-sm text-info hover:bg-info/10 hover:border-info/50 flex items-center gap-1.5 border transition-colors"

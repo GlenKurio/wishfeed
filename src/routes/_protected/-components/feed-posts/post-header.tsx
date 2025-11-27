@@ -7,7 +7,8 @@ export default function PostHeader(post: PostType) {
       <div className="flex items-center gap-2">
         <div className="avatar">
           <div className="w-8 rounded-full">
-            <img src={post.userAvatar} alt={post.userName} />
+            {/* TODO: add fillers */}
+            <img src={post.userAvatar || ""} alt={post.userName || ""} />
           </div>
         </div>
         <div className="flex flex-col">
