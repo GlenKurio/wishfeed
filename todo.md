@@ -7,6 +7,7 @@
 - Create wish:
 
   -- Add create wish ui and functionality to frontend;
+  -- Allow to paste the link by pressing cmd+v on create wish page;
 
 - Replace the link with affiliated link:
   -- Register on most popular plaforms, brands websites and add their affiliate links to the function;
