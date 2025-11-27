@@ -1,3 +1,4 @@
+import type { FieldValue, Timestamp } from "firebase/firestore";
 import z from "zod";
 
 export const scrapedWishSchema = z.object({
@@ -51,9 +52,19 @@ export type PostType = {
   likes: string[];
   saves: string[];
   gifted: boolean;
+
   userUid: string;
-  createdAt: Date;
-  updatedAt: Date;
+  userName: string | null;
+  userAvatar: string | null;
+  userHandle: string;
+
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+export type NewPostType = Omit<PostType, "createdAt" | "updatedAt"> & {
+  createdAt: FieldValue;
+  updatedAt: FieldValue;
 };
 
 export const newWishSchema = z.object({

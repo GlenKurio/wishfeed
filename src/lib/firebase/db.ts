@@ -1,13 +1,13 @@
 import {
-  addDoc,
   collection,
   doc,
   getDoc,
   getFirestore,
   serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
 import { firebaseApp } from ".";
-import type { NewWishType, PostType } from "../types";
+import type { NewPostType, NewWishType } from "../types";
 
 import { auth } from "./auth";
 
@@ -32,7 +32,7 @@ export async function saveWishPostToDb(
   }
 
   // Construct the final post object
-  const fullPost: PostType = {
+  const fullPost: NewPostType = {
     image: wishData.wish_image as string,
     title: wishData.wish_title,
     description: wishData.wish_description,
@@ -49,13 +49,17 @@ export async function saveWishPostToDb(
     userAvatar: userProfile?.avatar ?? user.photoURL,
     userHandle: userProfile?.handle,
 
-    createdAt: serverTimestamp(), // Firestore backend timestamp
+    createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
 
-  // Save the document
-  const docRef = await addDoc(collection(db, "posts"), fullPost);
+  // Create a reference to the user's posts subcollection with an auto-generated ID
+  const userPostsRef = collection(db, "posts", user.uid);
+  const newPostRef = doc(userPostsRef); // Generates a unique ID
+
+  // Save the document at posts/{userUid}/{postId}
+  await setDoc(newPostRef, fullPost);
 
   // Return final post with id
-  return { id: docRef.id, ...fullPost };
+  return { id: newPostRef.id, ...fullPost };
 }
