@@ -46,7 +46,8 @@ export type PostType = {
   brand: string;
   description: string;
   price: string;
-  wishUrl: string;
+  wishUrlOriginal: string;
+  wishUrlAffiliate?: string;
   likes: string[];
   saves: string[];
   gifted: boolean;

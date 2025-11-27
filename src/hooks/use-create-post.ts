@@ -2,25 +2,40 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type { NewWishType } from "../lib/types";
 import { saveWishPostToDb } from "../lib/firebase/db";
+import { uploadPostImage } from "../lib/firebase/storage";
+import { swapUrl } from "../lib/firebase/functions";
 
 export function useCreatePost() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const createPost = async (newWishData: NewWishType) => {
-    // Step 1: Handle image upload if needed
+    // 1. Handle image upload if needed
     let imageUrl = newWishData.wish_image;
 
-    if (newWishData.wish_image && isFile(value.wish_image)) {
-      imageUrl = await uploadImageToStorage(value.wish_image);
+    // Check if it's a base64 string (starts with "data:")
+    if (newWishData.wish_image.startsWith("data:")) {
+      // Convert base64 back to File for upload
+      const base64Data = newWishData.wish_image;
+      const blob = await fetch(base64Data).then((r) => r.blob());
+      const file = new File([blob], "image.jpg", { type: blob.type });
+
+      imageUrl = await uploadPostImage(file);
+    } else {
+      imageUrl = newWishData.wish_image; // URL already
     }
 
+    // 2. Swap the url
+    const affiliateLink = await swapUrl(newWishData.wish_url);
+
+    // 3. Construct wish data with Cover image url, original product url and affiliate link
     const wishData = {
       ...newWishData,
       wish_image: imageUrl,
     };
-    await saveWishPostToDb(wishData);
-    return "success";
+
+    // 4. Save the post to Firestore
+    await saveWishPostToDb(wishData, affiliateLink);
   };
 
   const mutation = useMutation({

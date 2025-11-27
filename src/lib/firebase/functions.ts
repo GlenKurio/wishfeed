@@ -27,4 +27,6 @@ export async function scrapeWishUrl({ url }: ScrapeWishInput) {
   return result.data;
 }
 
-export async function swapUrl({ url }: { url: string }) {}
+export async function swapUrl(url: string) {
+  return url;
+}

@@ -10,18 +10,10 @@ import {
 } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import z from "zod";
-import {
-  newWishSchema,
-  type PostType,
-  type ScrapedWishData,
-} from "../../../lib/types";
-import { loadScrapedWish } from "../../../lib/scraped-wish-storage";
 import { useRef } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "../../../hooks/use-auth";
-import { saveWishPostToDb } from "../../../lib/firebase/db";
 import { useCreatePost } from "../../../hooks/use-create-post";
+import { loadScrapedWish } from "../../../lib/scraped-wish-storage";
+import { newWishSchema, type ScrapedWishData } from "../../../lib/types";
 
 export const Route = createFileRoute("/_protected/new-wish/preview")({
   loader: ({ context: { queryClient } }) => {
@@ -53,6 +45,7 @@ function RouteComponent() {
 
   const form = useForm({
     defaultValues: {
+      // TODO: persist url in local storage
       wish_url: "",
       wish_title: scrapedWish?.wish_title || "",
       wish_description: scrapedWish?.wish_description || "",
@@ -97,19 +90,19 @@ function RouteComponent() {
         <form.Field
           name="wish_image"
           children={(field) => {
-            const { isTouched, errors } = field.state.meta;
-            const hasError = isTouched && errors.length > 0;
-            const message = isTouched ? errors[0]?.message : null;
-            const hasImage = !!field.state.value;
+            const value = field.state.value;
 
-            const handleFileChange = (
+            const hasImage = !!value;
+
+            const handleFileChange = async (
               e: React.ChangeEvent<HTMLInputElement>,
             ) => {
               const file = e.target.files?.[0];
               if (file) {
+                // Convert to base64 string
                 const reader = new FileReader();
                 reader.onloadend = () => {
-                  field.handleChange(reader.result as string);
+                  field.handleChange(reader.result as string); // Store base64 string
                 };
                 reader.readAsDataURL(file);
               }
@@ -118,6 +111,10 @@ function RouteComponent() {
             const handleRemoveImage = () => {
               field.handleChange("");
             };
+
+            const { isTouched, errors } = field.state.meta;
+            const hasError = isTouched && errors.length > 0;
+            const message = isTouched ? errors[0]?.message : null;
 
             return (
               <div className="w-full md:max-w-[250px]">
@@ -128,38 +125,32 @@ function RouteComponent() {
                 </label>
 
                 {hasImage ? (
-                  <div className="border-base-content relative aspect-square overflow-hidden rounded-lg border-2">
+                  <div className="relative aspect-square overflow-hidden rounded-lg border-2">
                     <img
                       src={field.state.value}
-                      alt="Product preview"
                       className="h-full w-full object-cover"
+                      alt="Preview"
                     />
                     <button
                       type="button"
                       onClick={handleRemoveImage}
-                      className="btn btn-sm btn-circle btn-error absolute top-2 right-2"
+                      className="btn btn-error btn-circle btn-sm absolute top-2 right-2"
                     >
                       ✕
                     </button>
                   </div>
                 ) : (
                   <label
-                    className={`hover:bg-base-200 flex aspect-square w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${hasError ? "border-error" : "border-base-content"}`}
+                    className={`hover:bg-base-200 flex aspect-square w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed ${
+                      hasError ? "border-error" : "border-base-content"
+                    }`}
                   >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <IconPhoto
-                        width="48"
-                        height="48"
-                        className={`mb-3 ${hasError ? "text-error" : "text-base-content/50"}`}
-                      />
-                      <p className="text-base-content/70 mb-2 text-sm">
-                        <span className="font-semibold">Click to upload</span>{" "}
-                        or drag and drop
-                      </p>
-                      <p className="text-base-content/50 text-xs">
-                        PNG, JPG, GIF up to 10MB
-                      </p>
-                    </div>
+                    <IconPhoto width="48" height="48" />
+                    <p className="mb-2 text-sm">
+                      Click to upload or drag and drop
+                    </p>
+                    <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
+
                     <input
                       type="file"
                       accept="image/*"
@@ -179,6 +170,7 @@ function RouteComponent() {
             );
           }}
         />
+
         {/* Url Field */}
         <form.Field
           name="wish_url"
