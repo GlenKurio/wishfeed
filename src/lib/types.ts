@@ -38,3 +38,42 @@ export type ScrapedWishData = z.infer<typeof scrapedWishSchema>;
 export type ScrapeWishInput = {
   url: string;
 };
+
+export type PostType = {
+  id?: string;
+  image: string;
+  title: string;
+  brand: string;
+  description: string;
+  price: string;
+  wishUrl: string;
+  likes: string[];
+  saves: string[];
+  gifted: boolean;
+  userUid: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export const newWishSchema = z.object({
+  wish_image: z.string().min(1, { message: "Image is required." }),
+  wish_title: z
+    .string()
+    .trim()
+    .min(1, { message: "Title is required." })
+    .max(100, { message: "Title cannot exceed 100 characters." }),
+  wish_description: z
+    .string()
+    .trim()
+    .min(1, { message: "Description is required." })
+    .max(500, { message: "Description cannot exceed 250 characters." }),
+  wish_price: z.string().trim().min(1, { message: "Price is required." }),
+  brand: z
+    .string()
+    .trim()
+    .min(1, { message: "Brand is required." })
+    .max(50, { message: "Brand cannot exceed 50 characters." }),
+  wish_url: z.url().min(1, { message: "Url to your wish is required." }),
+});
+
+export type NewWishType = z.infer<typeof newWishSchema>;

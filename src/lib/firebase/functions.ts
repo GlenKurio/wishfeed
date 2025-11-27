@@ -5,7 +5,7 @@ import {
   type HttpsCallableResult,
 } from "firebase/functions";
 import { firebaseApp } from ".";
-import type { ScrapeWishInput, ScrapedWishData } from "./types";
+import type { ScrapeWishInput, ScrapedWishData } from "../types";
 
 export const functions = getFunctions(firebaseApp);
 if (window.location.hostname === "localhost") {
@@ -27,4 +27,4 @@ export async function scrapeWishUrl({ url }: ScrapeWishInput) {
   return result.data;
 }
 
-// export async function swapUrl({ url }: { url: string }) {}
+export async function swapUrl({ url }: { url: string }) {}

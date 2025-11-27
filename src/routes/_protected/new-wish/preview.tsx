@@ -11,9 +11,17 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import z from "zod";
-import type { ScrapedWishData } from "../../../lib/firebase/types";
+import {
+  newWishSchema,
+  type PostType,
+  type ScrapedWishData,
+} from "../../../lib/types";
 import { loadScrapedWish } from "../../../lib/scraped-wish-storage";
 import { useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "../../../hooks/use-auth";
+import { saveWishPostToDb } from "../../../lib/firebase/db";
+import { useCreatePost } from "../../../hooks/use-create-post";
 
 export const Route = createFileRoute("/_protected/new-wish/preview")({
   loader: ({ context: { queryClient } }) => {
@@ -35,30 +43,14 @@ export const Route = createFileRoute("/_protected/new-wish/preview")({
   },
   component: RouteComponent,
 });
-const newWishSchema = z.object({
-  wish_image: z.string().min(1, { message: "Image is required." }),
-  wish_title: z
-    .string()
-    .trim()
-    .min(1, { message: "Title is required." })
-    .max(100, { message: "Title cannot exceed 100 characters." }),
-  wish_description: z
-    .string()
-    .trim()
-    .min(1, { message: "Description is required." })
-    .max(500, { message: "Description cannot exceed 250 characters." }),
-  wish_price: z.string().trim().min(1, { message: "Price is required." }),
-  brand: z
-    .string()
-    .trim()
-    .min(1, { message: "Brand is required." })
-    .max(50, { message: "Brand cannot exceed 50 characters." }),
-  wish_url: z.url().min(1, { message: "Url to your wish is required." }),
-});
+
 function RouteComponent() {
   const scrapedWish = Route.useLoaderData();
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDialogElement>(null);
+
+  const { createPost } = useCreatePost();
+
   const form = useForm({
     defaultValues: {
       wish_url: "",
@@ -73,9 +65,12 @@ function RouteComponent() {
       onChange: newWishSchema,
       onBlur: newWishSchema,
     },
-    onSubmit: ({ value }) => {
-      console.log("Submitting wish:", value);
-      // TODO: Implement wish submission logic
+    onSubmit: async ({ value }) => {
+      try {
+        createPost(value);
+      } catch (error) {
+        console.error("Failed to save wish:", error);
+      }
     },
   });
 

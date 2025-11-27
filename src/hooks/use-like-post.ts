@@ -2,8 +2,9 @@ import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import { toast } from "../components/toast/toast";
 import { db } from "../lib/firebase/db";
-import type { PostType } from "../routes/_protected/-components/feed-posts/post";
+
 import { useAuth } from "./use-auth";
+import type { PostType } from "../lib/types";
 
 export function useLikePost(post: PostType) {
   const user = useAuth();

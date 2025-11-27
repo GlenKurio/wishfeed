@@ -10,26 +10,7 @@
 import { useState } from "react";
 import PostFooter from "./post-footer";
 import PostHeader from "./post-header";
-
-export type PostType = {
-  id: string;
-  image: string;
-  title: string;
-  brand: string;
-  description: string;
-  price: string;
-  productUrl: string;
-  likes: string[];
-  saves: string[];
-  gifted: boolean;
-  userUid: string;
-  userName: string;
-  userVerified: boolean;
-  userAvatar: string;
-  userHandle: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import type { PostType } from "../../../../lib/types";
 
 interface PostProps {
   post: PostType;
@@ -40,11 +21,11 @@ export function Post({ post }: PostProps) {
   const hasLongDescription = post.description && post.description.length > 120;
 
   return (
-    <div className={`w-full flex flex-col gap-2`}>
+    <div className={`flex w-full flex-col gap-2`}>
       {/* Header */}
       <PostHeader {...post} />
       {/* Product Image */}
-      <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-linear-to-br from-gray-50 to-gray-100 ">
+      <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-linear-to-br from-gray-50 to-gray-100">
         <img
           src={post.image || "/product-placeholder.webp"}
           alt={post.title}
@@ -52,20 +33,20 @@ export function Post({ post }: PostProps) {
         />
 
         {post.brand && (
-          <div className="absolute top-2 left-2 rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-medium uppercase tracking-wide text-foreground shadow-sm">
+          <div className="text-foreground absolute top-2 left-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium tracking-wide uppercase shadow-sm backdrop-blur-sm">
             {post.brand}
           </div>
         )}
       </div>
       {/* Content */}
-      <div className="flex flex-col gap-2 px-2 ">
-        <div className="flex flex-col gap-1 my-1 lg:my-2">
-          <h3 className="line-clamp-2 text-pretty text-sm lg:text-base font-medium leading-snug">
+      <div className="flex flex-col gap-2 px-2">
+        <div className="my-1 flex flex-col gap-1 lg:my-2">
+          <h3 className="line-clamp-2 text-sm leading-snug font-medium text-pretty lg:text-base">
             {post.title}
           </h3>
 
           <p
-            className={`text-xs lg:text-sm text-pretty leading-relaxed text-base-content/80 ${
+            className={`text-base-content/80 text-xs leading-relaxed text-pretty lg:text-sm ${
               isExpanded ? "" : "line-clamp-2"
             }`}
           >
@@ -75,7 +56,7 @@ export function Post({ post }: PostProps) {
           {hasLongDescription && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-xs font-medium text-primary hover:underline self-start -mt-0.5"
+              className="text-primary -mt-0.5 self-start text-xs font-medium hover:underline"
             >
               {isExpanded ? "see less" : "see more"}
             </button>

@@ -1,4 +1,4 @@
-import type { ScrapedWishData } from "./firebase/types";
+import type { ScrapedWishData } from "./types";
 
 const KEY = "scraped-wish";
 
