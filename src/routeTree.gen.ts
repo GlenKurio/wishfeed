@@ -15,12 +15,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthIndexRouteImport } from './routes/auth/index'
 import { Route as LegalTermsRouteImport } from './routes/legal/terms'
 import { Route as AuthFinishRouteImport } from './routes/auth/finish'
-import { Route as ProtectednewWishRouteRouteImport } from './routes/_protected/(new-wish)/route'
+import { Route as ProtectedNewWishRouteRouteImport } from './routes/_protected/new-wish/route'
+import { Route as ProtectedNewWishIndexRouteImport } from './routes/_protected/new-wish/index'
+import { Route as ProtectedNewWishPreviewRouteImport } from './routes/_protected/new-wish/preview'
 import { Route as ProtectedsearchSearchRouteImport } from './routes/_protected/(search)/search'
 import { Route as ProtectedprofileProfileRouteImport } from './routes/_protected/(profile)/profile'
 import { Route as ProtectednotificationsNotificationsRouteImport } from './routes/_protected/(notifications)/notifications'
-import { Route as ProtectednewWishPreviewRouteImport } from './routes/_protected/(new-wish)/preview'
-import { Route as ProtectednewWishNewWishRouteImport } from './routes/_protected/(new-wish)/new-wish'
 import { Route as ProtectedhomeHomeRouteImport } from './routes/_protected/(home)/home'
 import { Route as ProtectedgiftsGiftsRouteImport } from './routes/_protected/(gifts)/gifts'
 
@@ -53,9 +53,20 @@ const AuthFinishRoute = AuthFinishRouteImport.update({
   path: '/finish',
   getParentRoute: () => AuthRouteRoute,
 } as any)
-const ProtectednewWishRouteRoute = ProtectednewWishRouteRouteImport.update({
-  id: '/(new-wish)',
+const ProtectedNewWishRouteRoute = ProtectedNewWishRouteRouteImport.update({
+  id: '/new-wish',
+  path: '/new-wish',
   getParentRoute: () => ProtectedRouteRoute,
+} as any)
+const ProtectedNewWishIndexRoute = ProtectedNewWishIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProtectedNewWishRouteRoute,
+} as any)
+const ProtectedNewWishPreviewRoute = ProtectedNewWishPreviewRouteImport.update({
+  id: '/preview',
+  path: '/preview',
+  getParentRoute: () => ProtectedNewWishRouteRoute,
 } as any)
 const ProtectedsearchSearchRoute = ProtectedsearchSearchRouteImport.update({
   id: '/(search)/search',
@@ -73,16 +84,6 @@ const ProtectednotificationsNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => ProtectedRouteRoute,
   } as any)
-const ProtectednewWishPreviewRoute = ProtectednewWishPreviewRouteImport.update({
-  id: '/preview',
-  path: '/preview',
-  getParentRoute: () => ProtectednewWishRouteRoute,
-} as any)
-const ProtectednewWishNewWishRoute = ProtectednewWishNewWishRouteImport.update({
-  id: '/new-wish',
-  path: '/new-wish',
-  getParentRoute: () => ProtectednewWishRouteRoute,
-} as any)
 const ProtectedhomeHomeRoute = ProtectedhomeHomeRouteImport.update({
   id: '/(home)/home',
   path: '/home',
@@ -97,16 +98,17 @@ const ProtectedgiftsGiftsRoute = ProtectedgiftsGiftsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
+  '/new-wish': typeof ProtectedNewWishRouteRouteWithChildren
   '/auth/finish': typeof AuthFinishRoute
   '/legal/terms': typeof LegalTermsRoute
   '/auth/': typeof AuthIndexRoute
   '/gifts': typeof ProtectedgiftsGiftsRoute
   '/home': typeof ProtectedhomeHomeRoute
-  '/new-wish': typeof ProtectednewWishNewWishRoute
-  '/preview': typeof ProtectednewWishPreviewRoute
   '/notifications': typeof ProtectednotificationsNotificationsRoute
   '/profile': typeof ProtectedprofileProfileRoute
   '/search': typeof ProtectedsearchSearchRoute
+  '/new-wish/preview': typeof ProtectedNewWishPreviewRoute
+  '/new-wish/': typeof ProtectedNewWishIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,44 +117,45 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthIndexRoute
   '/gifts': typeof ProtectedgiftsGiftsRoute
   '/home': typeof ProtectedhomeHomeRoute
-  '/new-wish': typeof ProtectednewWishNewWishRoute
-  '/preview': typeof ProtectednewWishPreviewRoute
   '/notifications': typeof ProtectednotificationsNotificationsRoute
   '/profile': typeof ProtectedprofileProfileRoute
   '/search': typeof ProtectedsearchSearchRoute
+  '/new-wish/preview': typeof ProtectedNewWishPreviewRoute
+  '/new-wish': typeof ProtectedNewWishIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteRouteWithChildren
   '/auth': typeof AuthRouteRouteWithChildren
-  '/_protected/(new-wish)': typeof ProtectednewWishRouteRouteWithChildren
+  '/_protected/new-wish': typeof ProtectedNewWishRouteRouteWithChildren
   '/auth/finish': typeof AuthFinishRoute
   '/legal/terms': typeof LegalTermsRoute
   '/auth/': typeof AuthIndexRoute
   '/_protected/(gifts)/gifts': typeof ProtectedgiftsGiftsRoute
   '/_protected/(home)/home': typeof ProtectedhomeHomeRoute
-  '/_protected/(new-wish)/new-wish': typeof ProtectednewWishNewWishRoute
-  '/_protected/(new-wish)/preview': typeof ProtectednewWishPreviewRoute
   '/_protected/(notifications)/notifications': typeof ProtectednotificationsNotificationsRoute
   '/_protected/(profile)/profile': typeof ProtectedprofileProfileRoute
   '/_protected/(search)/search': typeof ProtectedsearchSearchRoute
+  '/_protected/new-wish/preview': typeof ProtectedNewWishPreviewRoute
+  '/_protected/new-wish/': typeof ProtectedNewWishIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/new-wish'
     | '/auth/finish'
     | '/legal/terms'
     | '/auth/'
     | '/gifts'
     | '/home'
-    | '/new-wish'
-    | '/preview'
     | '/notifications'
     | '/profile'
     | '/search'
+    | '/new-wish/preview'
+    | '/new-wish/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -161,27 +164,27 @@ export interface FileRouteTypes {
     | '/auth'
     | '/gifts'
     | '/home'
-    | '/new-wish'
-    | '/preview'
     | '/notifications'
     | '/profile'
     | '/search'
+    | '/new-wish/preview'
+    | '/new-wish'
   id:
     | '__root__'
     | '/'
     | '/_protected'
     | '/auth'
-    | '/_protected/(new-wish)'
+    | '/_protected/new-wish'
     | '/auth/finish'
     | '/legal/terms'
     | '/auth/'
     | '/_protected/(gifts)/gifts'
     | '/_protected/(home)/home'
-    | '/_protected/(new-wish)/new-wish'
-    | '/_protected/(new-wish)/preview'
     | '/_protected/(notifications)/notifications'
     | '/_protected/(profile)/profile'
     | '/_protected/(search)/search'
+    | '/_protected/new-wish/preview'
+    | '/_protected/new-wish/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -235,12 +238,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthFinishRouteImport
       parentRoute: typeof AuthRouteRoute
     }
-    '/_protected/(new-wish)': {
-      id: '/_protected/(new-wish)'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof ProtectednewWishRouteRouteImport
+    '/_protected/new-wish': {
+      id: '/_protected/new-wish'
+      path: '/new-wish'
+      fullPath: '/new-wish'
+      preLoaderRoute: typeof ProtectedNewWishRouteRouteImport
       parentRoute: typeof ProtectedRouteRoute
+    }
+    '/_protected/new-wish/': {
+      id: '/_protected/new-wish/'
+      path: '/'
+      fullPath: '/new-wish/'
+      preLoaderRoute: typeof ProtectedNewWishIndexRouteImport
+      parentRoute: typeof ProtectedNewWishRouteRoute
+    }
+    '/_protected/new-wish/preview': {
+      id: '/_protected/new-wish/preview'
+      path: '/preview'
+      fullPath: '/new-wish/preview'
+      preLoaderRoute: typeof ProtectedNewWishPreviewRouteImport
+      parentRoute: typeof ProtectedNewWishRouteRoute
     }
     '/_protected/(search)/search': {
       id: '/_protected/(search)/search'
@@ -263,20 +280,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectednotificationsNotificationsRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
-    '/_protected/(new-wish)/preview': {
-      id: '/_protected/(new-wish)/preview'
-      path: '/preview'
-      fullPath: '/preview'
-      preLoaderRoute: typeof ProtectednewWishPreviewRouteImport
-      parentRoute: typeof ProtectednewWishRouteRoute
-    }
-    '/_protected/(new-wish)/new-wish': {
-      id: '/_protected/(new-wish)/new-wish'
-      path: '/new-wish'
-      fullPath: '/new-wish'
-      preLoaderRoute: typeof ProtectednewWishNewWishRouteImport
-      parentRoute: typeof ProtectednewWishRouteRoute
-    }
     '/_protected/(home)/home': {
       id: '/_protected/(home)/home'
       path: '/home'
@@ -294,23 +297,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface ProtectednewWishRouteRouteChildren {
-  ProtectednewWishNewWishRoute: typeof ProtectednewWishNewWishRoute
-  ProtectednewWishPreviewRoute: typeof ProtectednewWishPreviewRoute
+interface ProtectedNewWishRouteRouteChildren {
+  ProtectedNewWishPreviewRoute: typeof ProtectedNewWishPreviewRoute
+  ProtectedNewWishIndexRoute: typeof ProtectedNewWishIndexRoute
 }
 
-const ProtectednewWishRouteRouteChildren: ProtectednewWishRouteRouteChildren = {
-  ProtectednewWishNewWishRoute: ProtectednewWishNewWishRoute,
-  ProtectednewWishPreviewRoute: ProtectednewWishPreviewRoute,
+const ProtectedNewWishRouteRouteChildren: ProtectedNewWishRouteRouteChildren = {
+  ProtectedNewWishPreviewRoute: ProtectedNewWishPreviewRoute,
+  ProtectedNewWishIndexRoute: ProtectedNewWishIndexRoute,
 }
 
-const ProtectednewWishRouteRouteWithChildren =
-  ProtectednewWishRouteRoute._addFileChildren(
-    ProtectednewWishRouteRouteChildren,
+const ProtectedNewWishRouteRouteWithChildren =
+  ProtectedNewWishRouteRoute._addFileChildren(
+    ProtectedNewWishRouteRouteChildren,
   )
 
 interface ProtectedRouteRouteChildren {
-  ProtectednewWishRouteRoute: typeof ProtectednewWishRouteRouteWithChildren
+  ProtectedNewWishRouteRoute: typeof ProtectedNewWishRouteRouteWithChildren
   ProtectedgiftsGiftsRoute: typeof ProtectedgiftsGiftsRoute
   ProtectedhomeHomeRoute: typeof ProtectedhomeHomeRoute
   ProtectednotificationsNotificationsRoute: typeof ProtectednotificationsNotificationsRoute
@@ -319,7 +322,7 @@ interface ProtectedRouteRouteChildren {
 }
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
-  ProtectednewWishRouteRoute: ProtectednewWishRouteRouteWithChildren,
+  ProtectedNewWishRouteRoute: ProtectedNewWishRouteRouteWithChildren,
   ProtectedgiftsGiftsRoute: ProtectedgiftsGiftsRoute,
   ProtectedhomeHomeRoute: ProtectedhomeHomeRoute,
   ProtectednotificationsNotificationsRoute:

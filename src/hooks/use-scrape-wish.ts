@@ -20,7 +20,7 @@ export function useScrapeWish() {
 
       // 2. Redirect to the next step
       navigate({
-        to: "/preview",
+        to: "/new-wish/preview",
       });
     },
 
@@ -33,7 +33,7 @@ export function useScrapeWish() {
   });
 
   return {
-    scrapeProduct: mutation.mutate,
+    scrapeWish: mutation.mutate,
     isPending: mutation.isPending,
     data: mutation.data,
   };

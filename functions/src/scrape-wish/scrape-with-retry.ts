@@ -22,7 +22,7 @@ Your job:
 Rules:
 - wish_image: choose the main/hero image or first clear image on the page.
 - wish_title: short, clear, and human-friendly.
-- wish_description: concise, engaging, under 250 characters. No fluff.
+- wish_description: concise, engaging, under 500 characters. No fluff.
 - wish_price: if no price is available, return an empty string.
 - brand: for products = manufacturer/seller; for experiences/places/services = provider or location name, or empty string if not applicable.
 

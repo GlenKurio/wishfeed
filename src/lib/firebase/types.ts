@@ -15,9 +15,9 @@ export const scrapedWishSchema = z.object({
 
   wish_description: z
     .string()
-    .max(250)
+    .max(500)
     .describe(
-      "A concise and appealing description of the wish. Summarize key details, features, or highlights. Must be under 250 characters, friendly, and easy to read.",
+      "A concise and appealing description of the wish. Summarize key details, features, or highlights. Must be under 500 characters, friendly, and easy to read.",
     ),
 
   wish_price: z

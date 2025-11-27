@@ -1,20 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { loadScrapedWish } from "../../../lib/scraped-wish-storage";
-import type { ScrapedWishData } from "../../../lib/firebase/types";
-import { useForm } from "@tanstack/react-form";
-import z from "zod";
 import {
   IconBuildingStore,
-  IconCopyX,
   IconCurrencyDollar,
   IconFileText,
   IconHeartShare,
+  IconLink,
   IconPhoto,
   IconTag,
   IconTrash,
 } from "@tabler/icons-react";
+import { useForm } from "@tanstack/react-form";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import z from "zod";
+import type { ScrapedWishData } from "../../../lib/firebase/types";
+import { loadScrapedWish } from "../../../lib/scraped-wish-storage";
+import { useRef } from "react";
 
-export const Route = createFileRoute("/_protected/(new-wish)/preview")({
+export const Route = createFileRoute("/_protected/new-wish/preview")({
   loader: ({ context: { queryClient } }) => {
     // 1. Try cache
     const cached = queryClient.getQueryData([
@@ -35,10 +36,7 @@ export const Route = createFileRoute("/_protected/(new-wish)/preview")({
   component: RouteComponent,
 });
 const newWishSchema = z.object({
-  wish_image: z
-    .url({ message: "Please provide a valid image URL." })
-    .trim()
-    .min(1, { message: "Image URL is required." }),
+  wish_image: z.string().min(1, { message: "Image is required." }),
   wish_title: z
     .string()
     .trim()
@@ -48,20 +46,22 @@ const newWishSchema = z.object({
     .string()
     .trim()
     .min(1, { message: "Description is required." })
-    .max(250, { message: "Description cannot exceed 250 characters." }),
+    .max(500, { message: "Description cannot exceed 250 characters." }),
   wish_price: z.string().trim().min(1, { message: "Price is required." }),
   brand: z
     .string()
     .trim()
     .min(1, { message: "Brand is required." })
     .max(50, { message: "Brand cannot exceed 50 characters." }),
+  wish_url: z.url().min(1, { message: "Url to your wish is required." }),
 });
-
 function RouteComponent() {
   const scrapedWish = Route.useLoaderData();
-
+  const navigate = useNavigate();
+  const modalRef = useRef<HTMLDialogElement>(null);
   const form = useForm({
     defaultValues: {
+      wish_url: "",
       wish_title: scrapedWish?.wish_title || "",
       wish_description: scrapedWish?.wish_description || "",
       wish_image: scrapedWish?.wish_image || "",
@@ -78,20 +78,115 @@ function RouteComponent() {
       // TODO: Implement wish submission logic
     },
   });
-  // TODO:
-  // - add image uploader and preview
-  // - ADd tooltips to all fields with description
+
+  {
+    /* TODO: prompt user to submit deletion of the post. Allow to save it to drafts. */
+  }
+  const handleSaveToDrafts = () => {};
+
+  const handleDiscard = () => {
+    form.reset();
+    navigate({
+      to: "/new-wish",
+    });
+  };
 
   return (
-    <div className="flex h-full w-full flex-col gap-6 lg:gap-8">
+    <div className="flex h-full w-full flex-col gap-6">
       <picture className="mx-auto max-w-[150px] lg:mb-10 lg:max-w-[300px]">
         <img src="/create-wish/step-2.png" className="h-full w-full" />
       </picture>
 
-      <div className="flex w-full flex-col items-center gap-4">
-        {/* Image URL Field */}
+      <div className="flex w-full flex-col items-start gap-4">
+        {/* Image File Field with Preview */}
         <form.Field
           name="wish_image"
+          children={(field) => {
+            const { isTouched, errors } = field.state.meta;
+            const hasError = isTouched && errors.length > 0;
+            const message = isTouched ? errors[0]?.message : null;
+            const hasImage = !!field.state.value;
+
+            const handleFileChange = (
+              e: React.ChangeEvent<HTMLInputElement>,
+            ) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  field.handleChange(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+              }
+            };
+
+            const handleRemoveImage = () => {
+              field.handleChange("");
+            };
+
+            return (
+              <div className="w-full md:max-w-[250px]">
+                <label className="label mb-1 ml-1">
+                  <span className="label-text font-medium">
+                    Wish Cover Image
+                  </span>
+                </label>
+
+                {hasImage ? (
+                  <div className="border-base-content relative aspect-square overflow-hidden rounded-lg border-2">
+                    <img
+                      src={field.state.value}
+                      alt="Product preview"
+                      className="h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="btn btn-sm btn-circle btn-error absolute top-2 right-2"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <label
+                    className={`hover:bg-base-200 flex aspect-square w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${hasError ? "border-error" : "border-base-content"}`}
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <IconPhoto
+                        width="48"
+                        height="48"
+                        className={`mb-3 ${hasError ? "text-error" : "text-base-content/50"}`}
+                      />
+                      <p className="text-base-content/70 mb-2 text-sm">
+                        <span className="font-semibold">Click to upload</span>{" "}
+                        or drag and drop
+                      </p>
+                      <p className="text-base-content/50 text-xs">
+                        PNG, JPG, GIF up to 10MB
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                      onBlur={field.handleBlur}
+                    />
+                  </label>
+                )}
+
+                {message && (
+                  <div className="text-error mt-1.5 ml-1.5 text-xs">
+                    {message}
+                  </div>
+                )}
+              </div>
+            );
+          }}
+        />
+        {/* Url Field */}
+        <form.Field
+          name="wish_url"
           children={(field) => {
             const { isTouched, errors } = field.state.meta;
             const hasError = isTouched && errors.length > 0;
@@ -99,13 +194,13 @@ function RouteComponent() {
 
             return (
               <div className="w-full">
-                <label className="label">
-                  <span className="label-text font-medium">Product Image</span>
+                <label className="label mb-1 ml-1">
+                  <span className="label-text font-medium">URL</span>
                 </label>
                 <label
                   className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
                 >
-                  <IconPhoto
+                  <IconLink
                     width="20"
                     height="20"
                     className={hasError ? "text-error" : ""}
@@ -113,9 +208,9 @@ function RouteComponent() {
                   <input
                     id={field.name}
                     name={field.name}
-                    type="text"
+                    type="url"
                     value={field.state.value}
-                    placeholder="https://example.com/image.jpg"
+                    placeholder="Link to where to find your wish"
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
                     aria-invalid={hasError}
@@ -143,7 +238,7 @@ function RouteComponent() {
 
             return (
               <div className="w-full">
-                <label className="label">
+                <label className="label mb-1 ml-1">
                   <span className="label-text font-medium">Title</span>
                   <span className="label-text-alt text-neutral/70">
                     {charCount}/100
@@ -190,7 +285,7 @@ function RouteComponent() {
 
             return (
               <div className="w-full">
-                <label className="label">
+                <label className="label mb-1 ml-1">
                   <span className="label-text font-medium">Description</span>
                   <span className="label-text-alt text-neutral/70">
                     {charCount}/250
@@ -202,7 +297,7 @@ function RouteComponent() {
                   <IconFileText
                     width="20"
                     height="20"
-                    className={`mt-1 shrink-0 ${hasError ? "text-error" : ""}`}
+                    className={`shrink-0 ${hasError ? "text-error" : ""}`}
                   />
                   <textarea
                     id={field.name}
@@ -213,7 +308,7 @@ function RouteComponent() {
                     onBlur={field.handleBlur}
                     aria-invalid={hasError}
                     rows={3}
-                    className={`grow resize-none ${hasError ? "placeholder:text-error/50" : ""}`}
+                    className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
                   />
                 </label>
                 {message && (
@@ -238,7 +333,7 @@ function RouteComponent() {
 
               return (
                 <div className="flex-1">
-                  <label className="label">
+                  <label className="label mb-1 ml-1">
                     <span className="label-text font-medium">Brand</span>
                   </label>
                   <label
@@ -281,7 +376,7 @@ function RouteComponent() {
 
               return (
                 <div className="flex-1">
-                  <label className="label">
+                  <label className="label mb-1 ml-1">
                     <span className="label-text font-medium">Price</span>
                   </label>
                   <label
@@ -333,11 +428,49 @@ function RouteComponent() {
             );
           }}
         />
-        {/* TODO: prompt user to submit deletion of the post. Allow to save it to drafts. */}
-        <button className="btn btn-block btn-error btn-ghost h-10 text-[14px] font-semibold">
+
+        <button
+          onClick={() => {
+            if (form.state.isDirty) {
+              modalRef.current?.showModal();
+            } else {
+              navigate({
+                to: "/new-wish",
+              });
+            }
+          }}
+          className="btn btn-block btn-error btn-ghost h-10 text-[14px] font-semibold"
+        >
           Discard cahnges <IconTrash className="size-4" />
         </button>
       </div>
+
+      <dialog ref={modalRef} id="my_modal_1" className="modal">
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">Hello!</h3>
+          <p className="py-16">
+            Press ESC key or click the button below to close
+          </p>
+          <div className="flex w-full flex-col gap-2">
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={handleSaveToDrafts}
+            >
+              Save to drafts
+            </button>
+            <button
+              className="btn btn-error btn-sm btn-ghost"
+              onClick={handleDiscard}
+            >
+              Delete wish
+            </button>
+
+            <form method="dialog" className="w-full">
+              <button className="btn btn-sm btn-ghost w-full">Cancel</button>
+            </form>
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 }

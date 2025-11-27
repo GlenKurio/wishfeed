@@ -32,7 +32,7 @@ export default function Dock() {
   const { pathname } = useMatches().at(-1)!;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-neutral/10 bg-base-300 backdrop-blur-md">
+    <nav className="border-neutral/10 bg-base-300 fixed right-0 bottom-0 left-0 z-50 border-t backdrop-blur-md">
       <div className="container mx-auto flex max-w-2xl items-center justify-around md:p-1">
         {navLinks.slice(0, 2).map((link) => {
           const Icon = link.icon;
@@ -57,12 +57,12 @@ export default function Dock() {
         <div className="lg:tooltip tooltip-primary" data-tip="Create wish">
           <Link
             to="/new-wish"
-            className="btn btn-ghost rounded-full p-1 flex items-center justify-center"
+            className="btn btn-ghost flex items-center justify-center rounded-full p-1"
           >
-            {pathname === "/new-wish" ? (
-              <img src="/add-icon-active.svg" className="size-8 " />
+            {pathname.includes("/new-wish") ? (
+              <img src="/add-icon-active.svg" className="size-8" />
             ) : (
-              <img src="/add-icon.svg" className="size-8 " />
+              <img src="/add-icon.svg" className="size-8" />
             )}
             <span className="sr-only">Create wish</span>
           </Link>

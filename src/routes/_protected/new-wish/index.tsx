@@ -12,12 +12,12 @@ const createWishSchema = z.object({
 });
 
 // TODO: check if we have a product in the local storage and rdirect user to finsih that post. User can discard (delete) the product from step 2 and return here to scrape new one.
-export const Route = createFileRoute("/_protected/(new-wish)/new-wish")({
+export const Route = createFileRoute("/_protected/new-wish/")({
   beforeLoad: () => {
     const persisted = loadScrapedWish();
     if (persisted) {
       throw redirect({
-        to: "/preview",
+        to: "/new-wish/preview",
       });
     }
   },
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_protected/(new-wish)/new-wish")({
 // 2. Preview, if link was pasted - show the loading ui while scraping, and fill out the preview with ability to edit. On edit open the page/overlay with form-like fields to allow edit, and save to go backl to preview; Preview has button "Publish" or wish for it! On wish for it we are publishing the wish and swapping the url to our affiliate link;
 // 3. Success with return to home page?
 function RouteComponent() {
-  const { scrapeProduct, isPending } = useScrapeWish();
+  const { scrapeWish, isPending } = useScrapeWish();
   const form = useForm({
     defaultValues: {
       url: "",
@@ -40,7 +40,7 @@ function RouteComponent() {
     },
 
     onSubmit: ({ value }) => {
-      scrapeProduct({ url: value.url });
+      scrapeWish({ url: value.url });
     },
   });
   // TODO: while pending show the loading overlay before redirecting to next step;
@@ -120,7 +120,7 @@ function RouteComponent() {
           }}
         />
         <div className="divider text-neutral/70 my-2 text-xs">or</div>
-        <Link to="/preview" className="btn">
+        <Link to="/new-wish/preview" className="btn">
           Create wish by hand <IconEdit className="size-4" />
         </Link>
       </div>
