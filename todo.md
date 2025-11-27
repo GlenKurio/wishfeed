@@ -27,6 +27,8 @@
 
 # Finishing
 
+- Make sure images are optimized, do not cause layout shifts, accessible or hidden from screen readers;
+
 - Finish Auth setup:
   -- Improve magic link email design;
 
