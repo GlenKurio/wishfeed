@@ -1,20 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { scrapeProductUrl } from "../lib/firebase/functions";
+import { scrapeWishUrl } from "../lib/firebase/functions";
 import { toast } from "../components/toast/toast";
 import { useNavigate } from "@tanstack/react-router";
-import { saveScrapedProduct } from "../lib/scraped-product-storage";
+import { saveScrapedWish } from "../lib/scraped-wish-storage";
 
-export function useScrapeProduct() {
+export function useScrapeWish() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: scrapeProductUrl,
+    mutationFn: scrapeWishUrl,
     onSuccess: (data) => {
       // 1. Put scraped product into cache
       queryClient.setQueryData(["scraped-product"], data);
       //  Save scraped product data to localStorage so i can reuse it wif page refreshes, etc; Can also use redis or smth here.
-      saveScrapedProduct(data);
+      saveScrapedWish(data);
 
       toast.success({ title: "Product scraped!" });
 

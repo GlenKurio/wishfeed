@@ -1,8 +1,9 @@
-import { IconLink } from "@tabler/icons-react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useScrapeProduct } from "../../../hooks/use-scrape-product";
+import { IconEdit, IconLink, IconWand } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import z from "zod";
+import { useScrapeWish } from "../../../hooks/use-scrape-wish";
+import { loadScrapedWish } from "../../../lib/scraped-wish-storage";
 
 const createWishSchema = z.object({
   url: z.url().trim().min(1, { message: "Product URL is required." }).max(900, {
@@ -12,6 +13,14 @@ const createWishSchema = z.object({
 
 // TODO: check if we have a product in the local storage and rdirect user to finsih that post. User can discard (delete) the product from step 2 and return here to scrape new one.
 export const Route = createFileRoute("/_protected/(new-wish)/new-wish")({
+  beforeLoad: () => {
+    const persisted = loadScrapedWish();
+    if (persisted) {
+      throw redirect({
+        to: "/preview",
+      });
+    }
+  },
   component: RouteComponent,
 });
 // TODO:
@@ -20,7 +29,7 @@ export const Route = createFileRoute("/_protected/(new-wish)/new-wish")({
 // 2. Preview, if link was pasted - show the loading ui while scraping, and fill out the preview with ability to edit. On edit open the page/overlay with form-like fields to allow edit, and save to go backl to preview; Preview has button "Publish" or wish for it! On wish for it we are publishing the wish and swapping the url to our affiliate link;
 // 3. Success with return to home page?
 function RouteComponent() {
-  const { scrapeProduct, isPending } = useScrapeProduct();
+  const { scrapeProduct, isPending } = useScrapeWish();
   const form = useForm({
     defaultValues: {
       url: "",
@@ -105,14 +114,14 @@ function RouteComponent() {
                 disabled={isPending || disabledSubmit}
                 onClick={() => form.handleSubmit()}
               >
-                {isPending ? "Creating wish..." : "Create wish  🪄"}
+                Create wish <IconWand className="size-4" />
               </button>
             );
           }}
         />
         <div className="divider text-neutral/70 my-2 text-xs">or</div>
         <Link to="/preview" className="btn">
-          Create wish by hand
+          Create wish by hand <IconEdit className="size-4" />
         </Link>
       </div>
     </div>

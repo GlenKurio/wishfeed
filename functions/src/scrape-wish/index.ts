@@ -4,33 +4,46 @@ import * as logger from "firebase-functions/logger";
 import z from "zod";
 import { scrapeWithRetry } from "./scrape-with-retry";
 
-export const scrapeProductSchema = z.object({
-  product_image: z
+export const scrapedWishSchema = z.object({
+  wish_image: z
     .string()
-    .describe("For product_image use first image in the carousel on the page"),
-  product_title: z.string().describe("Title of the product"),
-  product_description: z
+    .describe(
+      "URL of the main image representing the wish. Prefer the first large, clear image on the page, usually the primary product or hero image.",
+    ),
+
+  wish_title: z
+    .string()
+    .describe(
+      "Short title of the wish. Should clearly describe what the item, place, experience, or service is.",
+    ),
+
+  wish_description: z
     .string()
     .max(250)
     .describe(
-      "Product description including specifications. Keep it short and sweet. Maximum length is 250 charachters",
+      "A concise and appealing description of the wish. Summarize key details, features, or highlights. Must be under 250 characters, friendly, and easy to read.",
     ),
-  product_price: z.string().describe("Product price"),
-  brand: z.string().describe("Product brand"),
+
+  wish_price: z
+    .string()
+    .describe(
+      "Price of the wish, if available. Extract it exactly as shown on the page (including currency symbols). If no price exists, return an empty string.",
+    ),
+
+  brand: z
+    .string()
+    .describe(
+      "Brand or source of the wish. For products: the manufacturer or seller. For travel, experiences, or services: use the provider, platform, or location name. If unavailable, return an empty string.",
+    ),
 });
 
-export type ScrapeProductData = z.infer<typeof scrapeProductSchema>;
+export type ScrapedWishData = z.infer<typeof scrapedWishSchema>;
 
-export type ScrapeProductInput = {
+export type ScrapeWishInput = {
   url: string;
 };
 
-export type ScrapeProductOutput = ScrapeProductData;
-
-export const scrapeProduct = onCall<
-  ScrapeProductInput,
-  Promise<ScrapeProductOutput>
->(
+export const scrapeWish = onCall<ScrapeWishInput, Promise<ScrapedWishData>>(
   { secrets: ["FIRECRAWL_API_KEY"], timeoutSeconds: 60, memory: "512MiB" },
   async (request) => {
     if (!request.auth) {
@@ -51,10 +64,10 @@ export const scrapeProduct = onCall<
         apiKey: process.env.FIRECRAWL_API_KEY,
       });
 
-      const scrapedProduct = await scrapeWithRetry({ firecrawl, url });
+      const scrapedWish = await scrapeWithRetry({ firecrawl, url });
 
       // Firecrawl returns json directly on the response object
-      if (!scrapedProduct?.json) {
+      if (!scrapedWish?.json) {
         throw new HttpsError("internal", "No data returned from scraper");
       }
       // TODO:
@@ -62,7 +75,7 @@ export const scrapeProduct = onCall<
       // - If some data is lacking fire a web search to find it
 
       // Return the typed data directly
-      return scrapedProduct.json as ScrapeProductOutput;
+      return scrapedWish.json as ScrapedWishData;
     } catch (error) {
       logger.error("Scraping failed", error);
       throw new HttpsError(

@@ -1,21 +1,40 @@
 import z from "zod";
 
-export const scrapeProductSchema = z.object({
-  product_image: z
+export const scrapedWishSchema = z.object({
+  wish_image: z
     .string()
-    .describe("For product_image use first image in the carousel on the page"),
-  product_title: z.string().describe("Title of the product"),
-  product_description: z
+    .describe(
+      "URL of the main image representing the wish. Prefer the first large, clear image on the page, usually the primary product or hero image.",
+    ),
+
+  wish_title: z
     .string()
-    .describe("Product description including specifications"),
-  product_price: z.string().describe("Product price"),
-  brand: z.string().describe("Product brand"),
+    .describe(
+      "Short title of the wish. Should clearly describe what the item, place, experience, or service is.",
+    ),
+
+  wish_description: z
+    .string()
+    .max(250)
+    .describe(
+      "A concise and appealing description of the wish. Summarize key details, features, or highlights. Must be under 250 characters, friendly, and easy to read.",
+    ),
+
+  wish_price: z
+    .string()
+    .describe(
+      "Price of the wish, if available. Extract it exactly as shown on the page (including currency symbols). If no price exists, return an empty string.",
+    ),
+
+  brand: z
+    .string()
+    .describe(
+      "Brand or source of the wish. For products: the manufacturer or seller. For travel, experiences, or services: use the provider, platform, or location name. If unavailable, return an empty string.",
+    ),
 });
 
-export type ScrapeProductData = z.infer<typeof scrapeProductSchema>;
+export type ScrapedWishData = z.infer<typeof scrapedWishSchema>;
 
-export type ScrapeProductInput = {
+export type ScrapeWishInput = {
   url: string;
 };
-
-export type ScrapeProductOutput = ScrapeProductData;
