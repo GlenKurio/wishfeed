@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { authQueryOptions } from "../../lib/firebase/auth";
 import AppHeader from "./-components/app-header";
 import Dock from "./-components/dock";
-import Gradient from "../../components/gradient";
+import Gradient from "../../components/pattern";
 
 export const Route = createFileRoute("/_protected")({
   beforeLoad: async ({ context }) => {
