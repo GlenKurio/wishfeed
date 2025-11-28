@@ -25,9 +25,9 @@ export const scrapedWishSchema = z.object({
     ),
 
   wish_price: z
-    .string()
+    .number()
     .describe(
-      "Price of the wish, if available. Extract it exactly as shown on the page (including currency symbols). If no price exists, return an empty string.",
+      "Price of the wish, if available. Extract it exactly as shown on the page. If no price found, return 0.",
     ),
 
   brand: z

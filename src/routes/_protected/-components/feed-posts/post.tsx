@@ -29,7 +29,7 @@ export function Post({ post }: PostProps) {
         <img
           src={post.image || "/product-placeholder.webp"}
           alt={post.title}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover object-center"
         />
 
         {post.brand && (

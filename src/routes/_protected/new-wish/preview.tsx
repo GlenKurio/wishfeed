@@ -55,7 +55,7 @@ function RouteComponent() {
       wish_title: scrapedWish?.wish_title || "",
       wish_description: scrapedWish?.wish_description || "",
       wish_image: scrapedWish?.wish_image || "",
-      wish_price: scrapedWish?.wish_price || "",
+      wish_price: scrapedWish?.wish_price || 0,
       brand: scrapedWish?.brand || "",
     },
 
@@ -135,7 +135,7 @@ function RouteComponent() {
                   <div className="relative aspect-square overflow-hidden rounded-lg border-2">
                     <img
                       src={field.state.value}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover object-center"
                       alt="Preview"
                     />
                     <button
@@ -384,10 +384,12 @@ function RouteComponent() {
                     <input
                       id={field.name}
                       name={field.name}
-                      type="text"
+                      type="number"
                       value={field.state.value}
                       placeholder="29.99"
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      step="0.01" // Allows decimal values
+                      min="0" // Prevents negative values
+                      onChange={(e) => field.handleChange(+e.target.value)}
                       onBlur={field.handleBlur}
                       aria-invalid={hasError}
                       className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
@@ -408,7 +410,7 @@ function RouteComponent() {
       <div className="flex flex-col gap-4">
         {/* Submit Button */}
         <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isTouched]}
+          selector={(state) => [state.canSubmit]}
           children={([canSubmit]) => {
             return (
               <button
@@ -444,7 +446,13 @@ function RouteComponent() {
           }}
           className="btn btn-block btn-error btn-ghost h-10 text-[14px] font-semibold"
         >
-          Discard cahnges <IconTrash className="size-4" />
+          {form.state.isDirty ? (
+            <>
+              Discard cahnges <IconTrash className="size-4" />
+            </>
+          ) : (
+            <>Go back</>
+          )}
         </button>
       </div>
 

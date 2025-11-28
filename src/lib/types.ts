@@ -34,9 +34,9 @@ export const scrapedWishSchema = z.object({
     ),
 
   wish_price: z
-    .string()
+    .number()
     .describe(
-      "Price of the wish, if available. Extract it exactly as shown on the page (including currency symbols). If no price exists, return an empty string.",
+      "Price of the wish, if available. Extract it exactly as shown on the page. If no price found, return 0.",
     ),
 
   brand: z
@@ -95,7 +95,11 @@ export const newWishSchema = z.object({
     .trim()
     .min(1, { message: "Description is required." })
     .max(500, { message: "Description cannot exceed 250 characters." }),
-  wish_price: z.string().trim().min(1, { message: "Price is required." }),
+  wish_price: z
+    .number()
+    .positive({ message: "Price must be greater than 0." })
+    .min(0.01, { message: "Price must be at least 0.01." })
+    .max(999999.99, { message: "Price cannot exceed 999,999.99." }),
   brand: z
     .string()
     .trim()
