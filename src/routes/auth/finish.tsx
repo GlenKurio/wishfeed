@@ -6,6 +6,7 @@ import {
   signInWithEmailLink,
 } from "firebase/auth";
 import { IconCheck, IconX, IconLoader2 } from "@tabler/icons-react";
+import { createUserProfile } from "../../lib/firebase/db";
 
 export const Route = createFileRoute("/auth/finish")({
   component: RouteComponent,
@@ -41,7 +42,13 @@ function RouteComponent() {
 
       // Proceed with sign-in
       try {
-        await signInWithEmailLink(auth, userEmail, window.location.href);
+        const result = await signInWithEmailLink(
+          auth,
+          userEmail,
+          window.location.href,
+        );
+
+        await createUserProfile(result.user);
 
         // Clear email from storage
         window.localStorage.removeItem("emailForSignIn");
@@ -238,7 +245,7 @@ function RouteComponent() {
             <h1 className="mb-2 text-2xl font-bold">Sign-in Failed</h1>
             <p className="text-base-content/70 mb-6 text-sm">{error}</p>
 
-            <div className="flex flex-col gap-2 w-full">
+            <div className="flex w-full flex-col gap-2">
               <button
                 onClick={() => navigate({ to: "/auth" })}
                 className="btn btn-primary"

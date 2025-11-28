@@ -1,6 +1,18 @@
 import type { FieldValue, Timestamp } from "firebase/firestore";
 import z from "zod";
 
+export type UserProfile = {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  handle: string;
+  followers: string[];
+  following: string[];
+  updatedAt: FieldValue;
+  createdAt?: FieldValue;
+};
+
 export const scrapedWishSchema = z.object({
   wish_image: z
     .string()

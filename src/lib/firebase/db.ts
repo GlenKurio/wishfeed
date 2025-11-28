@@ -7,11 +7,41 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { firebaseApp } from ".";
-import type { NewPostType, NewWishType } from "../types";
+import type { NewPostType, NewWishType, UserProfile } from "../types";
 
 import { auth } from "./auth";
+import type { User } from "firebase/auth";
 
 export const db = getFirestore(firebaseApp);
+
+export async function createUserProfile(user: User) {
+  if (!user || !user.email) {
+    console.log("NO USER");
+    return { message: "No user provided!" };
+  }
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+  if (userSnap.exists()) {
+    console.log("USER EXISTS");
+    return { message: "User already exists!" };
+  }
+
+  const userData: UserProfile = {
+    uid: user.uid,
+    email: user.email!,
+    displayName: user.displayName || "",
+    photoURL: user.photoURL || "",
+    handle: user.email?.split("@")[0], // default handle
+    updatedAt: serverTimestamp(),
+    followers: [],
+    following: [],
+    createdAt: serverTimestamp(),
+  };
+
+  await setDoc(userRef, userData);
+  console.log("SUCCESS");
+  return { message: "Success!" };
+}
 
 export async function saveWishPostToDb(
   wishData: NewWishType,

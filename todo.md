@@ -1,5 +1,5 @@
 - Auth:
-  -- Create user doc in firestore on auth, create handle automatically;
+  -- Create user doc in firestore on auth, create handle automatically; Try to use custom hooks for login/logout and set the auth to queryClient in them, then listen to that data in root route. Will it work without on auth state change? Create user if not exists in those custom hooks?
   -- Update user function to update user info in auth and firestore;
   -- Create a function to update posts when user updates the profile doc in firestore; (Name, handle, or avatar)
   -- Improve magic link email design;

@@ -7,6 +7,7 @@ import { useState } from "react";
 import z from "zod";
 import { auth, googleProvider } from "../../../lib/firebase/auth";
 import { toast } from "../../../components/toast/toast";
+import { createUserProfile } from "../../../lib/firebase/db";
 
 const signInSchema = z.object({
   email: z
@@ -56,6 +57,7 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
+
       toast.success({ title: "Signed in with Google." });
       navigate({ to: "/home" });
     } catch (error) {
@@ -89,7 +91,7 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
                 setLinkSent(false);
                 form.reset();
               }}
-              className="btn btn-ghost btn-sm mt-6 text-primary"
+              className="btn btn-ghost btn-sm text-primary mt-6"
             >
               Send to a different email
             </button>
@@ -100,12 +102,9 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 font-family-sans">
-      <div className="card bg-base-100 border-base-200 w-full max-w-110 border p-6  md:p-12 md:pt-8 shadow-lg">
-        <Link
-          to="/"
-          className=" flex items-center justify-center  mx-auto mb-4"
-        >
+    <div className="font-family-sans flex min-h-screen items-center justify-center p-4">
+      <div className="card bg-base-100 border-base-200 w-full max-w-110 border p-6 shadow-lg md:p-12 md:pt-8">
+        <Link to="/" className="mx-auto mb-4 flex items-center justify-center">
           <img src="/wishfeed-logo.svg" className="size-14" />
         </Link>
 
@@ -113,7 +112,7 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
           {" "}
           {isRegister ? "Create account" : "Welcome"}
         </h1>
-        <p className="text-base-content/70 mb-6 text-sm text-center">
+        <p className="text-base-content/70 mb-6 text-center text-sm">
           {isRegister
             ? "Join thousands of people who already sharing their wishlists with friends"
             : "Sign in to your account to continue"}
@@ -209,7 +208,7 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
                     />
                   </label>
                   {message && (
-                    <div className="mt-1.5 ml-1.5 text-xs text-error">
+                    <div className="text-error mt-1.5 ml-1.5 text-xs">
                       {message}
                     </div>
                   )}
@@ -225,7 +224,7 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
           )}
 
           {isRegister && (
-            <p className="text-xs cursor-pointer text-base-content/70">
+            <p className="text-base-content/70 cursor-pointer text-xs">
               <span>By registering you agree to </span>
               <Link to="/legal/terms" className="link link-info font-medium">
                 Terms & Conditions
