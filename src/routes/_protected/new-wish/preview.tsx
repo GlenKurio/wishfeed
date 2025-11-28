@@ -83,7 +83,13 @@ function RouteComponent() {
   return (
     <div className="flex h-full w-full flex-col gap-6">
       <picture className="mx-auto max-w-[200px] lg:mb-10 lg:max-w-[300px]">
-        <img src="/create-wish/step-2.png" className="h-full w-full" />
+        <img
+          src="/create-wish/step-2.png"
+          className="aspect-auto h-full w-full"
+          width="300"
+          height="400"
+          alt="Step 2"
+        />
       </picture>
 
       <div className="flex w-full flex-col items-start gap-4">

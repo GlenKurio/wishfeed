@@ -47,8 +47,14 @@ function RouteComponent() {
 
   return (
     <div className="flex h-full w-full flex-col gap-8 lg:gap-8">
-      <picture className="mx-auto max-w-[200px] lg:mb-12 lg:max-w-[300px]">
-        <img src="/create-wish/step-1.png" className="h-full w-full" />
+      <picture className="mx-auto max-w-[200px] lg:mb-10 lg:max-w-[300px]">
+        <img
+          src="/create-wish/step-1.png"
+          className="aspect-auto h-full w-full"
+          width="300"
+          height="400"
+          alt="Step 1"
+        />
       </picture>
       <form.Field
         name="url"
