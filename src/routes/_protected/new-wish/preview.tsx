@@ -12,7 +12,10 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useCreatePost } from "../../../hooks/use-create-post";
-import { loadScrapedWish } from "../../../lib/scraped-wish-storage";
+import {
+  loadScrapedWish,
+  SCRAPED_WISH_KEY,
+} from "../../../lib/scraped-wish-storage";
 import {
   newWishSchema,
   type ScrapedWishDataWithOriginalUrl,
@@ -22,14 +25,14 @@ export const Route = createFileRoute("/_protected/new-wish/preview")({
   loader: ({ context: { queryClient } }) => {
     // 1. Try cache
     const cached = queryClient.getQueryData([
-      "scraped-wish",
+      SCRAPED_WISH_KEY,
     ]) as ScrapedWishDataWithOriginalUrl;
     if (cached) return cached;
 
     // 2. Fallback to localStorage
     const persisted = loadScrapedWish();
     if (persisted) {
-      queryClient.setQueryData(["scraped-wish"], persisted);
+      queryClient.setQueryData([SCRAPED_WISH_KEY], persisted);
       return persisted;
     }
 
@@ -44,7 +47,7 @@ function RouteComponent() {
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const { createPost } = useCreatePost();
+  const { createPost, isPending } = useCreatePost();
 
   const form = useForm({
     defaultValues: {
@@ -79,7 +82,7 @@ function RouteComponent() {
 
   return (
     <div className="flex h-full w-full flex-col gap-6">
-      <picture className="mx-auto max-w-[150px] lg:mb-10 lg:max-w-[300px]">
+      <picture className="mx-auto max-w-[200px] lg:mb-10 lg:max-w-[300px]">
         <img src="/create-wish/step-2.png" className="h-full w-full" />
       </picture>
 
@@ -400,15 +403,24 @@ function RouteComponent() {
         {/* Submit Button */}
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isTouched]}
-          children={([canSubmit, isTouched]) => {
+          children={([canSubmit]) => {
             return (
               <button
                 type="submit"
                 className="btn btn-block btn-primary mt-2 h-10 text-[14px] font-semibold"
-                disabled={!canSubmit || !isTouched}
+                disabled={!canSubmit || isPending}
                 onClick={() => form.handleSubmit()}
               >
-                Publish Wish <IconHeartShare className="size-4" />
+                {isPending ? (
+                  <>
+                    Publishing Your Wish...{" "}
+                    <IconHeartShare className="size-4" />
+                  </>
+                ) : (
+                  <>
+                    Publish Wish <IconHeartShare className="size-4" />
+                  </>
+                )}
               </button>
             );
           }}
@@ -456,6 +468,25 @@ function RouteComponent() {
           </div>
         </div>
       </dialog>
+
+      {isPending && (
+        <div className="absolute inset-0 flex min-h-screen items-center justify-center p-4 backdrop-blur-xl">
+          <div className="card bg-base-300 border-neutral/5 w-full max-w-md border p-12 shadow-xl">
+            <div className="flex flex-col items-center text-center">
+              <picture className="max-w-[250px]">
+                <img
+                  src="/create-wish/post.png"
+                  alt="Love letter with wings"
+                  className="animate-ring"
+                />
+              </picture>
+
+              <h1 className="mb-2 text-2xl font-bold">Posting your wish...</h1>
+              <p className="text-base-content/70 text-sm">Please wait</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

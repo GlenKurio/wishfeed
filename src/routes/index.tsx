@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Header from "./-components/header";
-import { toast } from "../components/toast/toast";
+import { toast } from "sonner";
 
 // import { toast } from "sonner";
 
@@ -13,9 +13,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const handleClik = () => {
-    return toast.success({
-      title: "This is a headless toast",
-    });
+    return toast.success("This is a headless toast");
   };
 
   return (

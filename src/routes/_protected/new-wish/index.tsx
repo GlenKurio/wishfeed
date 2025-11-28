@@ -47,7 +47,7 @@ function RouteComponent() {
 
   return (
     <div className="flex h-full w-full flex-col gap-8 lg:gap-8">
-      <picture className="mx-auto mb-4 max-w-[150px] lg:mb-12 lg:max-w-[300px]">
+      <picture className="mx-auto max-w-[200px] lg:mb-12 lg:max-w-[300px]">
         <img src="/create-wish/step-1.png" className="h-full w-full" />
       </picture>
       <form.Field
@@ -124,6 +124,27 @@ function RouteComponent() {
           Create wish by hand <IconEdit className="size-4" />
         </Link>
       </div>
+
+      {isPending && (
+        <div className="absolute inset-0 flex min-h-screen items-center justify-center p-4 backdrop-blur-xl">
+          <div className="card bg-base-300 border-neutral/5 w-full max-w-md border p-12 shadow-xl">
+            <div className="flex flex-col items-center text-center">
+              <picture className="max-w-[250px]">
+                <img
+                  src="/create-wish/scrape.png"
+                  alt="Love letter with wings"
+                  className="animate-pulse"
+                />
+              </picture>
+
+              <h1 className="mb-2 text-2xl font-bold">
+                Getting information about your wish...
+              </h1>
+              <p className="text-base-content/70 text-sm">Please wait</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

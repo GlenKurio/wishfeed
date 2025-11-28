@@ -5,8 +5,9 @@ import { sendSignInLinkToEmail, signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 
 import z from "zod";
-import { toast } from "../../../components/toast/toast";
+
 import { auth, googleProvider } from "../../../lib/firebase/auth";
+import { toast } from "sonner";
 
 const signInSchema = z.object({
   email: z
@@ -57,11 +58,11 @@ export default function AuthForm({ mode = "login" }: AuthFormProps) {
     try {
       await signInWithPopup(auth, googleProvider);
 
-      toast.success({ title: "Signed in with Google." });
+      toast.success("Signed in with Google.");
       navigate({ to: "/home" });
     } catch (error) {
       console.log("Error occured when signing in with Google: ", error);
-      toast.error({ title: "There was an error signing in with Google." });
+      toast.error("There was an error signing in with Google.");
     }
   };
 

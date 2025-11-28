@@ -1,6 +1,6 @@
 import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
-import { toast } from "../components/toast/toast";
+
 import { db } from "../lib/firebase/db";
 
 import { useAuth } from "./use-auth";

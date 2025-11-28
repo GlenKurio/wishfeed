@@ -1,13 +1,13 @@
 import type { ScrapedWishDataWithOriginalUrl } from "./types";
 
-const KEY = "scraped-wish";
+export const SCRAPED_WISH_KEY = "scraped-wish";
 
 export function saveScrapedWish(wish: ScrapedWishDataWithOriginalUrl) {
-  localStorage.setItem(KEY, JSON.stringify(wish));
+  localStorage.setItem(SCRAPED_WISH_KEY, JSON.stringify(wish));
 }
 
 export function loadScrapedWish(): ScrapedWishDataWithOriginalUrl | null {
-  const raw = localStorage.getItem(KEY);
+  const raw = localStorage.getItem(SCRAPED_WISH_KEY);
   if (!raw) return null;
 
   try {
@@ -18,5 +18,5 @@ export function loadScrapedWish(): ScrapedWishDataWithOriginalUrl | null {
 }
 
 export function clearScrapedWish() {
-  localStorage.removeItem(KEY);
+  localStorage.removeItem(SCRAPED_WISH_KEY);
 }

@@ -4,6 +4,11 @@ import type { NewWishType } from "../lib/types";
 import { saveWishPostToDb } from "../lib/firebase/db";
 import { uploadPostImage } from "../lib/firebase/storage";
 import { swapUrl } from "../lib/firebase/functions";
+import { toast } from "sonner";
+import {
+  clearScrapedWish,
+  SCRAPED_WISH_KEY,
+} from "../lib/scraped-wish-storage";
 
 export function useCreatePost() {
   const queryClient = useQueryClient();
@@ -40,6 +45,16 @@ export function useCreatePost() {
 
   const mutation = useMutation({
     mutationFn: createPost,
+
+    onSuccess: () => {
+      toast.success("You've made a wish!");
+      clearScrapedWish();
+      queryClient.setQueryData([SCRAPED_WISH_KEY], null);
+
+      navigate({
+        to: "/home",
+      });
+    },
   });
 
   return {

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createUserProfile } from "../../../lib/firebase/db";
+import { toast } from "sonner";
 import { useAuth } from "../../../hooks/use-auth";
 
 export const Route = createFileRoute("/_protected/(gifts)/gifts")({
@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_protected/(gifts)/gifts")({
 function RouteComponent() {
   const user = useAuth();
   const handleCreate = async () => {
-    await createUserProfile(user);
+    toast.success("You've made a wish");
   };
   return (
     <div className="">
