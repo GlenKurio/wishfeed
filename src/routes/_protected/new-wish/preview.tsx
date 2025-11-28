@@ -13,6 +13,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 
 import {
+  clearScrapedWish,
   loadScrapedWish,
   SCRAPED_WISH_KEY,
 } from "../../../lib/scraped-wish-storage";
@@ -20,7 +21,8 @@ import {
   newWishSchema,
   type ScrapedWishDataWithOriginalUrl,
 } from "../../../lib/types";
-import { usePublishPost } from "../../../hooks/use-publish-post";
+import { useCreatePost } from "../../../hooks/use-create-post";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_protected/new-wish/preview")({
   loader: ({ context: { queryClient } }) => {
@@ -44,11 +46,12 @@ export const Route = createFileRoute("/_protected/new-wish/preview")({
 });
 
 function RouteComponent() {
+  const queryClient = useQueryClient();
   const scrapedWish = Route.useLoaderData();
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const { publishPost, isPublishing } = usePublishPost();
+  const { createPost, isPending } = useCreatePost();
 
   const form = useForm({
     defaultValues: {
@@ -65,17 +68,18 @@ function RouteComponent() {
       onBlur: newWishSchema,
     },
     onSubmit: async ({ value }) => {
-      publishPost(value);
+      createPost({ ...value, status: "published" });
     },
   });
 
-  {
-    /* TODO: prompt user to submit deletion of the post. Allow to save it to drafts. */
-  }
-  const handleSaveToDrafts = () => {};
+  const handleSaveToDrafts = () => {
+    createPost({ ...form.state.values, status: "draft" });
+  };
 
   const handleDiscard = () => {
     form.reset();
+    clearScrapedWish();
+    queryClient.setQueryData([SCRAPED_WISH_KEY], null);
     navigate({
       to: "/new-wish",
     });
@@ -417,10 +421,10 @@ function RouteComponent() {
               <button
                 type="submit"
                 className="btn btn-block btn-primary mt-2 h-10 text-[14px] font-semibold"
-                disabled={!canSubmit || isPublishing}
+                disabled={!canSubmit || isPending}
                 onClick={() => form.handleSubmit()}
               >
-                {isPublishing ? (
+                {isPending ? (
                   <>
                     Publishing Your Wish...{" "}
                     <IconHeartShare className="size-4" />
@@ -484,7 +488,7 @@ function RouteComponent() {
         </div>
       </dialog>
 
-      {isPublishing && (
+      {isPending && (
         <div className="absolute inset-0 flex min-h-screen items-center justify-center p-4 backdrop-blur-xl">
           <div className="card bg-base-300 border-neutral/5 w-full max-w-md border p-12 shadow-xl">
             <div className="flex flex-col items-center text-center">

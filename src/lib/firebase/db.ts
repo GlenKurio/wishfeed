@@ -7,15 +7,10 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { firebaseApp } from ".";
-import type {
-  NewPostType,
-  NewWishType,
-  PostStatus,
-  UserProfile,
-} from "../types";
+import type { CreateWishType, NewPostType, UserProfile } from "../types";
 
-import { auth } from "./auth";
 import type { User } from "firebase/auth";
+import { auth } from "./auth";
 
 export const db = getFirestore(firebaseApp);
 
@@ -49,9 +44,8 @@ export async function createUserProfile(user: User) {
 }
 
 export async function saveWishPostToDb(
-  wishData: NewWishType,
+  wishData: CreateWishType,
   affiliateLink: string,
-  status: PostStatus = "draft",
 ) {
   const user = auth.currentUser;
   if (!user) {
@@ -85,8 +79,8 @@ export async function saveWishPostToDb(
     userAvatar: userProfile?.photoURL ?? user.photoURL,
     userHandle: userProfile?.handle,
 
-    status,
-    ...(status === "draft"
+    status: wishData.status,
+    ...(wishData.status === "draft"
       ? { publishedAt: null }
       : { publishedAt: serverTimestamp() }),
     createdAt: serverTimestamp(),

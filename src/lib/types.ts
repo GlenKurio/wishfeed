@@ -88,7 +88,7 @@ export type NewPostType = Omit<
 > & {
   createdAt: FieldValue;
   updatedAt: FieldValue;
-  publishedAt: FieldValue;
+  publishedAt: FieldValue | null;
 };
 
 export const newWishSchema = z.object({
@@ -117,3 +117,6 @@ export const newWishSchema = z.object({
 });
 
 export type NewWishType = z.infer<typeof newWishSchema>;
+export type CreateWishType = NewWishType & {
+  status: PostStatus;
+};

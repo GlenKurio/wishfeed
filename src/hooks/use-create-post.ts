@@ -1,20 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import type { NewWishType } from "../lib/types";
-import { saveWishPostToDb } from "../lib/firebase/db";
-import { uploadPostImage } from "../lib/firebase/storage";
-import { swapUrl } from "../lib/firebase/functions";
 import { toast } from "sonner";
+import { saveWishPostToDb } from "../lib/firebase/db";
+import { swapUrl } from "../lib/firebase/functions";
+import { uploadPostImage } from "../lib/firebase/storage";
 import {
   clearScrapedWish,
   SCRAPED_WISH_KEY,
 } from "../lib/scraped-wish-storage";
+import type { CreateWishType } from "../lib/types";
 
-export function usePublishPost() {
+export function useCreatePost() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const publishPost = async (newWishData: NewWishType) => {
+  const createPost = async (newWishData: CreateWishType) => {
     // 1. Handle image upload if needed
     let imageUrl = newWishData.wish_image;
 
@@ -40,14 +40,25 @@ export function usePublishPost() {
     };
 
     // 4. Save the post to Firestore
-    await saveWishPostToDb(wishData, affiliateLink, "published");
+    const savedPost = await saveWishPostToDb(wishData, affiliateLink);
+    return { savedPost };
   };
 
   const mutation = useMutation({
-    mutationFn: publishPost,
+    mutationFn: createPost,
 
-    onSuccess: () => {
-      toast.success("You've made a wish!");
+    onSuccess: ({ savedPost }) => {
+      switch (savedPost.status) {
+        case "draft":
+          toast.info("Wish saved as draft!");
+          break;
+        case "published":
+          toast.success("You've made a wish!");
+          break;
+        default:
+          toast.success("Wish saved!");
+      }
+
       clearScrapedWish();
       queryClient.setQueryData([SCRAPED_WISH_KEY], null);
 
@@ -58,8 +69,8 @@ export function usePublishPost() {
   });
 
   return {
-    publishPost: mutation.mutateAsync,
-    isPublishing: mutation.isPending,
+    createPost: mutation.mutateAsync,
+    isPending: mutation.isPending,
     data: mutation.data,
   };
 }
