@@ -11,7 +11,7 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
-import { useCreatePost } from "../../../hooks/use-create-post";
+
 import {
   loadScrapedWish,
   SCRAPED_WISH_KEY,
@@ -20,6 +20,7 @@ import {
   newWishSchema,
   type ScrapedWishDataWithOriginalUrl,
 } from "../../../lib/types";
+import { usePublishPost } from "../../../hooks/use-publish-post";
 
 export const Route = createFileRoute("/_protected/new-wish/preview")({
   loader: ({ context: { queryClient } }) => {
@@ -47,7 +48,7 @@ function RouteComponent() {
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const { createPost, isPending } = useCreatePost();
+  const { publishPost, isPublishing } = usePublishPost();
 
   const form = useForm({
     defaultValues: {
@@ -64,7 +65,7 @@ function RouteComponent() {
       onBlur: newWishSchema,
     },
     onSubmit: async ({ value }) => {
-      createPost(value);
+      publishPost(value);
     },
   });
 
@@ -416,10 +417,10 @@ function RouteComponent() {
               <button
                 type="submit"
                 className="btn btn-block btn-primary mt-2 h-10 text-[14px] font-semibold"
-                disabled={!canSubmit || isPending}
+                disabled={!canSubmit || isPublishing}
                 onClick={() => form.handleSubmit()}
               >
-                {isPending ? (
+                {isPublishing ? (
                   <>
                     Publishing Your Wish...{" "}
                     <IconHeartShare className="size-4" />
@@ -436,7 +437,7 @@ function RouteComponent() {
 
         <button
           onClick={() => {
-            if (form.state.isDirty) {
+            if (scrapedWish || form.state.isDirty) {
               modalRef.current?.showModal();
             } else {
               navigate({
@@ -446,9 +447,9 @@ function RouteComponent() {
           }}
           className="btn btn-block btn-error btn-ghost h-10 text-[14px] font-semibold"
         >
-          {form.state.isDirty ? (
+          {scrapedWish || form.state.isDirty ? (
             <>
-              Discard cahnges <IconTrash className="size-4" />
+              Discard <IconTrash className="size-4" />
             </>
           ) : (
             <>Go back</>
@@ -483,7 +484,7 @@ function RouteComponent() {
         </div>
       </dialog>
 
-      {isPending && (
+      {isPublishing && (
         <div className="absolute inset-0 flex min-h-screen items-center justify-center p-4 backdrop-blur-xl">
           <div className="card bg-base-300 border-neutral/5 w-full max-w-md border p-12 shadow-xl">
             <div className="flex flex-col items-center text-center">

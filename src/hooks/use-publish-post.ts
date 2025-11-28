@@ -10,11 +10,11 @@ import {
   SCRAPED_WISH_KEY,
 } from "../lib/scraped-wish-storage";
 
-export function useCreatePost() {
+export function usePublishPost() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const createPost = async (newWishData: NewWishType) => {
+  const publishPost = async (newWishData: NewWishType) => {
     // 1. Handle image upload if needed
     let imageUrl = newWishData.wish_image;
 
@@ -40,11 +40,11 @@ export function useCreatePost() {
     };
 
     // 4. Save the post to Firestore
-    await saveWishPostToDb(wishData, affiliateLink);
+    await saveWishPostToDb(wishData, affiliateLink, "published");
   };
 
   const mutation = useMutation({
-    mutationFn: createPost,
+    mutationFn: publishPost,
 
     onSuccess: () => {
       toast.success("You've made a wish!");
@@ -58,8 +58,8 @@ export function useCreatePost() {
   });
 
   return {
-    createPost: mutation.mutateAsync,
-    isPending: mutation.isPending,
+    publishPost: mutation.mutateAsync,
+    isPublishing: mutation.isPending,
     data: mutation.data,
   };
 }

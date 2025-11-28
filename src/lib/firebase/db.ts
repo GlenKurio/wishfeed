@@ -7,7 +7,12 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { firebaseApp } from ".";
-import type { NewPostType, NewWishType, UserProfile } from "../types";
+import type {
+  NewPostType,
+  NewWishType,
+  PostStatus,
+  UserProfile,
+} from "../types";
 
 import { auth } from "./auth";
 import type { User } from "firebase/auth";
@@ -46,13 +51,14 @@ export async function createUserProfile(user: User) {
 export async function saveWishPostToDb(
   wishData: NewWishType,
   affiliateLink: string,
+  status: PostStatus = "draft",
 ) {
   const user = auth.currentUser;
   if (!user) {
     throw new Error("Must be logged in to save posts.");
   }
 
-  // Fetch the user's Firestore profile (optional but recommended)
+  // Fetch the user's Firestore profile
   const userDocRef = doc(db, "users", user.uid);
   const userSnap = await getDoc(userDocRef);
 
@@ -79,6 +85,10 @@ export async function saveWishPostToDb(
     userAvatar: userProfile?.photoURL ?? user.photoURL,
     userHandle: userProfile?.handle,
 
+    status,
+    ...(status === "draft"
+      ? { publishedAt: null }
+      : { publishedAt: serverTimestamp() }),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };

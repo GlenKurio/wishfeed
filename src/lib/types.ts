@@ -56,13 +56,15 @@ export type ScrapeWishInput = {
   url: string;
 };
 
+export const postStatuses = ["draft", "published"] as const;
+export type PostStatus = (typeof postStatuses)[number];
 export type PostType = {
   id?: string;
   image: string;
   title: string;
   brand: string;
   description: string;
-  price: string;
+  price: number;
   wishUrlOriginal: string;
   wishUrlAffiliate?: string;
   likes: string[];
@@ -74,13 +76,19 @@ export type PostType = {
   userAvatar: string | null;
   userHandle: string;
 
+  status: PostStatus;
+  publishedAt: Timestamp | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
 
-export type NewPostType = Omit<PostType, "createdAt" | "updatedAt"> & {
+export type NewPostType = Omit<
+  PostType,
+  "createdAt" | "updatedAt" | "publishedAt"
+> & {
   createdAt: FieldValue;
   updatedAt: FieldValue;
+  publishedAt: FieldValue;
 };
 
 export const newWishSchema = z.object({
