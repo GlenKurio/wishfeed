@@ -12,7 +12,7 @@ export function useScrapeWish() {
     mutationFn: scrapeWishUrl,
     onSuccess: (data) => {
       // 1. Put scraped product into cache
-      queryClient.setQueryData(["scraped-product"], data);
+      queryClient.setQueryData(["scraped-wish"], data);
       //  Save scraped product data to localStorage so i can reuse it wif page refreshes, etc; Can also use redis or smth here.
       saveScrapedWish(data);
 

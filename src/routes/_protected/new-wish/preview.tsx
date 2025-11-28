@@ -13,14 +13,17 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 import { useCreatePost } from "../../../hooks/use-create-post";
 import { loadScrapedWish } from "../../../lib/scraped-wish-storage";
-import { newWishSchema, type ScrapedWishData } from "../../../lib/types";
+import {
+  newWishSchema,
+  type ScrapedWishDataWithOriginalUrl,
+} from "../../../lib/types";
 
 export const Route = createFileRoute("/_protected/new-wish/preview")({
   loader: ({ context: { queryClient } }) => {
     // 1. Try cache
     const cached = queryClient.getQueryData([
       "scraped-wish",
-    ]) as ScrapedWishData;
+    ]) as ScrapedWishDataWithOriginalUrl;
     if (cached) return cached;
 
     // 2. Fallback to localStorage
@@ -45,8 +48,7 @@ function RouteComponent() {
 
   const form = useForm({
     defaultValues: {
-      // TODO: persist url in local storage
-      wish_url: "",
+      wish_url: scrapedWish?.original_url || "",
       wish_title: scrapedWish?.wish_title || "",
       wish_description: scrapedWish?.wish_description || "",
       wish_image: scrapedWish?.wish_image || "",

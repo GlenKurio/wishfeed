@@ -1,12 +1,12 @@
-import type { ScrapedWishData } from "./types";
+import type { ScrapedWishDataWithOriginalUrl } from "./types";
 
 const KEY = "scraped-wish";
 
-export function saveScrapedWish(wish: ScrapedWishData) {
+export function saveScrapedWish(wish: ScrapedWishDataWithOriginalUrl) {
   localStorage.setItem(KEY, JSON.stringify(wish));
 }
 
-export function loadScrapedWish(): ScrapedWishData | null {
+export function loadScrapedWish(): ScrapedWishDataWithOriginalUrl | null {
   const raw = localStorage.getItem(KEY);
   if (!raw) return null;
 

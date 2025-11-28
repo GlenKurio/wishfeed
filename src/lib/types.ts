@@ -48,6 +48,10 @@ export const scrapedWishSchema = z.object({
 
 export type ScrapedWishData = z.infer<typeof scrapedWishSchema>;
 
+export type ScrapedWishDataWithOriginalUrl = ScrapedWishData & {
+  original_url: string;
+};
+
 export type ScrapeWishInput = {
   url: string;
 };
