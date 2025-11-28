@@ -43,7 +43,7 @@ export function useCreatePost() {
   });
 
   return {
-    createPost: mutation.mutate,
+    createPost: mutation.mutateAsync,
     isPending: mutation.isPending,
     data: mutation.data,
   };

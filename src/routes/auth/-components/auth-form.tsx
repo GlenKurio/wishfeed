@@ -5,9 +5,8 @@ import { sendSignInLinkToEmail, signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 
 import z from "zod";
-import { auth, googleProvider } from "../../../lib/firebase/auth";
 import { toast } from "../../../components/toast/toast";
-import { createUserProfile } from "../../../lib/firebase/db";
+import { auth, googleProvider } from "../../../lib/firebase/auth";
 
 const signInSchema = z.object({
   email: z

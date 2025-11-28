@@ -1,7 +1,7 @@
 import Firecrawl from "@mendable/firecrawl-js";
 import { scrapedWishSchema } from ".";
 
-const pompt = `
+const prompt = `
 You are extracting structured data to create a user's "wish" for a wishlist and social discovery platform.
 
 A "wish" can be:
@@ -42,7 +42,7 @@ export async function scrapeWithRetry({
         {
           type: "json",
           schema: scrapedWishSchema,
-          pompt,
+          prompt,
         },
       ],
     });
@@ -55,7 +55,7 @@ export async function scrapeWithRetry({
           {
             type: "json",
             schema: scrapedWishSchema,
-            pompt,
+            prompt,
           },
         ],
         proxy: "stealth",
@@ -71,7 +71,7 @@ export async function scrapeWithRetry({
           {
             type: "json",
             schema: scrapedWishSchema,
-            pompt,
+            prompt,
           },
         ],
         proxy: "stealth",

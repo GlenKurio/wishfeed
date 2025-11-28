@@ -33,7 +33,7 @@ export function useScrapeWish() {
   });
 
   return {
-    scrapeWish: mutation.mutate,
+    scrapeWish: mutation.mutateAsync,
     isPending: mutation.isPending,
     data: mutation.data,
   };

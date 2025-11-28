@@ -59,11 +59,7 @@ function RouteComponent() {
       onBlur: newWishSchema,
     },
     onSubmit: async ({ value }) => {
-      try {
-        createPost(value);
-      } catch (error) {
-        console.error("Failed to save wish:", error);
-      }
+      createPost(value);
     },
   });
 

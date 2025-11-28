@@ -1,12 +1,11 @@
+import { IconCheck, IconLoader2, IconX } from "@tabler/icons-react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import {
   getAuth,
   isSignInWithEmailLink,
   signInWithEmailLink,
 } from "firebase/auth";
-import { IconCheck, IconX, IconLoader2 } from "@tabler/icons-react";
-import { createUserProfile } from "../../lib/firebase/db";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/auth/finish")({
   component: RouteComponent,
@@ -42,13 +41,7 @@ function RouteComponent() {
 
       // Proceed with sign-in
       try {
-        const result = await signInWithEmailLink(
-          auth,
-          userEmail,
-          window.location.href,
-        );
-
-        await createUserProfile(result.user);
+        await signInWithEmailLink(auth, userEmail, window.location.href);
 
         // Clear email from storage
         window.localStorage.removeItem("emailForSignIn");

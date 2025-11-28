@@ -17,13 +17,13 @@ export const db = getFirestore(firebaseApp);
 export async function createUserProfile(user: User) {
   if (!user || !user.email) {
     console.log("NO USER");
-    return { message: "No user provided!" };
+    return;
   }
   const userRef = doc(db, "users", user.uid);
   const userSnap = await getDoc(userRef);
   if (userSnap.exists()) {
     console.log("USER EXISTS");
-    return { message: "User already exists!" };
+    return;
   }
 
   const userData: UserProfile = {
@@ -31,7 +31,7 @@ export async function createUserProfile(user: User) {
     email: user.email!,
     displayName: user.displayName || "",
     photoURL: user.photoURL || "",
-    handle: user.email?.split("@")[0], // default handle
+    handle: user.email?.split("@")[0],
     updatedAt: serverTimestamp(),
     followers: [],
     following: [],
@@ -40,7 +40,7 @@ export async function createUserProfile(user: User) {
 
   await setDoc(userRef, userData);
   console.log("SUCCESS");
-  return { message: "Success!" };
+  return;
 }
 
 export async function saveWishPostToDb(
@@ -75,8 +75,8 @@ export async function saveWishPostToDb(
     gifted: false,
 
     userUid: user.uid,
-    userName: userProfile?.name ?? user.displayName,
-    userAvatar: userProfile?.avatar ?? user.photoURL,
+    userName: userProfile?.displayName ?? user.displayName,
+    userAvatar: userProfile?.photoURL ?? user.photoURL,
     userHandle: userProfile?.handle,
 
     createdAt: serverTimestamp(),
@@ -84,8 +84,8 @@ export async function saveWishPostToDb(
   };
 
   // Create a reference to the user's posts subcollection with an auto-generated ID
-  const userPostsRef = collection(db, "posts", user.uid);
-  const newPostRef = doc(userPostsRef); // Generates a unique ID
+  const postsRef = collection(db, "posts"); // ✅ 1 segment = collection
+  const newPostRef = doc(postsRef); // Creates posts/{autoId}
 
   // Save the document at posts/{userUid}/{postId}
   await setDoc(newPostRef, fullPost);
