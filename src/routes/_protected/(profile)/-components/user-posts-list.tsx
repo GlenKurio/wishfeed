@@ -13,7 +13,7 @@ export default function UserPostsList({ userId }: { userId: string }) {
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <>Error: {error.message}</>;
-  // TODO: filter posts here
+
   const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 
   return (

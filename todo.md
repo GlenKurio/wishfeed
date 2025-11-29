@@ -1,3 +1,13 @@
+- Get posts:
+  -- Get Feed posts for user from people user follows
+  -- Display user posts in profile
+  -- Get and display user drafts in profile
+  -- Improve the profile page design
+  -- Add ui to get followers, following
+  -- Display the lists and show the posts by wishlits
+  -- Add the wishlist array to post in db;
+  -- Allow to create wishlists; Write a function to get the wishlists;
+
 - Auth:
 
   -- Create a function to update posts when user updates the profile doc in firestore; (Name, handle, or avatar)

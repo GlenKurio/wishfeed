@@ -162,32 +162,6 @@ export async function getFeedPosts() {
   return allPosts;
 }
 
-export async function getDrafts() {}
-
-// TODO: how to implement pagination using useQuery options
-export async function getUserPosts(userId: string): Promise<PostType[]> {
-  const user = auth.currentUser;
-  if (!user || user.uid !== userId) {
-    throw new Error("Must be logged in to save posts.");
-  }
-  const postsRef = collection(db, "posts");
-
-  const q = query(
-    postsRef,
-    where("userUid", "==", userId),
-    orderBy("createdAt", "desc"), // Most recent first
-  );
-
-  const querySnapshot = await getDocs(q);
-
-  const posts = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as PostType[];
-
-  return posts;
-}
-
 export interface PaginatedPostsResult {
   posts: PostType[];
   lastDoc: QueryDocumentSnapshot<DocumentData> | null;
