@@ -3,10 +3,15 @@
   -- Display user posts in profile
   -- Get and display user drafts in profile
   -- Improve the profile page design
-  -- Add ui to get followers, following
-  -- Display the lists and show the posts by wishlits
+  -- Add ui to get followers, following; Implement functionality to follow/unfollow;
+  -- Display the lists and show the posts by wishlist
   -- Add the wishlist array to post in db;
   -- Allow to create wishlists; Write a function to get the wishlists;
+- Finish post design:
+  -- Like posts
+  -- Save post
+  -- Finish all the todos in the component;
+  -- Add actions to post (report, delete, edit, hide?)
 
 - Auth:
 
@@ -29,16 +34,7 @@
   -- Allow to share the product to the app from the product page website - Bookmarklet for desktop browser, Web Share Target API (PWA feature);
   -- Create first wisher in Firestore and fetch them into feed
 
-- Finish post design:
-  -- Should I use tanstacQuery to update the post likes and saves using optimistic updates?
-  -- Finish all the todos in the component;
-
-- Create darwer to write comments and create reposts!
 - How 'gifting' will work?
-
-- Create a form to create a wish
-- Show wishes in feed; make intersitng layout like pinterest?
-- Allow to make a post
 
 # Finishing
 
