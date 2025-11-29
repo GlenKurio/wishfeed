@@ -48,15 +48,10 @@ export function useCreatePost() {
     mutationFn: createPost,
 
     onSuccess: ({ savedPost }) => {
-      switch (savedPost.status) {
-        case "draft":
-          toast.info("Wish saved as draft!");
-          break;
-        case "published":
-          toast.success("You've made a wish!");
-          break;
-        default:
-          toast.success("Wish saved!");
+      if (savedPost.isPublished) {
+        toast.success("You've made a wish!");
+      } else {
+        toast.info("Wish saved as draft!");
       }
 
       clearScrapedWish();

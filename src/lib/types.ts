@@ -75,14 +75,14 @@ export type PostType = {
   userName: string | null;
   userAvatar: string | null;
   userHandle: string;
-
-  status: PostStatus;
+  isPublished: boolean;
+  // status: PostStatus;
   publishedAt: Timestamp | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
 
-export type NewPostType = Omit<
+export type DbPostType = Omit<
   PostType,
   "createdAt" | "updatedAt" | "publishedAt"
 > & {
@@ -118,5 +118,5 @@ export const newWishSchema = z.object({
 
 export type NewWishType = z.infer<typeof newWishSchema>;
 export type CreateWishType = NewWishType & {
-  status: PostStatus;
+  isPublished: boolean;
 };

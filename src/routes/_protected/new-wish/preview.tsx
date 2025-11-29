@@ -68,12 +68,12 @@ function RouteComponent() {
       onBlur: newWishSchema,
     },
     onSubmit: async ({ value }) => {
-      createPost({ ...value, status: "published" });
+      createPost({ ...value, isPublished: true });
     },
   });
 
   const handleSaveToDrafts = () => {
-    createPost({ ...form.state.values, status: "draft" });
+    createPost({ ...form.state.values, isPublished: false });
   };
 
   const handleDiscard = () => {
