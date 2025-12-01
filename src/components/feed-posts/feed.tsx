@@ -105,11 +105,24 @@ const wishes: PostType[] = [
   },
 ];
 
-export default function Feed({ posts }: { posts: PostType[] }) {
+export default function Feed({
+  posts,
+  postRefs,
+}: {
+  posts: PostType[];
+  postRefs?: React.RefObject<Map<string, HTMLElement>>;
+}) {
+  const setPostRef = (postId: string, element: HTMLElement | null) => {
+    if (element && postRefs) {
+      postRefs.current.set(postId, element);
+    }
+  };
   return (
     <div className="flex max-w-3xl flex-col items-center gap-12 md:grid md:gap-16">
       {posts.map((wish, index) => (
-        <Post key={index} post={wish} />
+        <div key={wish.id} ref={(el) => setPostRef(wish.id!, el)}>
+          <Post key={index} post={wish} />
+        </div>
       ))}
     </div>
   );

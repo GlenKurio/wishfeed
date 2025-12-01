@@ -66,6 +66,19 @@
   }
 }
 
+@keyframes highlight {
+  0% {
+    background-color: #f4187063;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
 .animate-ring {
   animation: ring 1.5s ease-in-out infinite;
+}
+
+.animate-highlight {
+  animation: highlight 2s ease-out;
 }
