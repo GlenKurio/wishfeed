@@ -56,8 +56,8 @@ export type ScrapeWishInput = {
   url: string;
 };
 
-export const postStatuses = ["draft", "published"] as const;
-export type PostStatus = (typeof postStatuses)[number];
+// export const postStatuses = ["draft", "published"] as const;
+// export type PostStatus = (typeof postStatuses)[number];
 export type PostType = {
   id?: string;
   image: string;
@@ -69,6 +69,7 @@ export type PostType = {
   wishUrlAffiliate?: string;
   likes: string[];
   saves: string[];
+  wishlists: string[];
   gifted: boolean;
 
   userUid: string;
@@ -76,7 +77,7 @@ export type PostType = {
   userAvatar: string | null;
   userHandle: string;
   isPublished: boolean;
-  // status: PostStatus;
+
   publishedAt: Timestamp | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;

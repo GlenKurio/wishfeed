@@ -73,7 +73,10 @@ function RouteComponent() {
   });
 
   const handleSaveToDrafts = () => {
-    createPost({ ...form.state.values, isPublished: false });
+    createPost({
+      ...form.state.values,
+      isPublished: false,
+    });
   };
 
   const handleDiscard = () => {

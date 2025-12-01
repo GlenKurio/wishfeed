@@ -7,6 +7,7 @@ import {
   limit,
   orderBy,
   query,
+  QueryConstraint,
   QueryDocumentSnapshot,
   serverTimestamp,
   setDoc,
@@ -85,6 +86,7 @@ export async function saveWishPostToDb(
     wishUrlAffiliate: affiliateLink,
     likes: [],
     saves: [],
+    wishlists: [],
     gifted: false,
 
     userUid: user.uid,
@@ -168,12 +170,19 @@ export interface PaginatedPostsResult {
   hasMore: boolean;
 }
 
-export async function getUserPostsPaginated(
-  userId: string,
-  published: boolean = true,
-  pageSize: number = 10,
-  lastDoc?: QueryDocumentSnapshot<DocumentData>,
-): Promise<PaginatedPostsResult> {
+export async function getUserPostsPaginated({
+  userId,
+  published = true,
+  pageSize = 10,
+  lastDoc,
+  wishlist,
+}: {
+  userId: string;
+  published: boolean;
+  pageSize: number;
+  lastDoc?: QueryDocumentSnapshot<DocumentData>;
+  wishlist: string;
+}): Promise<PaginatedPostsResult> {
   const user = auth.currentUser;
   if (!user || user.uid !== userId) {
     throw new Error("Must be logged in to view posts.");
@@ -181,17 +190,32 @@ export async function getUserPostsPaginated(
 
   const postsRef = collection(db, "posts");
 
-  let q = query(
-    postsRef,
+  const queryConstraints: QueryConstraint[] = [
     where("userUid", "==", userId),
     where("isPublished", "==", published),
     orderBy("createdAt", "desc"),
     limit(pageSize + 1),
-  );
+  ];
+
+  // Add collection filters only if there is collections passed; Otherwise just get all posts;
+  if (wishlist !== "all" && wishlist !== "drafts") {
+    // Firestore supports up to 10 values
+    queryConstraints.push(where("wishlists", "array-contains", wishlist));
+  }
+
+  //   let q = query(
+  //     postsRef,
+  //     where("userUid", "==", userId),
+  //     where("isPublished", "==", published),
+  //     orderBy("createdAt", "desc"),
+  //     limit(pageSize + 1),
+  //   );
 
   if (lastDoc) {
-    q = query(q, startAfter(lastDoc));
+    queryConstraints.push(startAfter(lastDoc));
   }
+
+  const q = query(postsRef, ...queryConstraints);
 
   const querySnapshot = await getDocs(q);
   const docs = querySnapshot.docs;
