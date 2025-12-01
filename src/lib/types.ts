@@ -72,10 +72,13 @@ export type PostType = {
   wishlists: string[];
   gifted: boolean;
 
+  createdBy: string;
+
   userUid: string;
   userName: string | null;
   userAvatar: string | null;
   userHandle: string;
+
   isPublished: boolean;
 
   publishedAt: Timestamp | null;

@@ -34,7 +34,7 @@ export default function PostsGrid({ userId }: { userId: string }) {
               <img
                 src={post.image || "/placeholder.svg"}
                 alt={`Post ${post.id}`}
-                className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                className="h-full w-full object-cover object-center transition-transform group-hover:scale-105"
               />
             </div>
           ))}

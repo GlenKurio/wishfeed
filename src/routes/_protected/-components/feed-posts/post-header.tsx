@@ -2,12 +2,14 @@ import { MoreHorizontal } from "lucide-react";
 import type { PostType } from "../../../../lib/types";
 
 export default function PostHeader(post: PostType) {
+  // TODO: get post author profile info by createdBy post property;
+  // If profile is deleted show skeletons fallabcks and that profile is deleted?
   return (
     <div className="flex w-full items-center justify-between px-2">
       <div className="flex items-center gap-2">
         <div className="avatar">
           <div className="w-8 rounded-full">
-            {/* TODO: add fillers */}
+            {/* TODO: add fallbacks */}
             <img src={post.userAvatar || ""} alt={post.userName || ""} />
           </div>
         </div>
