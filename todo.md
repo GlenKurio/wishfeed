@@ -1,19 +1,19 @@
 - Get posts:
-  -- Improve the profile page design
-  -- Display the lists and show the posts by wishlist
-  -- Allow to create wishlists; Write a function to get the wishlists;
-  -- When click on the post in profile open that list 'feed';
+  -- Improve the profile page design:
+  -- Edit profile & Setting
+  -- Allow to open the page with followers and following with search;
+  -- Allow to create wishlists; Write a function to get the wishlists; Edit wishlists;
+
+  -- Display different actions on the proile page if visitor is not the profile owner;
+
   -- On hover of the post in proifle show actions (same actions that in full feed post card).
   -- Create post actions: one for author, one for other users;
-  -- Allow to open the page with followers and following with search;
-  -- Make adit profile work;
-  -- Display different actions on the proile page if visitor is not the profile owner;
 
   -- Add ui to get followers, following; Implement functionality to follow/unfollow;
   -- Get Feed posts for user from people user follows
 
 - Finish post design:
-  -- Like posts
+  -- Like posts (add ratelimit to it)
   -- Save post
   -- Finish all the todos in the component;
   -- Add actions to post (report, delete, edit, hide?)
