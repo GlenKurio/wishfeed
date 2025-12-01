@@ -29,5 +29,6 @@ export function useUserPosts({
     getNextPageParam: (lastPage) =>
       lastPage.hasMore ? lastPage.lastDoc : undefined,
     enabled: !!userId,
+    staleTime: 60 * 1000,
   });
 }
