@@ -1,0 +1,26 @@
+import { createFileRoute } from "@tanstack/react-router";
+import PostsGrid from "../-components/posts-grid";
+import ProfileHeader from "../-components/profile-header";
+import Wishlists from "../-components/wishlists";
+import { useAuth } from "../../../../hooks/use-auth";
+
+export const Route = createFileRoute("/_protected/profile/$userId/")({
+  component: RouteComponent,
+});
+// Profile header with info and settings
+// Stats, followers, following
+// Collections circles - click on one and feed under changes to all the posts(wishes) in the list;
+//  Info where to send the gift
+function RouteComponent() {
+  const authUser = useAuth();
+  const { userId } = Route.useParams();
+  const isOwner = authUser?.uid === userId;
+
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-8 md:py-12">
+      <ProfileHeader userId={userId} isOwner={isOwner} />
+      <Wishlists userId={userId} isOwner={isOwner} />
+      <PostsGrid userId={userId} isOwner={isOwner} />
+    </div>
+  );
+}

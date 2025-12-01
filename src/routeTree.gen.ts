@@ -17,12 +17,14 @@ import { Route as LegalTermsRouteImport } from './routes/legal/terms'
 import { Route as AuthFinishRouteImport } from './routes/auth/finish'
 import { Route as ProtectedNewWishRouteRouteImport } from './routes/_protected/new-wish/route'
 import { Route as ProtectedNewWishIndexRouteImport } from './routes/_protected/new-wish/index'
+import { Route as ProtectedProfileUserIdRouteImport } from './routes/_protected/profile/$userId'
 import { Route as ProtectedNewWishPreviewRouteImport } from './routes/_protected/new-wish/preview'
 import { Route as ProtectedsearchSearchRouteImport } from './routes/_protected/(search)/search'
-import { Route as ProtectedprofileProfileRouteImport } from './routes/_protected/(profile)/profile'
 import { Route as ProtectednotificationsNotificationsRouteImport } from './routes/_protected/(notifications)/notifications'
 import { Route as ProtectedhomeHomeRouteImport } from './routes/_protected/(home)/home'
 import { Route as ProtectedgiftsGiftsRouteImport } from './routes/_protected/(gifts)/gifts'
+import { Route as ProtectedProfileUserIdIndexRouteImport } from './routes/_protected/profile/$userId/index'
+import { Route as ProtectedProfileUserIdFeedIndexRouteImport } from './routes/_protected/profile/$userId/feed/index'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
@@ -63,6 +65,11 @@ const ProtectedNewWishIndexRoute = ProtectedNewWishIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProtectedNewWishRouteRoute,
 } as any)
+const ProtectedProfileUserIdRoute = ProtectedProfileUserIdRouteImport.update({
+  id: '/profile/$userId',
+  path: '/profile/$userId',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
 const ProtectedNewWishPreviewRoute = ProtectedNewWishPreviewRouteImport.update({
   id: '/preview',
   path: '/preview',
@@ -71,11 +78,6 @@ const ProtectedNewWishPreviewRoute = ProtectedNewWishPreviewRouteImport.update({
 const ProtectedsearchSearchRoute = ProtectedsearchSearchRouteImport.update({
   id: '/(search)/search',
   path: '/search',
-  getParentRoute: () => ProtectedRouteRoute,
-} as any)
-const ProtectedprofileProfileRoute = ProtectedprofileProfileRouteImport.update({
-  id: '/(profile)/profile',
-  path: '/profile',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
 const ProtectednotificationsNotificationsRoute =
@@ -94,6 +96,18 @@ const ProtectedgiftsGiftsRoute = ProtectedgiftsGiftsRouteImport.update({
   path: '/gifts',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
+const ProtectedProfileUserIdIndexRoute =
+  ProtectedProfileUserIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ProtectedProfileUserIdRoute,
+  } as any)
+const ProtectedProfileUserIdFeedIndexRoute =
+  ProtectedProfileUserIdFeedIndexRouteImport.update({
+    id: '/feed/',
+    path: '/feed/',
+    getParentRoute: () => ProtectedProfileUserIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -105,10 +119,12 @@ export interface FileRoutesByFullPath {
   '/gifts': typeof ProtectedgiftsGiftsRoute
   '/home': typeof ProtectedhomeHomeRoute
   '/notifications': typeof ProtectednotificationsNotificationsRoute
-  '/profile': typeof ProtectedprofileProfileRoute
   '/search': typeof ProtectedsearchSearchRoute
   '/new-wish/preview': typeof ProtectedNewWishPreviewRoute
+  '/profile/$userId': typeof ProtectedProfileUserIdRouteWithChildren
   '/new-wish/': typeof ProtectedNewWishIndexRoute
+  '/profile/$userId/': typeof ProtectedProfileUserIdIndexRoute
+  '/profile/$userId/feed': typeof ProtectedProfileUserIdFeedIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,10 +134,11 @@ export interface FileRoutesByTo {
   '/gifts': typeof ProtectedgiftsGiftsRoute
   '/home': typeof ProtectedhomeHomeRoute
   '/notifications': typeof ProtectednotificationsNotificationsRoute
-  '/profile': typeof ProtectedprofileProfileRoute
   '/search': typeof ProtectedsearchSearchRoute
   '/new-wish/preview': typeof ProtectedNewWishPreviewRoute
   '/new-wish': typeof ProtectedNewWishIndexRoute
+  '/profile/$userId': typeof ProtectedProfileUserIdIndexRoute
+  '/profile/$userId/feed': typeof ProtectedProfileUserIdFeedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -135,10 +152,12 @@ export interface FileRoutesById {
   '/_protected/(gifts)/gifts': typeof ProtectedgiftsGiftsRoute
   '/_protected/(home)/home': typeof ProtectedhomeHomeRoute
   '/_protected/(notifications)/notifications': typeof ProtectednotificationsNotificationsRoute
-  '/_protected/(profile)/profile': typeof ProtectedprofileProfileRoute
   '/_protected/(search)/search': typeof ProtectedsearchSearchRoute
   '/_protected/new-wish/preview': typeof ProtectedNewWishPreviewRoute
+  '/_protected/profile/$userId': typeof ProtectedProfileUserIdRouteWithChildren
   '/_protected/new-wish/': typeof ProtectedNewWishIndexRoute
+  '/_protected/profile/$userId/': typeof ProtectedProfileUserIdIndexRoute
+  '/_protected/profile/$userId/feed/': typeof ProtectedProfileUserIdFeedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -152,10 +171,12 @@ export interface FileRouteTypes {
     | '/gifts'
     | '/home'
     | '/notifications'
-    | '/profile'
     | '/search'
     | '/new-wish/preview'
+    | '/profile/$userId'
     | '/new-wish/'
+    | '/profile/$userId/'
+    | '/profile/$userId/feed'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -165,10 +186,11 @@ export interface FileRouteTypes {
     | '/gifts'
     | '/home'
     | '/notifications'
-    | '/profile'
     | '/search'
     | '/new-wish/preview'
     | '/new-wish'
+    | '/profile/$userId'
+    | '/profile/$userId/feed'
   id:
     | '__root__'
     | '/'
@@ -181,10 +203,12 @@ export interface FileRouteTypes {
     | '/_protected/(gifts)/gifts'
     | '/_protected/(home)/home'
     | '/_protected/(notifications)/notifications'
-    | '/_protected/(profile)/profile'
     | '/_protected/(search)/search'
     | '/_protected/new-wish/preview'
+    | '/_protected/profile/$userId'
     | '/_protected/new-wish/'
+    | '/_protected/profile/$userId/'
+    | '/_protected/profile/$userId/feed/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -252,6 +276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedNewWishIndexRouteImport
       parentRoute: typeof ProtectedNewWishRouteRoute
     }
+    '/_protected/profile/$userId': {
+      id: '/_protected/profile/$userId'
+      path: '/profile/$userId'
+      fullPath: '/profile/$userId'
+      preLoaderRoute: typeof ProtectedProfileUserIdRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
     '/_protected/new-wish/preview': {
       id: '/_protected/new-wish/preview'
       path: '/preview'
@@ -264,13 +295,6 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof ProtectedsearchSearchRouteImport
-      parentRoute: typeof ProtectedRouteRoute
-    }
-    '/_protected/(profile)/profile': {
-      id: '/_protected/(profile)/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProtectedprofileProfileRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
     '/_protected/(notifications)/notifications': {
@@ -294,6 +318,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedgiftsGiftsRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
+    '/_protected/profile/$userId/': {
+      id: '/_protected/profile/$userId/'
+      path: '/'
+      fullPath: '/profile/$userId/'
+      preLoaderRoute: typeof ProtectedProfileUserIdIndexRouteImport
+      parentRoute: typeof ProtectedProfileUserIdRoute
+    }
+    '/_protected/profile/$userId/feed/': {
+      id: '/_protected/profile/$userId/feed/'
+      path: '/feed'
+      fullPath: '/profile/$userId/feed'
+      preLoaderRoute: typeof ProtectedProfileUserIdFeedIndexRouteImport
+      parentRoute: typeof ProtectedProfileUserIdRoute
+    }
   }
 }
 
@@ -312,13 +350,29 @@ const ProtectedNewWishRouteRouteWithChildren =
     ProtectedNewWishRouteRouteChildren,
   )
 
+interface ProtectedProfileUserIdRouteChildren {
+  ProtectedProfileUserIdIndexRoute: typeof ProtectedProfileUserIdIndexRoute
+  ProtectedProfileUserIdFeedIndexRoute: typeof ProtectedProfileUserIdFeedIndexRoute
+}
+
+const ProtectedProfileUserIdRouteChildren: ProtectedProfileUserIdRouteChildren =
+  {
+    ProtectedProfileUserIdIndexRoute: ProtectedProfileUserIdIndexRoute,
+    ProtectedProfileUserIdFeedIndexRoute: ProtectedProfileUserIdFeedIndexRoute,
+  }
+
+const ProtectedProfileUserIdRouteWithChildren =
+  ProtectedProfileUserIdRoute._addFileChildren(
+    ProtectedProfileUserIdRouteChildren,
+  )
+
 interface ProtectedRouteRouteChildren {
   ProtectedNewWishRouteRoute: typeof ProtectedNewWishRouteRouteWithChildren
   ProtectedgiftsGiftsRoute: typeof ProtectedgiftsGiftsRoute
   ProtectedhomeHomeRoute: typeof ProtectedhomeHomeRoute
   ProtectednotificationsNotificationsRoute: typeof ProtectednotificationsNotificationsRoute
-  ProtectedprofileProfileRoute: typeof ProtectedprofileProfileRoute
   ProtectedsearchSearchRoute: typeof ProtectedsearchSearchRoute
+  ProtectedProfileUserIdRoute: typeof ProtectedProfileUserIdRouteWithChildren
 }
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
@@ -327,8 +381,8 @@ const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
   ProtectedhomeHomeRoute: ProtectedhomeHomeRoute,
   ProtectednotificationsNotificationsRoute:
     ProtectednotificationsNotificationsRoute,
-  ProtectedprofileProfileRoute: ProtectedprofileProfileRoute,
   ProtectedsearchSearchRoute: ProtectedsearchSearchRoute,
+  ProtectedProfileUserIdRoute: ProtectedProfileUserIdRouteWithChildren,
 }
 
 const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(

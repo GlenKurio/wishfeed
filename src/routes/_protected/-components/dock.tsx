@@ -1,57 +1,30 @@
 import { IconGift, IconHome, IconSearch, IconUser } from "@tabler/icons-react";
 import { Link, useMatches } from "@tanstack/react-router";
-
-const navLinks = [
-  {
-    to: "/home",
-    icon: IconHome,
-    label: "Feed",
-    tooltip: "Feed",
-  },
-  {
-    to: "/search",
-    icon: IconSearch,
-    label: "Explore",
-    tooltip: "Explore",
-  },
-  {
-    to: "/gifts",
-    icon: IconGift,
-    label: "Gifts",
-    tooltip: "Gifts",
-  },
-  {
-    to: "/profile",
-    icon: IconUser,
-    label: "Profile",
-    tooltip: "Profile",
-  },
-];
+import { useAuth } from "../../../hooks/use-auth";
 
 export default function Dock() {
   const { pathname } = useMatches().at(-1)!;
+  const user = useAuth();
 
   return (
     <nav className="border-neutral/10 bg-base-300 fixed right-0 bottom-0 left-0 z-50 border-t backdrop-blur-md">
       <div className="container mx-auto flex max-w-2xl items-center justify-around md:p-1">
-        {navLinks.slice(0, 2).map((link) => {
-          const Icon = link.icon;
-          const isActive = pathname === link.to;
-          return (
-            <div
-              key={link.to}
-              className="lg:tooltip tooltip-primary"
-              data-tip={link.tooltip}
-            >
-              <Link to={link.to} className="btn btn-ghost rounded-full p-2.5">
-                <Icon
-                  className={`size-4 md:size-5 ${isActive ? "text-primary" : ""}`}
-                />
-                <span className="sr-only">{link.label}</span>
-              </Link>
-            </div>
-          );
-        })}
+        <div className="lg:tooltip tooltip-primary" data-tip={"Feed"}>
+          <Link to={"/home"} className="btn btn-ghost rounded-full p-2.5">
+            <IconHome
+              className={`size-4 md:size-5 ${pathname === "/home" ? "text-primary" : ""}`}
+            />
+            <span className="sr-only">Home</span>
+          </Link>
+        </div>
+        <div className="lg:tooltip tooltip-primary" data-tip={"Explore"}>
+          <Link to={"/search"} className="btn btn-ghost rounded-full p-2.5">
+            <IconSearch
+              className={`size-4 md:size-5 ${pathname === "/explore" ? "text-primary" : ""}`}
+            />
+            <span className="sr-only">Explore</span>
+          </Link>
+        </div>
 
         {/* Create wish button stays in the middle */}
         <div className="lg:tooltip tooltip-primary" data-tip="Create wish">
@@ -68,24 +41,28 @@ export default function Dock() {
           </Link>
         </div>
 
-        {navLinks.slice(2).map((link) => {
-          const Icon = link.icon;
-          const isActive = pathname === link.to;
-          return (
-            <div
-              key={link.to}
-              className="lg:tooltip tooltip-primary"
-              data-tip={link.tooltip}
-            >
-              <Link to={link.to} className="btn btn-ghost rounded-full p-2.5">
-                <Icon
-                  className={`size-4 md:size-5 ${isActive ? "text-primary" : ""}`}
-                />
-                <span className="sr-only">{link.label}</span>
-              </Link>
-            </div>
-          );
-        })}
+        <div className="lg:tooltip tooltip-primary" data-tip={"Gifts"}>
+          <Link to={"/gifts"} className="btn btn-ghost rounded-full p-2.5">
+            <IconGift
+              className={`size-4 md:size-5 ${pathname === "/gifts" ? "text-primary" : ""}`}
+            />
+            <span className="sr-only">Gifts</span>
+          </Link>
+        </div>
+        <div className="lg:tooltip tooltip-primary" data-tip={"Profile"}>
+          <Link
+            to="/profile/$userId"
+            params={{
+              userId: user.uid,
+            }}
+            className="btn btn-ghost rounded-full p-2.5"
+          >
+            <IconUser
+              className={`size-4 md:size-5 ${pathname === `/profile/${user.uid}` ? "text-primary" : ""}`}
+            />
+            <span className="sr-only">Profile</span>
+          </Link>
+        </div>
       </div>
     </nav>
   );

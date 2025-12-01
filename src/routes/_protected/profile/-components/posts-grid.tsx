@@ -1,11 +1,16 @@
-import { useSearch } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 import { useUserPosts } from "../../../../hooks/use-user-posts";
-import PostCard from "./post-card";
 
-export default function PostsGrid({ userId }: { userId: string }) {
+export default function PostsGrid({
+  userId,
+  isOwner,
+}: {
+  userId: string;
+  isOwner: boolean;
+}) {
   const { wishlist } = useSearch({
-    from: "/_protected/(profile)/profile",
-  }); // adjust route path
+    from: "/_protected/profile/$userId",
+  });
 
   const isDrafts = wishlist === "drafts";
   const {
@@ -27,8 +32,11 @@ export default function PostsGrid({ userId }: { userId: string }) {
       {allPosts.length !== 0 ? (
         <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4">
           {allPosts.map((post) => (
-            <div
+            <Link
               key={post.id}
+              to="/profile/$userId/feed"
+              params={{ userId }}
+              search={{ postId: post.id, wishlist }}
               className="group bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-lg transition-all hover:opacity-90"
             >
               <img
@@ -36,7 +44,7 @@ export default function PostsGrid({ userId }: { userId: string }) {
                 alt={`Post ${post.id}`}
                 className="h-full w-full object-cover object-center transition-transform group-hover:scale-105"
               />
-            </div>
+            </Link>
           ))}
         </div>
       ) : (

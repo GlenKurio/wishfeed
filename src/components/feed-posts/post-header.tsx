@@ -1,5 +1,5 @@
 import { MoreHorizontal } from "lucide-react";
-import type { PostType } from "../../../../lib/types";
+import type { PostType } from "../../lib/types";
 
 export default function PostHeader(post: PostType) {
   // TODO: get post author profile info by createdBy post property;

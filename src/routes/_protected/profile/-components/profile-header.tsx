@@ -1,4 +1,10 @@
-export default function ProfileHeader() {
+export default function ProfileHeader({
+  userId,
+  isOwner,
+}: {
+  userId: string;
+  isOwner: boolean;
+}) {
   return (
     <div className="mb-8 flex flex-col items-start gap-6 md:flex-row md:items-center md:gap-8">
       <div className="avatar">

@@ -7,10 +7,10 @@ import {
   IconHeartFilled,
 } from "@tabler/icons-react";
 
-import { useAuth } from "../../../../hooks/use-auth";
-import { useLikePost } from "../../../../hooks/use-like-post";
+import { useAuth } from "../../hooks/use-auth";
+import { useLikePost } from "../../hooks/use-like-post";
 import { Link } from "@tanstack/react-router";
-import type { PostType } from "../../../../lib/types";
+import type { PostType } from "../../lib/types";
 
 export default function PostFooter(post: PostType) {
   const user = useAuth();

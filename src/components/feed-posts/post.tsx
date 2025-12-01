@@ -10,7 +10,7 @@
 import { useState } from "react";
 import PostFooter from "./post-footer";
 import PostHeader from "./post-header";
-import type { PostType } from "../../../../lib/types";
+import type { PostType } from "../../lib/types";
 
 interface PostProps {
   post: PostType;

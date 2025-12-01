@@ -1,4 +1,5 @@
-import { Post, type PostType } from "./post";
+import type { PostType } from "../../lib/types";
+import { Post } from "./post";
 
 const wishes: PostType[] = [
   {
@@ -104,10 +105,10 @@ const wishes: PostType[] = [
   },
 ];
 
-export default function Feed() {
+export default function Feed({ posts }: { posts: PostType[] }) {
   return (
-    <div className="flex flex-col items-center gap-12 md:grid  md:gap-16 max-w-3xl">
-      {wishes.map((wish, index) => (
+    <div className="flex max-w-3xl flex-col items-center gap-12 md:grid md:gap-16">
+      {posts.map((wish, index) => (
         <Post key={index} post={wish} />
       ))}
     </div>
