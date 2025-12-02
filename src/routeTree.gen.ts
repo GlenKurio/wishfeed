@@ -27,6 +27,7 @@ import { Route as ProtectedProfileUserIdIndexRouteImport } from './routes/_prote
 import { Route as ProtectedProfileUserIdFollowingIndexRouteImport } from './routes/_protected/profile/$userId/following/index'
 import { Route as ProtectedProfileUserIdFollowersIndexRouteImport } from './routes/_protected/profile/$userId/followers/index'
 import { Route as ProtectedProfileUserIdFeedIndexRouteImport } from './routes/_protected/profile/$userId/feed/index'
+import { Route as ProtectedProfileUserIdEditProfileIndexRouteImport } from './routes/_protected/profile/$userId/edit-profile/index'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
@@ -122,6 +123,12 @@ const ProtectedProfileUserIdFeedIndexRoute =
     path: '/feed/',
     getParentRoute: () => ProtectedProfileUserIdRoute,
   } as any)
+const ProtectedProfileUserIdEditProfileIndexRoute =
+  ProtectedProfileUserIdEditProfileIndexRouteImport.update({
+    id: '/edit-profile/',
+    path: '/edit-profile/',
+    getParentRoute: () => ProtectedProfileUserIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/profile/$userId': typeof ProtectedProfileUserIdRouteWithChildren
   '/new-wish/': typeof ProtectedNewWishIndexRoute
   '/profile/$userId/': typeof ProtectedProfileUserIdIndexRoute
+  '/profile/$userId/edit-profile': typeof ProtectedProfileUserIdEditProfileIndexRoute
   '/profile/$userId/feed': typeof ProtectedProfileUserIdFeedIndexRoute
   '/profile/$userId/followers': typeof ProtectedProfileUserIdFollowersIndexRoute
   '/profile/$userId/following': typeof ProtectedProfileUserIdFollowingIndexRoute
@@ -154,6 +162,7 @@ export interface FileRoutesByTo {
   '/new-wish/preview': typeof ProtectedNewWishPreviewRoute
   '/new-wish': typeof ProtectedNewWishIndexRoute
   '/profile/$userId': typeof ProtectedProfileUserIdIndexRoute
+  '/profile/$userId/edit-profile': typeof ProtectedProfileUserIdEditProfileIndexRoute
   '/profile/$userId/feed': typeof ProtectedProfileUserIdFeedIndexRoute
   '/profile/$userId/followers': typeof ProtectedProfileUserIdFollowersIndexRoute
   '/profile/$userId/following': typeof ProtectedProfileUserIdFollowingIndexRoute
@@ -175,6 +184,7 @@ export interface FileRoutesById {
   '/_protected/profile/$userId': typeof ProtectedProfileUserIdRouteWithChildren
   '/_protected/new-wish/': typeof ProtectedNewWishIndexRoute
   '/_protected/profile/$userId/': typeof ProtectedProfileUserIdIndexRoute
+  '/_protected/profile/$userId/edit-profile/': typeof ProtectedProfileUserIdEditProfileIndexRoute
   '/_protected/profile/$userId/feed/': typeof ProtectedProfileUserIdFeedIndexRoute
   '/_protected/profile/$userId/followers/': typeof ProtectedProfileUserIdFollowersIndexRoute
   '/_protected/profile/$userId/following/': typeof ProtectedProfileUserIdFollowingIndexRoute
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/profile/$userId'
     | '/new-wish/'
     | '/profile/$userId/'
+    | '/profile/$userId/edit-profile'
     | '/profile/$userId/feed'
     | '/profile/$userId/followers'
     | '/profile/$userId/following'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/new-wish/preview'
     | '/new-wish'
     | '/profile/$userId'
+    | '/profile/$userId/edit-profile'
     | '/profile/$userId/feed'
     | '/profile/$userId/followers'
     | '/profile/$userId/following'
@@ -232,6 +244,7 @@ export interface FileRouteTypes {
     | '/_protected/profile/$userId'
     | '/_protected/new-wish/'
     | '/_protected/profile/$userId/'
+    | '/_protected/profile/$userId/edit-profile/'
     | '/_protected/profile/$userId/feed/'
     | '/_protected/profile/$userId/followers/'
     | '/_protected/profile/$userId/following/'
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedProfileUserIdFeedIndexRouteImport
       parentRoute: typeof ProtectedProfileUserIdRoute
     }
+    '/_protected/profile/$userId/edit-profile/': {
+      id: '/_protected/profile/$userId/edit-profile/'
+      path: '/edit-profile'
+      fullPath: '/profile/$userId/edit-profile'
+      preLoaderRoute: typeof ProtectedProfileUserIdEditProfileIndexRouteImport
+      parentRoute: typeof ProtectedProfileUserIdRoute
+    }
   }
 }
 
@@ -392,6 +412,7 @@ const ProtectedNewWishRouteRouteWithChildren =
 
 interface ProtectedProfileUserIdRouteChildren {
   ProtectedProfileUserIdIndexRoute: typeof ProtectedProfileUserIdIndexRoute
+  ProtectedProfileUserIdEditProfileIndexRoute: typeof ProtectedProfileUserIdEditProfileIndexRoute
   ProtectedProfileUserIdFeedIndexRoute: typeof ProtectedProfileUserIdFeedIndexRoute
   ProtectedProfileUserIdFollowersIndexRoute: typeof ProtectedProfileUserIdFollowersIndexRoute
   ProtectedProfileUserIdFollowingIndexRoute: typeof ProtectedProfileUserIdFollowingIndexRoute
@@ -400,6 +421,8 @@ interface ProtectedProfileUserIdRouteChildren {
 const ProtectedProfileUserIdRouteChildren: ProtectedProfileUserIdRouteChildren =
   {
     ProtectedProfileUserIdIndexRoute: ProtectedProfileUserIdIndexRoute,
+    ProtectedProfileUserIdEditProfileIndexRoute:
+      ProtectedProfileUserIdEditProfileIndexRoute,
     ProtectedProfileUserIdFeedIndexRoute: ProtectedProfileUserIdFeedIndexRoute,
     ProtectedProfileUserIdFollowersIndexRoute:
       ProtectedProfileUserIdFollowersIndexRoute,

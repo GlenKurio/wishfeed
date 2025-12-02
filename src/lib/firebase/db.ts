@@ -13,6 +13,7 @@ import {
   serverTimestamp,
   setDoc,
   startAfter,
+  updateDoc,
   where,
   writeBatch,
   type DocumentData,
@@ -26,7 +27,7 @@ import type {
   UserProfile,
 } from "../types";
 
-import type { User } from "firebase/auth";
+import { updateProfile, type User } from "firebase/auth";
 import { auth } from "./auth";
 
 export const db = getFirestore(firebaseApp);
@@ -258,4 +259,26 @@ export async function getUserProfileById({
   }
 
   return userProfile;
+}
+
+export async function editUserProfile({
+  updatedUserProfile,
+}: {
+  updatedUserProfile: UserProfile;
+}) {
+  const user = auth.currentUser;
+
+  if (!user || user.uid !== updatedUserProfile.uid) {
+    throw new Error("Must be logged in to update a profile.");
+  }
+
+  // 1. Update Firebase Authentication profile
+  await updateProfile(user, {
+    displayName: updatedUserProfile.displayName,
+    photoURL: updatedUserProfile.photoURL,
+  });
+
+  // 2. Update the userProfile document in Firestore
+  const userProfileDocRef = doc(db, "users", updatedUserProfile.uid);
+  await updateDoc(userProfileDocRef, updatedUserProfile);
 }

@@ -1,24 +1,6 @@
 import type { FieldValue, Timestamp } from "firebase/firestore";
 import z from "zod";
 
-export type UserProfile = {
-  uid: string;
-  email: string;
-  displayName: string;
-  photoURL?: string;
-  handle: string;
-  followers: string[];
-  following: string[];
-  posts: number;
-  updatedAt: Timestamp;
-  createdAt: Timestamp;
-};
-
-export type DbUserProfile = Omit<UserProfile, "createdAt" | "updatedAt"> & {
-  createdAt: FieldValue;
-  updatedAt: FieldValue;
-};
-
 export const scrapedWishSchema = z.object({
   wish_image: z
     .string()
@@ -125,3 +107,42 @@ export type NewWishType = z.infer<typeof newWishSchema>;
 export type CreateWishType = NewWishType & {
   isPublished: boolean;
 };
+
+export type UserProfile = {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  handle: string;
+  followers: string[];
+  following: string[];
+  posts: number;
+  updatedAt: Timestamp;
+  createdAt: Timestamp;
+};
+
+export type DbUserProfile = Omit<UserProfile, "createdAt" | "updatedAt"> & {
+  createdAt: FieldValue;
+  updatedAt: FieldValue;
+};
+
+export const updateUserProfileSchema = z.object({
+  // Display Name: Required, max 50 chars
+  displayName: z
+    .string()
+    .min(1, { message: "Display name is required" })
+    .max(50, { message: "Display name cannot exceed 50 characters" }),
+
+  // Handle: Alphanumeric + underscores, 3-20 chars
+  handle: z
+    .string()
+    .min(3, { message: "Handle must be at least 3 characters" })
+    .max(20, { message: "Handle cannot exceed 20 characters" })
+    .regex(/^[a-zA-Z0-9_]+$/, {
+      message: "Handle can only contain letters, numbers, and underscores",
+    }),
+
+  // Photo URL: Optional (used if they don't upload a new file but keep the old one)
+  avatar: z.string().min(1, { message: "Avatar is required." }),
+});
+export type UpdatedUserProfile = z.infer<typeof updateUserProfileSchema>;

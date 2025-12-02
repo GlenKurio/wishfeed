@@ -7,7 +7,7 @@ export function useGetUserProfile({
   userProfileId: string;
 }) {
   return useQuery({
-    queryKey: ["user-proifle", userProfileId],
+    queryKey: ["user-profile", userProfileId],
     queryFn: () => getUserProfileById({ userId: userProfileId }),
     enabled: !!userProfileId,
     staleTime: 60 * 1000,

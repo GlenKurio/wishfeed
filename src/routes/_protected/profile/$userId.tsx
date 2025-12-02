@@ -10,5 +10,9 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
 });
 
 function RouteComponent() {
-  return <Outlet />;
+  return (
+    <div className="container mx-auto flex items-center justify-center px-4 py-6 lg:py-10">
+      <Outlet />
+    </div>
+  );
 }

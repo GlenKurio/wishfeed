@@ -57,6 +57,10 @@ export function useCreatePost() {
       clearScrapedWish();
       queryClient.setQueryData([SCRAPED_WISH_KEY], null);
 
+      queryClient.invalidateQueries({
+        queryKey: ["posts", "user", savedPost.createdBy, 10, "all"],
+      });
+
       navigate({
         to: "/home",
       });

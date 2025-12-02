@@ -20,3 +20,16 @@ export async function uploadPostImage(file: File): Promise<string> {
 
   return downloadUrl;
 }
+
+export async function uploadAvatar(file: File): Promise<string> {
+  if (!file) throw new Error("No file provided");
+  const fileExtension = file.name.split(".").pop() || "jpg";
+  const filePath = `avatars/${uuid()}.${fileExtension}`;
+
+  const fileRef = ref(storage, filePath);
+
+  await uploadBytes(fileRef, file);
+
+  const downloadUrl = await getDownloadURL(fileRef);
+  return downloadUrl;
+}
