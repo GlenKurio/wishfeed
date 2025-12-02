@@ -1,28 +1,27 @@
+import Avatar from "../../../../components/avatar";
+import { useFollowUser } from "../../../../hooks/use-follow-user";
+import type { UserProfile } from "../../../../lib/types";
+
 export default function ProfileHeader({
-  userId,
+  userProfile,
   isOwner,
 }: {
-  userId: string;
+  userProfile: UserProfile;
   isOwner: boolean;
 }) {
+  const { isFollowing } = useFollowUser({ userId: userProfile.uid });
   return (
-    <div className="mb-8 flex flex-col items-start gap-6 md:flex-row md:items-center md:gap-8">
-      <div className="avatar">
-        <div className="w-24 rounded-full">
-          <img src="https://img.daisyui.com/images/profile/demo/yellingwoman@192.webp" />
-        </div>
-      </div>
-      <div className="bg-neutral text-neutral-content w-24 rounded-full">
-        <span className="text-2xl">D</span>
-      </div>
+    <div className="mb-8 flex flex-col items-start gap-4 md:flex-row">
+      <Avatar src={userProfile.photoURL!} />
+      <div className="avatar"></div>
 
       <div className="flex-1">
         <div className="mb-4">
           <h1 className="text-foreground mb-1 text-2xl font-semibold md:text-3xl">
-            Alexandra Jensen
+            {userProfile.displayName}
           </h1>
           <p className="text-muted-foreground text-base md:text-lg">
-            @alexjensen
+            @{userProfile.handle}
           </p>
         </div>
 
@@ -30,25 +29,30 @@ export default function ProfileHeader({
         <div className="mb-4 flex gap-6">
           <div>
             <p className="text-foreground text-lg font-semibold md:text-xl">
-              1,234
+              {userProfile.followers.length}
             </p>
             <p className="text-muted-foreground text-sm">Followers</p>
           </div>
           <div>
             <p className="text-foreground text-lg font-semibold md:text-xl">
-              567
+              {userProfile.following.length}
             </p>
             <p className="text-muted-foreground text-sm">Following</p>
           </div>
           <div>
             <p className="text-foreground text-lg font-semibold md:text-xl">
-              89
+              {userProfile.posts?.length | 0}
             </p>
             <p className="text-muted-foreground text-sm">Posts</p>
           </div>
         </div>
-
-        <button className="btn w-full md:w-auto">Edit Profile</button>
+        {isOwner ? (
+          <button className="btn w-full md:w-auto">Edit Profile</button>
+        ) : isFollowing ? (
+          <button className="btn btn-primary">Unfollow</button>
+        ) : (
+          <button className="btn btn-primary">Follow</button>
+        )}
       </div>
     </div>
   );

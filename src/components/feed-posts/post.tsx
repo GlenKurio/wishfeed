@@ -11,7 +11,6 @@ import { useState } from "react";
 import PostFooter from "./post-footer";
 import PostHeader from "./post-header";
 import type { PostType } from "../../lib/types";
-import { useSearch } from "@tanstack/react-router";
 
 interface PostProps {
   post: PostType;
@@ -20,10 +19,6 @@ interface PostProps {
 export function Post({ post }: PostProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasLongDescription = post.description && post.description.length > 120;
-
-  const { postId } = useSearch({ from: "/_protected/profile/$userId/feed/" });
-  console.log("POST ID: ", postId);
-  const highlightedPostId = postId;
 
   return (
     <div className={`flex w-full flex-col gap-2`}>
@@ -34,8 +29,6 @@ export function Post({ post }: PostProps) {
         <img
           src={post.image || "/product-placeholder.webp"}
           alt={post.title}
-          // TODO: add an overlay on image to highlight the post
-          // className={highlightedPostId === wish.id ? "animate-highlight" : ""}
           className="h-full w-full object-cover object-center"
         />
 

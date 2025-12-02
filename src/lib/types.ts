@@ -9,8 +9,14 @@ export type UserProfile = {
   handle: string;
   followers: string[];
   following: string[];
+  posts: number;
+  updatedAt: Timestamp;
+  createdAt: Timestamp;
+};
+
+export type DbUserProfile = Omit<UserProfile, "createdAt" | "updatedAt"> & {
+  createdAt: FieldValue;
   updatedAt: FieldValue;
-  createdAt?: FieldValue;
 };
 
 export const scrapedWishSchema = z.object({
@@ -73,11 +79,6 @@ export type PostType = {
   gifted: boolean;
 
   createdBy: string;
-
-  userUid: string;
-  userName: string | null;
-  userAvatar: string | null;
-  userHandle: string;
 
   isPublished: boolean;
 

@@ -1,0 +1,25 @@
+import { cn } from "../lib/utils";
+
+export default function Avatar({
+  src,
+  className,
+}: {
+  src: string;
+  className?: string;
+}) {
+  const fallback = "/avatar-placeholder.png";
+  const imageSrc = src || fallback;
+  return (
+    <div className="avatar">
+      <div className={cn("w-24 overflow-hidden rounded-full", className)}>
+        <img
+          src={imageSrc}
+          onError={(e) => {
+            e.currentTarget.src = fallback;
+          }}
+          alt="avatar"
+        />
+      </div>
+    </div>
+  );
+}

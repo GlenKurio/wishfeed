@@ -4,6 +4,7 @@ import {
   getDoc,
   getDocs,
   getFirestore,
+  increment,
   limit,
   orderBy,
   query,
@@ -13,12 +14,14 @@ import {
   setDoc,
   startAfter,
   where,
+  writeBatch,
   type DocumentData,
 } from "firebase/firestore";
 import { firebaseApp } from ".";
 import type {
   CreateWishType,
   DbPostType,
+  DbUserProfile,
   PostType,
   UserProfile,
 } from "../types";
@@ -40,7 +43,7 @@ export async function createUserProfile(user: User) {
     return;
   }
 
-  const userData: UserProfile = {
+  const userData: DbUserProfile = {
     uid: user.uid,
     email: user.email!,
     displayName: user.displayName || "",
@@ -49,6 +52,7 @@ export async function createUserProfile(user: User) {
     updatedAt: serverTimestamp(),
     followers: [],
     following: [],
+    posts: 0,
     createdAt: serverTimestamp(),
   };
 
@@ -66,17 +70,19 @@ export async function saveWishPostToDb(
     throw new Error("Must be logged in to save posts.");
   }
 
-  // Fetch the user's Firestore profile
-  const userDocRef = doc(db, "users", user.uid);
-  const userSnap = await getDoc(userDocRef);
+  // 1. Get a new write batch
+  const batch = writeBatch(db);
 
-  let userProfile = null;
-  if (userSnap.exists()) {
-    userProfile = userSnap.data();
-  }
+  // 2. Create a reference for the new post document in the 'posts' collection
+  const newPostRef = doc(collection(db, "posts"));
 
-  // Construct the final post object
+  // 3. Create a reference to the user's profile document
+  const userProfileRef = doc(db, "users", user.uid);
+
+  // Construct the final post object, now including the author's UID
   const fullPost: DbPostType = {
+    id: newPostRef.id, // Store the auto-generated ID right in the document
+    createdBy: user.uid, // Crucial for querying posts by user
     image: wishData.wish_image as string,
     title: wishData.wish_title,
     description: wishData.wish_description,
@@ -88,12 +94,6 @@ export async function saveWishPostToDb(
     saves: [],
     wishlists: [],
     gifted: false,
-
-    userUid: user.uid,
-    userName: userProfile?.displayName ?? user.displayName,
-    userAvatar: userProfile?.photoURL ?? user.photoURL,
-    userHandle: userProfile?.handle,
-
     isPublished: wishData.isPublished,
     ...(wishData.isPublished
       ? { publishedAt: serverTimestamp() }
@@ -102,17 +102,24 @@ export async function saveWishPostToDb(
     updatedAt: serverTimestamp(),
   };
 
-  // Create a reference to the user's posts subcollection with an auto-generated ID
-  const postsRef = collection(db, "posts"); // ✅ 1 segment = collection
-  const newPostRef = doc(postsRef); // Creates posts/{autoId}
+  // 4. In the batch, set the new post document
+  batch.set(newPostRef, fullPost);
 
-  // Save the document at posts/{userUid}/{postId}
-  await setDoc(newPostRef, fullPost);
+  // 5. In the batch, update the user's profile to increment the postCount
+  // This is an atomic operation that happens on the Firestore server.
+  // We no longer need to fetch the user profile first, which saves a read operation.
+  if (wishData.isPublished) {
+    batch.update(userProfileRef, {
+      postCount: increment(1),
+    });
+  }
 
-  // Return final post with id
-  return { id: newPostRef.id, ...fullPost };
+  // 6. Commit the batch
+  await batch.commit();
+
+  // Return the final post object, which now includes its ID
+  return fullPost;
 }
-
 export async function getFeedPosts() {
   const currentUser = auth.currentUser;
   if (!currentUser) throw new Error("Not authenticated");
@@ -184,7 +191,7 @@ export async function getUserPostsPaginated({
   wishlist: string;
 }): Promise<PaginatedPostsResult> {
   const user = auth.currentUser;
-  if (!user || user.uid !== userId) {
+  if (!user) {
     throw new Error("Must be logged in to view posts.");
   }
 
@@ -231,4 +238,24 @@ export async function getUserPostsPaginated({
     lastDoc: hasMore ? docs[pageSize - 1] : null,
     hasMore,
   };
+}
+
+export async function getUserProfileById({
+  userId,
+}: {
+  userId: string;
+}): Promise<UserProfile | null> {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to get user profile.");
+  }
+  const userDocRef = doc(db, "users", userId);
+  const userSnap = await getDoc(userDocRef);
+
+  let userProfile = null;
+  if (userSnap.exists()) {
+    userProfile = userSnap.data() as UserProfile;
+  }
+
+  return userProfile;
 }

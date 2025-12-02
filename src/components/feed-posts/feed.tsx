@@ -117,9 +117,11 @@ export default function Feed({
       postRefs.current.set(postId, element);
     }
   };
+
+  const postsToMap = posts ? posts : wishes;
   return (
     <div className="flex max-w-3xl flex-col items-center gap-12 md:grid md:gap-16">
-      {posts.map((wish, index) => (
+      {postsToMap.map((wish, index) => (
         <div key={wish.id} ref={(el) => setPostRef(wish.id!, el)}>
           <Post key={index} post={wish} />
         </div>

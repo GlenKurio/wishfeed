@@ -31,7 +31,7 @@ function RouteComponent() {
   useEffect(() => {
     if (postId && postRefs.current.has(postId)) {
       const element = postRefs.current.get(postId);
-      element?.scrollIntoView({ behavior: "instant", block: "start" });
+      element?.scrollIntoView({ behavior: "instant", block: "center" });
     }
   }, [postId, data]); // Re-run when postId changes or data loads
 

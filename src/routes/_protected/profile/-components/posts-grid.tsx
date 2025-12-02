@@ -37,7 +37,7 @@ export default function PostsGrid({
               to="/profile/$userId/feed"
               params={{ userId }}
               search={{ postId: post.id, wishlist }}
-              className="group bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-lg transition-all hover:opacity-90"
+              className="group bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-3xl transition-all hover:opacity-90"
             >
               <img
                 src={post.image || "/placeholder.svg"}
