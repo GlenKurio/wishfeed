@@ -24,6 +24,8 @@ import { Route as ProtectednotificationsNotificationsRouteImport } from './route
 import { Route as ProtectedhomeHomeRouteImport } from './routes/_protected/(home)/home'
 import { Route as ProtectedgiftsGiftsRouteImport } from './routes/_protected/(gifts)/gifts'
 import { Route as ProtectedProfileUserIdIndexRouteImport } from './routes/_protected/profile/$userId/index'
+import { Route as ProtectedProfileUserIdFollowingIndexRouteImport } from './routes/_protected/profile/$userId/following/index'
+import { Route as ProtectedProfileUserIdFollowersIndexRouteImport } from './routes/_protected/profile/$userId/followers/index'
 import { Route as ProtectedProfileUserIdFeedIndexRouteImport } from './routes/_protected/profile/$userId/feed/index'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
@@ -102,6 +104,18 @@ const ProtectedProfileUserIdIndexRoute =
     path: '/',
     getParentRoute: () => ProtectedProfileUserIdRoute,
   } as any)
+const ProtectedProfileUserIdFollowingIndexRoute =
+  ProtectedProfileUserIdFollowingIndexRouteImport.update({
+    id: '/following/',
+    path: '/following/',
+    getParentRoute: () => ProtectedProfileUserIdRoute,
+  } as any)
+const ProtectedProfileUserIdFollowersIndexRoute =
+  ProtectedProfileUserIdFollowersIndexRouteImport.update({
+    id: '/followers/',
+    path: '/followers/',
+    getParentRoute: () => ProtectedProfileUserIdRoute,
+  } as any)
 const ProtectedProfileUserIdFeedIndexRoute =
   ProtectedProfileUserIdFeedIndexRouteImport.update({
     id: '/feed/',
@@ -125,6 +139,8 @@ export interface FileRoutesByFullPath {
   '/new-wish/': typeof ProtectedNewWishIndexRoute
   '/profile/$userId/': typeof ProtectedProfileUserIdIndexRoute
   '/profile/$userId/feed': typeof ProtectedProfileUserIdFeedIndexRoute
+  '/profile/$userId/followers': typeof ProtectedProfileUserIdFollowersIndexRoute
+  '/profile/$userId/following': typeof ProtectedProfileUserIdFollowingIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -139,6 +155,8 @@ export interface FileRoutesByTo {
   '/new-wish': typeof ProtectedNewWishIndexRoute
   '/profile/$userId': typeof ProtectedProfileUserIdIndexRoute
   '/profile/$userId/feed': typeof ProtectedProfileUserIdFeedIndexRoute
+  '/profile/$userId/followers': typeof ProtectedProfileUserIdFollowersIndexRoute
+  '/profile/$userId/following': typeof ProtectedProfileUserIdFollowingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -158,6 +176,8 @@ export interface FileRoutesById {
   '/_protected/new-wish/': typeof ProtectedNewWishIndexRoute
   '/_protected/profile/$userId/': typeof ProtectedProfileUserIdIndexRoute
   '/_protected/profile/$userId/feed/': typeof ProtectedProfileUserIdFeedIndexRoute
+  '/_protected/profile/$userId/followers/': typeof ProtectedProfileUserIdFollowersIndexRoute
+  '/_protected/profile/$userId/following/': typeof ProtectedProfileUserIdFollowingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -177,6 +197,8 @@ export interface FileRouteTypes {
     | '/new-wish/'
     | '/profile/$userId/'
     | '/profile/$userId/feed'
+    | '/profile/$userId/followers'
+    | '/profile/$userId/following'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -191,6 +213,8 @@ export interface FileRouteTypes {
     | '/new-wish'
     | '/profile/$userId'
     | '/profile/$userId/feed'
+    | '/profile/$userId/followers'
+    | '/profile/$userId/following'
   id:
     | '__root__'
     | '/'
@@ -209,6 +233,8 @@ export interface FileRouteTypes {
     | '/_protected/new-wish/'
     | '/_protected/profile/$userId/'
     | '/_protected/profile/$userId/feed/'
+    | '/_protected/profile/$userId/followers/'
+    | '/_protected/profile/$userId/following/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -325,6 +351,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedProfileUserIdIndexRouteImport
       parentRoute: typeof ProtectedProfileUserIdRoute
     }
+    '/_protected/profile/$userId/following/': {
+      id: '/_protected/profile/$userId/following/'
+      path: '/following'
+      fullPath: '/profile/$userId/following'
+      preLoaderRoute: typeof ProtectedProfileUserIdFollowingIndexRouteImport
+      parentRoute: typeof ProtectedProfileUserIdRoute
+    }
+    '/_protected/profile/$userId/followers/': {
+      id: '/_protected/profile/$userId/followers/'
+      path: '/followers'
+      fullPath: '/profile/$userId/followers'
+      preLoaderRoute: typeof ProtectedProfileUserIdFollowersIndexRouteImport
+      parentRoute: typeof ProtectedProfileUserIdRoute
+    }
     '/_protected/profile/$userId/feed/': {
       id: '/_protected/profile/$userId/feed/'
       path: '/feed'
@@ -353,12 +393,18 @@ const ProtectedNewWishRouteRouteWithChildren =
 interface ProtectedProfileUserIdRouteChildren {
   ProtectedProfileUserIdIndexRoute: typeof ProtectedProfileUserIdIndexRoute
   ProtectedProfileUserIdFeedIndexRoute: typeof ProtectedProfileUserIdFeedIndexRoute
+  ProtectedProfileUserIdFollowersIndexRoute: typeof ProtectedProfileUserIdFollowersIndexRoute
+  ProtectedProfileUserIdFollowingIndexRoute: typeof ProtectedProfileUserIdFollowingIndexRoute
 }
 
 const ProtectedProfileUserIdRouteChildren: ProtectedProfileUserIdRouteChildren =
   {
     ProtectedProfileUserIdIndexRoute: ProtectedProfileUserIdIndexRoute,
     ProtectedProfileUserIdFeedIndexRoute: ProtectedProfileUserIdFeedIndexRoute,
+    ProtectedProfileUserIdFollowersIndexRoute:
+      ProtectedProfileUserIdFollowersIndexRoute,
+    ProtectedProfileUserIdFollowingIndexRoute:
+      ProtectedProfileUserIdFollowingIndexRoute,
   }
 
 const ProtectedProfileUserIdRouteWithChildren =
