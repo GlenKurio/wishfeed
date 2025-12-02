@@ -61,7 +61,7 @@ export default function EditProfileModal({
   });
 
   return (
-    <DialogContent className="bg-base-100">
+    <DialogContent className="bg-base-100 border-neutral/20 rounded-4xl">
       <div className="">
         <h3 className="mb-4 text-lg font-bold">Edit Profile</h3>
 
@@ -423,7 +423,7 @@ export default function EditProfileModal({
             name="isPublic"
             children={(field) => {
               return (
-                <div className="border-base-content flex w-full items-center justify-between rounded-lg border p-4">
+                <div className="border-base-content flex w-full items-center justify-between rounded-full border p-4">
                   <div className="flex items-center gap-3">
                     <IconWorld width="20" height="20" />
                     <div>

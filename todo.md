@@ -1,7 +1,7 @@
 - Get posts:
   -- Improve the profile page design:
-  -- Finish header layout - use insta as example to decide on placement of everything in header;
-  -- Edit profile & Settings functionality;
+  -- Edit profile popover design - finish it with passing additional UserProfile fields;
+
   -- Allow to open the page with followers and following with search;
   -- Click on posts scrolls page to posts grid;
 
