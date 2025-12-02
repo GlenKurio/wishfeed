@@ -1,8 +1,11 @@
 - Get posts:
   -- Improve the profile page design:
-  -- Edit profile & Setting
+  -- Finish header layout - use insta as example to decide on placement of everything in header;
+  -- Edit profile & Settings functionality;
   -- Allow to open the page with followers and following with search;
-  -- Allow to create wishlists; Write a function to get the wishlists; Edit wishlists;
+  -- Click on posts scrolls page to posts grid;
+
+  -- Allow to create wishlists; Write a function to get the wishlists; Edit wishlists; Delete wishlits;
 
   -- Display different actions on the proile page if visitor is not the profile owner;
 

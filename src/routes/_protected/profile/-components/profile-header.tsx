@@ -29,25 +29,28 @@ export default function ProfileHeader({
         <div className="mb-4 flex gap-6">
           <div>
             <p className="text-foreground text-lg font-semibold md:text-xl">
-              {userProfile.followers.length}
+              {userProfile.followers.length | 0}
             </p>
             <p className="text-muted-foreground text-sm">Followers</p>
           </div>
           <div>
             <p className="text-foreground text-lg font-semibold md:text-xl">
-              {userProfile.following.length}
+              {userProfile.following.length | 0}
             </p>
             <p className="text-muted-foreground text-sm">Following</p>
           </div>
           <div>
             <p className="text-foreground text-lg font-semibold md:text-xl">
-              {userProfile.posts?.length | 0}
+              {userProfile.posts | 0}
             </p>
             <p className="text-muted-foreground text-sm">Posts</p>
           </div>
         </div>
         {isOwner ? (
-          <button className="btn w-full md:w-auto">Edit Profile</button>
+          <div className="flex">
+            <button className="btn w-full md:w-auto">Edit Profile</button>
+            <button className="btn w-full md:w-auto">Settings</button>
+          </div>
         ) : isFollowing ? (
           <button className="btn btn-primary">Unfollow</button>
         ) : (
