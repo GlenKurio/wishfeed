@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
 
 import { useRef } from "react";
-import Avatar from "../../../../components/avatar";
-import { useFollowUser } from "../../../../hooks/use-follow-user";
-import type { UserProfile } from "../../../../lib/types";
+import Avatar from "@/components/avatar";
+import { useFollowUser } from "@/hooks/use-follow-user";
+import type { UserProfile } from "@/lib/types";
 import EditProfileModal from "./edit-profile";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 export default function ProfileHeader({
   userProfile,
@@ -108,7 +109,14 @@ export default function ProfileHeader({
           </div>
         </div>
       </div>
-      <EditProfileModal modalRef={modalRef} />
+      <Dialog>
+        <form>
+          <DialogTrigger asChild>
+            <button className="btn">Open Dialog</button>
+          </DialogTrigger>
+          <EditProfileModal />
+        </form>
+      </Dialog>
     </>
   );
 }

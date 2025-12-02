@@ -1,8 +1,8 @@
-import { useRef } from "react";
-import { useAuth } from "../../../../hooks/use-auth";
-import { useGetUserProfile } from "../../../../hooks/use-get-user-profile";
+import { useRef, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useGetUserProfile } from "@/hooks/use-get-user-profile";
 import { useForm } from "@tanstack/react-form";
-import { updateUserProfileSchema } from "../../../../lib/types";
+import { updateUserProfileSchema } from "@/lib/types";
 import {
   IconPhoto,
   IconUpload,
@@ -10,15 +10,26 @@ import {
   IconUser,
   IconAt,
   IconDeviceFloppy,
+  IconMessage,
+  IconCake,
+  IconWorld,
 } from "@tabler/icons-react";
-import { useEditProfile } from "../../../../hooks/use-edit-profile";
+import { useEditProfile } from "@/hooks/use-edit-profile";
 import { toast } from "sonner";
+import { Popover } from "@radix-ui/react-popover";
+import { PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ChevronDownIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { DialogContent } from "@/components/ui/dialog";
 
 export default function EditProfileModal({
   modalRef,
 }: {
-  modalRef: React.RefObject<HTMLDialogElement | null>;
+  modalRef?: React.RefObject<HTMLDialogElement | null>;
 }) {
+  const [open, setOpen] = useState(false);
+  const [date, setDate] = useState<Date | undefined>(undefined);
+
   const authUser = useAuth();
   const { data } = useGetUserProfile({ userProfileId: authUser.uid });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,6 +40,9 @@ export default function EditProfileModal({
       displayName: data?.displayName || authUser.displayName || "",
       handle: data?.handle || "",
       avatar: data?.photoURL || "",
+      bio: data?.bio || "",
+      birthday: data?.birthday || "",
+      isPublic: data?.isPublic || false,
     },
 
     validators: {
@@ -38,17 +52,17 @@ export default function EditProfileModal({
     onSubmit: ({ value }) => {
       if (form.state.isDefaultValue) {
         toast.success("Profile successfully updated!");
-        modalRef.current?.close();
+        //   modalRef.current?.close();
         return;
       }
       editProfile({ updatedUserProfile: value });
-      modalRef.current?.close();
+      // modalRef.current?.close();
     },
   });
 
   return (
-    <dialog ref={modalRef} id="my_modal_1" className="modal">
-      <div className="modal-box">
+    <DialogContent className="bg-base-100">
+      <div className="">
         <h3 className="mb-4 text-lg font-bold">Edit Profile</h3>
 
         <div className="space-y-4 pb-4">
@@ -128,7 +142,7 @@ export default function EditProfileModal({
 
               const { isTouched, errors } = field.state.meta;
 
-              const message = isTouched ? errors[0]?.message : null;
+              const message = isTouched ? errors[0] : null;
 
               return (
                 <div className="flex w-full flex-col">
@@ -209,12 +223,13 @@ export default function EditProfileModal({
             }}
           />
 
+          {/* Display Name Field */}
           <form.Field
             name="displayName"
             children={(field) => {
               const { isTouched, errors } = field.state.meta;
               const hasError = isTouched && errors.length > 0;
-              const message = isTouched ? errors[0]?.message : null;
+              const message = isTouched ? errors[0] : null;
 
               return (
                 <div className="flex w-full flex-col">
@@ -235,7 +250,7 @@ export default function EditProfileModal({
                       type="text"
                       value={field.state.value}
                       disabled={isPending}
-                      placeholder="Your Full name"
+                      placeholder="Enter your full name"
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                       aria-invalid={hasError}
@@ -251,12 +266,14 @@ export default function EditProfileModal({
               );
             }}
           />
+
+          {/* Handle Field */}
           <form.Field
             name="handle"
             children={(field) => {
               const { isTouched, errors } = field.state.meta;
               const hasError = isTouched && errors.length > 0;
-              const message = isTouched ? errors[0]?.message : null;
+              const message = isTouched ? errors[0] : null;
 
               return (
                 <div className="flex w-full flex-col">
@@ -277,7 +294,7 @@ export default function EditProfileModal({
                       type="text"
                       value={field.state.value}
                       disabled={isPending}
-                      placeholder="Your social handle"
+                      placeholder="@username"
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                       aria-invalid={hasError}
@@ -289,6 +306,141 @@ export default function EditProfileModal({
                       {message}
                     </div>
                   )}
+                </div>
+              );
+            }}
+          />
+
+          {/* Bio Field */}
+          <form.Field
+            name="bio"
+            children={(field) => {
+              const { isTouched, errors } = field.state.meta;
+              const hasError = isTouched && errors.length > 0;
+              const message = isTouched ? errors[0] : null;
+
+              return (
+                <div className="flex w-full flex-col">
+                  <label className="label mb-1 ml-1">
+                    <span className="label-text font-medium">Bio</span>
+                  </label>
+                  <label
+                    className={`textarea textarea-bordered border-base-content flex w-full items-start gap-2 ${hasError ? "textarea-error border-error" : ""}`}
+                  >
+                    <IconMessage
+                      width="20"
+                      height="20"
+                      className={`mt-1 ${hasError ? "text-error" : ""}`}
+                    />
+                    <textarea
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      disabled={isPending}
+                      placeholder="Tell us about yourself..."
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      aria-invalid={hasError}
+                      rows={3}
+                      className={`grow resize-none ${hasError ? "placeholder:text-error/50" : ""}`}
+                    />
+                  </label>
+                  {message && (
+                    <div className="text-error mt-1.5 ml-1.5 text-xs">
+                      {message}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
+
+          <form.Field
+            name="birthday"
+            children={(field) => {
+              const { isTouched, errors } = field.state.meta;
+              const hasError = isTouched && errors.length > 0;
+              const message = isTouched ? errors[0] : null;
+
+              //   const formatDisplayDate = (isoDate: string) => {
+              //     if (!isoDate) return "Pick a date";
+              //     try {
+              //       const date = new Date(isoDate);
+              //       return date.toLocaleDateString("en-US", {
+              //         year: "numeric",
+              //         month: "long",
+              //         day: "numeric",
+              //       });
+              //     } catch {
+              //       return "Pick a date";
+              //     }
+              //   };
+
+              return (
+                <div className="flex w-full flex-col">
+                  <label className="label mb-1 ml-1">
+                    <span className="label-text font-medium">Birthday</span>
+                  </label>
+
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <button
+                        id="date"
+                        className="btn btn-outline w-48 justify-between font-normal"
+                      >
+                        {date ? date.toLocaleDateString() : "Select date"}
+                        <ChevronDownIcon />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto overflow-hidden p-0"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        captionLayout="dropdown"
+                        onSelect={(date) => {
+                          setDate(date);
+                          setOpen(false);
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+
+                  {message && (
+                    <div className="text-error mt-1.5 ml-1.5 text-xs">
+                      {message}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
+
+          {/* Privacy Toggle Field */}
+          <form.Field
+            name="isPublic"
+            children={(field) => {
+              return (
+                <div className="border-base-content flex w-full items-center justify-between rounded-lg border p-4">
+                  <div className="flex items-center gap-3">
+                    <IconWorld width="20" height="20" />
+                    <div>
+                      <div className="font-medium">Public Profile</div>
+                      <div className="text-base-content/60 text-xs">
+                        Allow others to view your profile
+                      </div>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-primary"
+                    checked={field.state.value}
+                    disabled={isPending}
+                    onChange={(e) => field.handleChange(e.target.checked)}
+                    onBlur={field.handleBlur}
+                  />
                 </div>
               );
             }}
@@ -328,7 +480,7 @@ export default function EditProfileModal({
               className="btn btn-ghost w-full"
               onClick={() => {
                 form.reset();
-                modalRef.current?.close();
+                //     modalRef.current?.close();
               }}
             >
               Cancel
@@ -336,6 +488,6 @@ export default function EditProfileModal({
           </form>
         </div>
       </div>
-    </dialog>
+    </DialogContent>
   );
 }
