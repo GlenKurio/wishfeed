@@ -129,31 +129,6 @@ export type DbUserProfile = Omit<UserProfile, "createdAt" | "updatedAt"> & {
   updatedAt: FieldValue;
 };
 
-// export const updateUserProfileSchema = z.object({
-//   // Display Name: Required, max 50 chars
-//   displayName: z
-//     .string()
-//     .min(1, { message: "Display name is required" })
-//     .max(50, { message: "Display name cannot exceed 50 characters" }),
-
-//   // Handle: Alphanumeric + underscores, 3-20 chars
-//   handle: z
-//     .string()
-//     .min(3, { message: "Handle must be at least 3 characters" })
-//     .max(20, { message: "Handle cannot exceed 20 characters" })
-//     .regex(/^[a-zA-Z0-9_]+$/, {
-//       message: "Handle can only contain letters, numbers, and underscores",
-//     }),
-
-//   bio: z.string().max(150, { message: "Bio cannot exceed 150 characters." }),
-//   isPublic: z.boolean(),
-//   birthday: z.string().max(),
-//   email:
-
-//   // Photo URL: Optional (used if they don't upload a new file but keep the old one)
-//   avatar: z.string().min(1, { message: "Avatar is required." }),
-// });
-
 export const updateUserProfileSchema = z.object({
   // Display Name: Required, max 50 chars
   displayName: z
@@ -166,8 +141,8 @@ export const updateUserProfileSchema = z.object({
   handle: z
     .string()
     .trim()
-    .min(3, "Handle must be at least 3 characters")
-    .max(20, "Handle cannot exceed 20 characters")
+    .min(3, { message: "Handle must be at least 3 characters" })
+    .max(20, { message: "Handle cannot exceed 20 characters" })
     .regex(/^[a-zA-Z0-9_]+$/, {
       message: "Handle can only contain letters, numbers, and underscores",
     }),
@@ -176,7 +151,7 @@ export const updateUserProfileSchema = z.object({
   bio: z
     .string()
     .trim()
-    .max(150, "Bio cannot exceed 150 characters")
+    .max(150, { message: "Bio cannot exceed 150 characters" })
     .optional(),
 
   // Profile privacy
@@ -184,10 +159,12 @@ export const updateUserProfileSchema = z.object({
 
   // Birthday: Optional ISO date string (YYYY-MM-DD)
   // Also validates correct date format
-  birthday: z.date("Birthday must be a valid date (YYYY-MM-DD)").optional(),
+  birthday: z
+    .date({ message: "Birthday must be a valid date (YYYY-MM-DD)" })
+    .optional(),
 
   // Avatar URL: Optional — user may keep old one or upload new one
-  avatar: z.string().optional(),
+  avatar: z.string(),
 });
 
 export type UpdatedUserProfile = z.infer<typeof updateUserProfileSchema>;

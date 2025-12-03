@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useGetUserProfile } from "@/hooks/use-get-user-profile";
 import { useForm } from "@tanstack/react-form";
@@ -16,20 +16,13 @@ import {
 } from "@tabler/icons-react";
 import { useEditProfile } from "@/hooks/use-edit-profile";
 import { toast } from "sonner";
-import { Popover } from "@radix-ui/react-popover";
-import { PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronDownIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { DialogContent } from "@/components/ui/dialog";
+// Helper function to format the date to YYYY-MM-DD
 
 export default function EditProfileModal({
   modalRef,
 }: {
-  modalRef?: React.RefObject<HTMLDialogElement | null>;
+  modalRef: React.RefObject<HTMLDialogElement | null>;
 }) {
-  const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<Date | undefined>(undefined);
-
   const authUser = useAuth();
   const { data } = useGetUserProfile({ userProfileId: authUser.uid });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,7 +34,7 @@ export default function EditProfileModal({
       handle: data?.handle || "",
       avatar: data?.photoURL || "",
       bio: data?.bio || "",
-      birthday: data?.birthday || "",
+      birthday: data?.birthday || "1995-03-01",
       isPublic: data?.isPublic || false,
     },
 
@@ -52,17 +45,17 @@ export default function EditProfileModal({
     onSubmit: ({ value }) => {
       if (form.state.isDefaultValue) {
         toast.success("Profile successfully updated!");
-        //   modalRef.current?.close();
+        modalRef.current?.close();
         return;
       }
       editProfile({ updatedUserProfile: value });
-      // modalRef.current?.close();
+      modalRef.current?.close();
     },
   });
 
   return (
-    <DialogContent className="bg-base-100 border-neutral/20 rounded-4xl">
-      <div className="">
+    <dialog ref={modalRef} id="my_modal_1" className="modal">
+      <div className="modal-box">
         <h3 className="mb-4 text-lg font-bold">Edit Profile</h3>
 
         <div className="space-y-4 pb-4">
@@ -142,7 +135,7 @@ export default function EditProfileModal({
 
               const { isTouched, errors } = field.state.meta;
 
-              const message = isTouched ? errors[0] : null;
+              const message = isTouched ? errors[0]?.message : null;
 
               return (
                 <div className="flex w-full flex-col">
@@ -205,6 +198,7 @@ export default function EditProfileModal({
                     <input
                       ref={fileInputRef}
                       type="file"
+                      required
                       accept="image/png,image/jpeg,image/jpg,image/webp"
                       className="hidden"
                       onChange={handleFileChange}
@@ -229,7 +223,7 @@ export default function EditProfileModal({
             children={(field) => {
               const { isTouched, errors } = field.state.meta;
               const hasError = isTouched && errors.length > 0;
-              const message = isTouched ? errors[0] : null;
+              const message = isTouched ? errors[0]?.message : null;
 
               return (
                 <div className="flex w-full flex-col">
@@ -273,7 +267,7 @@ export default function EditProfileModal({
             children={(field) => {
               const { isTouched, errors } = field.state.meta;
               const hasError = isTouched && errors.length > 0;
-              const message = isTouched ? errors[0] : null;
+              const message = isTouched ? errors[0]?.message : null;
 
               return (
                 <div className="flex w-full flex-col">
@@ -317,7 +311,7 @@ export default function EditProfileModal({
             children={(field) => {
               const { isTouched, errors } = field.state.meta;
               const hasError = isTouched && errors.length > 0;
-              const message = isTouched ? errors[0] : null;
+              const message = isTouched ? errors[0]?.message : null;
 
               return (
                 <div className="flex w-full flex-col">
@@ -355,59 +349,40 @@ export default function EditProfileModal({
             }}
           />
 
+          {/* Birthday Field */}
           <form.Field
             name="birthday"
             children={(field) => {
               const { isTouched, errors } = field.state.meta;
               const hasError = isTouched && errors.length > 0;
-              const message = isTouched ? errors[0] : null;
-
-              //   const formatDisplayDate = (isoDate: string) => {
-              //     if (!isoDate) return "Pick a date";
-              //     try {
-              //       const date = new Date(isoDate);
-              //       return date.toLocaleDateString("en-US", {
-              //         year: "numeric",
-              //         month: "long",
-              //         day: "numeric",
-              //       });
-              //     } catch {
-              //       return "Pick a date";
-              //     }
-              //   };
+              const message = isTouched ? errors[0]?.message : null;
 
               return (
                 <div className="flex w-full flex-col">
                   <label className="label mb-1 ml-1">
                     <span className="label-text font-medium">Birthday</span>
                   </label>
+                  <label
+                    className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                  >
+                    <IconCake
+                      width="20"
+                      height="20"
+                      className={hasError ? "text-error" : ""}
+                    />
 
-                  <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                      <button
-                        id="date"
-                        className="btn btn-outline w-48 justify-between font-normal"
-                      >
-                        {date ? date.toLocaleDateString() : "Select date"}
-                        <ChevronDownIcon />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-auto overflow-hidden p-0"
-                      align="start"
-                    >
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        captionLayout="dropdown"
-                        onSelect={(date) => {
-                          setDate(date);
-                          setOpen(false);
-                        }}
-                      />
-                    </PopoverContent>
-                  </Popover>
-
+                    <input
+                      id={field.name}
+                      name={field.name}
+                      type="date"
+                      value={field.state.value} // Use the formatted date
+                      disabled={isPending}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      aria-invalid={hasError}
+                      className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                    />
+                  </label>
                   {message && (
                     <div className="text-error mt-1.5 ml-1.5 text-xs">
                       {message}
@@ -423,7 +398,7 @@ export default function EditProfileModal({
             name="isPublic"
             children={(field) => {
               return (
-                <div className="border-base-content flex w-full items-center justify-between rounded-full border p-4">
+                <div className="border-base-content flex w-full items-center justify-between rounded-lg border p-4">
                   <div className="flex items-center gap-3">
                     <IconWorld width="20" height="20" />
                     <div>
@@ -480,7 +455,7 @@ export default function EditProfileModal({
               className="btn btn-ghost w-full"
               onClick={() => {
                 form.reset();
-                //     modalRef.current?.close();
+                modalRef.current?.close();
               }}
             >
               Cancel
@@ -488,6 +463,6 @@ export default function EditProfileModal({
           </form>
         </div>
       </div>
-    </DialogContent>
+    </dialog>
   );
 }

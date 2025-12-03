@@ -1,11 +1,10 @@
 import { Link } from "@tanstack/react-router";
 
 import { useRef } from "react";
+import EditProfileModal from "./edit-profile";
 import Avatar from "@/components/avatar";
 import { useFollowUser } from "@/hooks/use-follow-user";
 import type { UserProfile } from "@/lib/types";
-import EditProfileModal from "./edit-profile";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 export default function ProfileHeader({
   userProfile,
@@ -96,9 +95,13 @@ export default function ProfileHeader({
                   >
                     Edit Profile
                   </button>
-                  <button className="btn btn-sm md:btn-md flex-1 sm:flex-none">
+                  <Link
+                    to="/profile/$userId/edit-profile"
+                    params={{ userId: userProfile.uid }}
+                    className="btn btn-sm md:btn-md flex-1 sm:flex-none"
+                  >
                     Settings
-                  </button>
+                  </Link>
                 </>
               ) : isFollowing ? (
                 <button className="btn w-full sm:w-auto">Unfollow</button>
@@ -109,14 +112,7 @@ export default function ProfileHeader({
           </div>
         </div>
       </div>
-      <Dialog>
-        <form>
-          <DialogTrigger asChild>
-            <button className="btn">Open Dialog</button>
-          </DialogTrigger>
-          <EditProfileModal />
-        </form>
-      </Dialog>
+      <EditProfileModal modalRef={modalRef} />
     </>
   );
 }

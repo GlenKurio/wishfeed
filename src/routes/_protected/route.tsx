@@ -15,6 +15,8 @@ export const Route = createFileRoute("/_protected")({
         },
       });
     }
+
+    return { user };
   },
   component: ProtectedLayout,
 });
