@@ -1,6 +1,6 @@
 - Get posts:
   -- Improve the profile page design:
-  -- Edit profile popover design - finish it with passing additional UserProfile fields;
+  -- Edit profile page - finish, how to use router context properly to pass user(static) and userProfile(dynamic, depending on params)?
 
   -- Allow to open the page with followers and following with search;
   -- Click on posts scrolls page to posts grid;
