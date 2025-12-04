@@ -1,3 +1,3 @@
 export default function UserNotFound() {
-  return <div>UserNotFound</div>;
+  return <div className="py-40">UserNotFound</div>;
 }

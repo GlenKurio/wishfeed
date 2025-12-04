@@ -1,13 +1,19 @@
 import { profileQueryOptions } from "@/lib/api";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Suspense } from "react";
 import z from "zod";
 
 export const Route = createFileRoute("/_protected/profile/$userId")({
-  loader: async ({ context, params }) => {
-    await context.queryClient.ensureQueryData(
+  beforeLoad: async ({ context, params }) => {
+    const userProfile = await context.queryClient.ensureQueryData(
       profileQueryOptions(params.userId),
     );
+
+    if (!userProfile)
+      throw redirect({
+        to: "/profile/$userId",
+        params: { userId: context.user.uid },
+      });
   },
   validateSearch: z.object({
     wishlist: z.string().optional().default("all"),
@@ -19,7 +25,7 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
 function RouteComponent() {
   return (
     <div className="container mx-auto flex items-center justify-center px-4 py-6 lg:py-10">
-      <Suspense fallback={<div>Loading…</div>}>
+      <Suspense fallback={<div>Loading profile…</div>}>
         <Outlet />
       </Suspense>
     </div>

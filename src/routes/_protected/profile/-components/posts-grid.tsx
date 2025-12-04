@@ -1,5 +1,7 @@
 import { Link, useSearch } from "@tanstack/react-router";
 import { useUserPosts } from "../../../../hooks/use-user-posts";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { userPostsQueryOptions } from "@/lib/api";
 
 export default function PostsGrid({
   userId,
@@ -13,17 +15,15 @@ export default function PostsGrid({
   });
 
   const isDrafts = wishlist === "drafts";
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    error,
-  } = useUserPosts({ userId, wishlist, published: !isDrafts });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <>Error: {error.message}</>;
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useSuspenseInfiniteQuery(
+      userPostsQueryOptions({
+        userId: userId,
+        published: !isDrafts,
+        wishlist,
+      }),
+    );
 
   const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 

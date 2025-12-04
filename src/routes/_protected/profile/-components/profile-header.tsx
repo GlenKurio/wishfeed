@@ -69,7 +69,7 @@ export default function ProfileHeader({
                   </Link>
 
                   <div className="bg-neutral/10 h-10 w-px" />
-
+                  {/* TODO: if user has no posts do not allow navigation*/}
                   <Link
                     to="/profile/$userId/feed"
                     params={{

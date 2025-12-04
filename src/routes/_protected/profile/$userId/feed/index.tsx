@@ -1,10 +1,38 @@
-import { createFileRoute, useParams, useSearch } from "@tanstack/react-router";
-import { useAuth } from "../../../../../hooks/use-auth";
-import { useUserPosts } from "../../../../../hooks/use-user-posts";
-import Feed from "../../../../../components/feed-posts/feed";
+import { userPostsQueryOptions } from "@/lib/api";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import {
+  createFileRoute,
+  redirect,
+  useParams,
+  useSearch,
+} from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
+import Feed from "../../../../../components/feed-posts/feed";
+import { useAuth } from "../../../../../hooks/use-auth";
 
 export const Route = createFileRoute("/_protected/profile/$userId/feed/")({
+  beforeLoad: async ({ context, params, search }) => {
+    const isDrafts = search.wishlist === "drafts";
+
+    // Ensure the data is loaded
+    const data = await context.queryClient.ensureInfiniteQueryData(
+      userPostsQueryOptions({
+        userId: params.userId,
+        published: !isDrafts,
+        wishlist: search.wishlist,
+      }),
+    );
+
+    // Check if there are any posts
+    const hasPost = data.pages.some((page) => page.posts.length > 0);
+
+    if (!hasPost) {
+      throw redirect({
+        to: "/profile/$userId",
+        params: { userId: params.userId },
+      });
+    }
+  },
   component: RouteComponent,
 });
 
@@ -17,15 +45,14 @@ function RouteComponent() {
   });
 
   const isDrafts = wishlist === "drafts";
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    error,
-  } = useUserPosts({ userId, wishlist, published: !isDrafts });
 
+  const { data } = useSuspenseInfiniteQuery(
+    userPostsQueryOptions({
+      userId: userId,
+      published: !isDrafts,
+      wishlist,
+    }),
+  );
   const postRefs = useRef<Map<string, HTMLElement>>(new Map());
 
   useEffect(() => {
@@ -35,14 +62,15 @@ function RouteComponent() {
     }
   }, [postId, data]); // Re-run when postId changes or data loads
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <>Error: {error.message}</>;
-
   const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 
   return (
     <div className="container mx-auto flex items-center justify-center px-4 py-6 lg:py-10">
-      <Feed posts={allPosts} postRefs={postRefs} />
+      {allPosts.length === 0 ? (
+        <>Empty feed</>
+      ) : (
+        <Feed posts={allPosts} postRefs={postRefs} />
+      )}
     </div>
   );
 }
