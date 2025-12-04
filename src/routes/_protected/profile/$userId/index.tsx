@@ -1,25 +1,24 @@
+import { profileQueryOptions } from "@/lib/api";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { Suspense } from "react";
 import PostsGrid from "../-components/posts-grid";
 import ProfileHeader from "../-components/profile-header";
-import UserNotFound from "../-components/user-not-found";
 import Wishlists from "../-components/wishlists";
 import { useAuth } from "../../../../hooks/use-auth";
-import { profileQueryOptions, userPostsQueryOptions } from "@/lib/api";
-import { Suspense } from "react";
 
 export const Route = createFileRoute("/_protected/profile/$userId/")({
-  loaderDeps: ({ search: { postId, wishlist } }) => ({ postId, wishlist }),
-  loader: async ({ context, params, deps: { wishlist } }) => {
-    const isDrafts = wishlist === "drafts";
-    await context.queryClient.ensureInfiniteQueryData(
-      userPostsQueryOptions({
-        userId: params.userId,
-        published: !isDrafts,
-        wishlist,
-      }),
-    );
-  },
+  // loaderDeps: ({ search: { postId, wishlist } }) => ({ postId, wishlist }),
+  // loader: async ({ context, params, deps: { wishlist } }) => {
+  //   const isDrafts = wishlist === "drafts";
+  //   await context.queryClient.ensureInfiniteQueryData(
+  //     userPostsQueryOptions({
+  //       userId: params.userId,
+  //       published: !isDrafts,
+  //       wishlist,
+  //     }),
+  //   );
+  // },
   component: RouteComponent,
 });
 // Profile header with info and settings
