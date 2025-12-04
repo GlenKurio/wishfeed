@@ -13,8 +13,9 @@ export default function ProfileHeader({
   userProfile: UserProfile;
   isOwner: boolean;
 }) {
-  const { isFollowing } = useFollowUser({ userId: userProfile.uid });
+  const { isFollowing } = useFollowUser({ userId: userProfile?.uid });
   const modalRef = useRef<HTMLDialogElement>(null);
+
   return (
     <>
       <div className="bg-background w-full pb-4">
@@ -24,13 +25,13 @@ export default function ProfileHeader({
             {/* Left side: Avatar + Info + Stats */}
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-8">
               <div className="flex items-center gap-4">
-                <Avatar src={userProfile.photoURL!} className="w-14 md:w-20" />
+                <Avatar src={userProfile?.photoURL} className="w-14 md:w-20" />
                 <div className="shrink-0">
                   <h1 className="text-foreground text-2xl leading-tight font-bold">
-                    {userProfile.displayName}
+                    {userProfile?.displayName}
                   </h1>
                   <p className="text-muted-foreground text-base md:text-lg">
-                    @{userProfile.handle}
+                    @{userProfile?.handle}
                   </p>
                 </div>
               </div>
@@ -39,13 +40,13 @@ export default function ProfileHeader({
                   <Link
                     to="/profile/$userId/followers"
                     params={{
-                      userId: userProfile.uid,
+                      userId: userProfile?.uid,
                     }}
                     className="group transition-colors hover:opacity-80"
                   >
                     <div>
                       <p className="text-foreground text-lg font-bold md:text-xl">
-                        {userProfile.followers.length || 0}
+                        {userProfile?.followers.length || 0}
                       </p>
                       <p className="text-muted-foreground group-hover:text-foreground text-sm">
                         Followers
@@ -58,11 +59,11 @@ export default function ProfileHeader({
                   <Link
                     to="/profile/$userId/following"
                     params={{
-                      userId: userProfile.uid,
+                      userId: userProfile?.uid,
                     }}
                   >
                     <p className="text-foreground text-lg font-bold md:text-xl">
-                      {userProfile.following.length || 0}
+                      {userProfile?.following.length || 0}
                     </p>
                     <p className="text-muted-foreground text-sm">Following</p>
                   </Link>
@@ -72,11 +73,11 @@ export default function ProfileHeader({
                   <Link
                     to="/profile/$userId/feed"
                     params={{
-                      userId: userProfile.uid,
+                      userId: userProfile?.uid,
                     }}
                   >
                     <p className="text-foreground text-lg font-bold md:text-xl">
-                      {userProfile.posts || 0}
+                      {userProfile?.posts || 0}
                     </p>
                     <p className="text-muted-foreground text-sm">Posts</p>
                   </Link>
@@ -97,10 +98,24 @@ export default function ProfileHeader({
                   </button>
                   <Link
                     to="/profile/$userId/edit-profile"
-                    params={{ userId: userProfile.uid }}
+                    params={{ userId: userProfile?.uid }}
                     className="btn btn-sm md:btn-md flex-1 sm:flex-none"
                   >
                     Settings
+                  </Link>
+                  <Link
+                    to="/profile/$userId"
+                    params={{ userId: "JyLsRANwzbSZukKtZ0WqYjY1moh2" }}
+                    className="btn btn-sm md:btn-md flex-1 sm:flex-none"
+                  >
+                    Go to another User
+                  </Link>
+                  <Link
+                    to="/profile/$userId/edit-profile"
+                    params={{ userId: "JyLsRANwzbSZukKtZ0WqYjY1moh2" }}
+                    className="btn btn-sm md:btn-md flex-1 sm:flex-none"
+                  >
+                    Go to another User Settings
                   </Link>
                 </>
               ) : isFollowing ? (

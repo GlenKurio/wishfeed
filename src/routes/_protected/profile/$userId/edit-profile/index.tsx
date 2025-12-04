@@ -1,3 +1,5 @@
+import { profileQueryOptions } from "@/hooks/use-get-user-profile";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   createFileRoute,
   redirect,
@@ -8,25 +10,30 @@ export const Route = createFileRoute(
   "/_protected/profile/$userId/edit-profile/",
 )({
   beforeLoad: ({ context, params }) => {
-    if (context.user.uid !== context.userProfile.uid) {
+    const authUserId = context.user?.uid;
+    const profileId = params.userId;
+
+    if (authUserId !== profileId) {
       throw redirect({
         to: "/profile/$userId",
         params: { userId: params.userId },
       });
     }
   },
+
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { userProfile } = useRouteContext({
-    from: "/_protected/profile/$userId",
-  });
+  const { userId } = Route.useParams();
   const { user } = useRouteContext({ from: "/_protected" });
+
+  const { data: userProfile } = useSuspenseQuery(profileQueryOptions(userId));
+
   return (
     <>
       Edit profiel page: for user {user.displayName} and userProfile is:{" "}
-      {userProfile.uid}
+      {userProfile?.uid}
     </>
   );
   // const authUser = useAuth();

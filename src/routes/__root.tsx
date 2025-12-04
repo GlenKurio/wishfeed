@@ -1,15 +1,13 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import type { User } from "firebase/auth";
 import { Toaster } from "sonner";
 import { useAuthListener } from "../hooks/use-auth-listener";
-import type { User } from "firebase/auth";
-import type { UserProfile } from "@/lib/types";
 
 export interface MyRouterContext {
   queryClient: QueryClient;
   user: User;
-  userProfile: UserProfile;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
