@@ -1,4 +1,7 @@
 - Get posts:
+  -- Refactor hook to get posts into route loader and suspense query for smooth navigation;
+  -- Can I refactor auth so I get authed user from router context only and not my custom hook?
+
   -- Improve the profile page design:
   -- Edit profile page - finish, how to use router context properly to pass user(static) and userProfile(dynamic, depending on params)?
 
