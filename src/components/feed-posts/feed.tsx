@@ -8,6 +8,7 @@ const wishes: PostType[] = [
     title:
       "Apple Watch Series 9 (GPS 41mm) Smartwatch with Pink Sport Band Apple Watch Series 9 (GPS 41mm) Smartwatch with Pink Sport Band",
     price: "$452.99",
+    createdBy: "JyLsRANwzbSZukKtZ0WqYjY1moh2",
     productUrl: "https://www.apple.com/ca/shop/buy-watch/apple-watch",
     image:
       "https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=600&q=80",
@@ -39,6 +40,8 @@ const wishes: PostType[] = [
     userUid: "user_2",
     userName: "Marcus Rivera",
     userVerified: false,
+    createdBy: "JyLsRANwzbSZukKtZ0WqYjY1moh2",
+
     userAvatar:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
     userHandle: "marcusfilms",
@@ -55,6 +58,7 @@ const wishes: PostType[] = [
       "Need these for my commute! The noise cancellation is supposed to be amazing 🎧",
     likes: ["12"],
     saves: [],
+    createdBy: "vJDEKsrRAvYYxNOShVtYCPvIvBA2",
     gifted: false,
     userUid: "user_3",
     userName: "Alex Kim",
@@ -76,6 +80,7 @@ const wishes: PostType[] = [
     likes: ["asf"],
     saves: [],
     gifted: false,
+    createdBy: "vJDEKsrRAvYYxNOShVtYCPvIvBA2",
     userUid: "user_4",
     userName: "Jennifer Park",
     userVerified: true,
@@ -89,6 +94,7 @@ const wishes: PostType[] = [
     brand: "DYSON",
     title: "Dyson Airwrap Complete Hair Styler - Multi-Styler",
     price: "$599.99",
+    createdBy: "JyLsRANwzbSZukKtZ0WqYjY1moh2",
     image: "/public/stock/products/dyson.jpeg",
     description:
       "Every beauty influencer swears by this! Time to treat myself ✨",

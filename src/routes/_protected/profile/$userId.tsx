@@ -1,4 +1,4 @@
-import { profileQueryOptions } from "@/hooks/use-get-user-profile";
+import { profileQueryOptions } from "@/lib/api";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { Suspense } from "react";
 import z from "zod";

@@ -1,4 +1,4 @@
-import { profileQueryOptions } from "@/hooks/use-get-user-profile";
+import { profileQueryOptions } from "@/lib/api";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   createFileRoute,

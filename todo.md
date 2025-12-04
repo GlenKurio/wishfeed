@@ -1,6 +1,8 @@
 - Get posts:
   -- Refactor hook to get posts into route loader and suspense query for smooth navigation;
   -- Can I refactor auth so I get authed user from router context only and not my custom hook?
+  -- Get user posts with ensureQueryData in loader and display in component with useSuspense Infinite query;
+  -- Get user feed posts in loader/preload and also get user profiles for posts? Profile later can be reused from cache in profile page layout loader? SHould I load all the profiles from feed or better to keep some data in post in db and just update it using firebase function when user updates the profile?
 
   -- Improve the profile page design:
   -- Edit profile page - finish, how to use router context properly to pass user(static) and userProfile(dynamic, depending on params)?

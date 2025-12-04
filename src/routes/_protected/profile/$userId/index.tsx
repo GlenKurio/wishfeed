@@ -5,7 +5,7 @@ import ProfileHeader from "../-components/profile-header";
 import UserNotFound from "../-components/user-not-found";
 import Wishlists from "../-components/wishlists";
 import { useAuth } from "../../../../hooks/use-auth";
-import { profileQueryOptions } from "../../../../hooks/use-get-user-profile";
+import { profileQueryOptions } from "@/lib/api";
 
 export const Route = createFileRoute("/_protected/profile/$userId/")({
   component: RouteComponent,
