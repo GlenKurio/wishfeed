@@ -23,7 +23,7 @@ import { useRef } from "react";
 import { toast } from "sonner";
 
 // TODO: add ratelimit to form submission and after submission navigate to profile page
-// TODO: add loading states to fields and buttons
+
 export const Route = createFileRoute(
   "/_protected/profile/$userId/edit-profile/",
 )({
@@ -46,7 +46,7 @@ function RouteComponent() {
   const user = useAuth();
   const { data: userProfile } = useSuspenseQuery(profileQueryOptions(user.uid));
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { editProfile } = useEditProfile();
+  const { editProfile, isPending } = useEditProfile();
   const form = useForm({
     defaultValues: {
       photoUrl: userProfile?.photoURL || user.photoURL || "",
@@ -59,35 +59,6 @@ function RouteComponent() {
 
     validators: {
       onChange: updateUserProfileSchema,
-      // onChangeAsyncDebounceMs: 500,
-      // onChangeAsync: async ({ value }) => {
-      //   if (!value.handle || value.handle === userProfile?.handle) {
-      //     return;
-      //   }
-
-      //   // First, check sync validation (format, length, etc.)
-      //   const syncValidation = updateUserProfileSchema.shape.handle.safeParse(
-      //     value.handle,
-      //   );
-      //   // If sync validation fails, don't check availability
-      //   if (!syncValidation.success || !userProfile) {
-      //     return;
-      //   }
-
-      //   const isAvailable = await validateHandle(value.handle, userProfile);
-
-      //   console.log("IS AVAILABLE: ", isAvailable);
-
-      //   if (!isAvailable) {
-      //     return {
-      //       fields: {
-      //         handle: "This handle is already taken. Please try another one.",
-      //       },
-      //     };
-      //   }
-
-      //   return;
-      // },
     },
 
     onSubmit: async ({ value }) => {
@@ -100,6 +71,9 @@ function RouteComponent() {
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
+
+  const disabled =
+    isPending || form.state.isSubmitting || form.state.isValidating;
 
   return (
     <div className="flex w-full max-w-3xl flex-col">
@@ -208,6 +182,7 @@ function RouteComponent() {
                         type="button"
                         onClick={handleUploadClick}
                         className="btn btn-sm gap-2"
+                        disabled={disabled}
                       >
                         <IconUpload className="h-4 w-4" />
                         {hasImage ? "Change Avatar" : "Select Avatar"}
@@ -216,6 +191,7 @@ function RouteComponent() {
                       {hasImage && (
                         <button
                           type="button"
+                          disabled={disabled}
                           onClick={handleRemoveImage}
                           className="btn btn-ghost btn-sm btn-error gap-2"
                         >
@@ -233,6 +209,7 @@ function RouteComponent() {
                       className="hidden"
                       onChange={handleFileChange}
                       onBlur={field.handleBlur}
+                      disabled={disabled}
                     />
                   </div>
 
@@ -274,7 +251,7 @@ function RouteComponent() {
                       name={field.name}
                       type="text"
                       value={field.state.value}
-                      // disabled={isPending}
+                      disabled={disabled}
                       placeholder="Enter your full name"
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
@@ -372,6 +349,7 @@ function RouteComponent() {
                       onBlur={field.handleBlur}
                       aria-invalid={hasError}
                       className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                      disabled={disabled}
                     />
                     {isValidating && (
                       <span className="loading loading-spinner loading-xs text-primary" />
@@ -417,7 +395,7 @@ function RouteComponent() {
                       id={field.name}
                       name={field.name}
                       value={field.state.value}
-                      // disabled={isPending}
+                      disabled={disabled}
                       placeholder="Tell us about yourself..."
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
@@ -465,7 +443,7 @@ function RouteComponent() {
                       name={field.name}
                       type="date"
                       value={field.state.value || ""} // Handle empty string
-                      // disabled={isPending}
+                      disabled={disabled}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                       aria-invalid={hasError}
@@ -525,7 +503,7 @@ function RouteComponent() {
                       type="checkbox"
                       className="toggle toggle-primary"
                       checked={field.state.value}
-                      // disabled={isPending}
+                      disabled={disabled}
                       onChange={(e) => field.handleChange(e.target.checked)}
                       onBlur={field.handleBlur}
                     />
@@ -543,10 +521,10 @@ function RouteComponent() {
                 <button
                   type="submit"
                   className="btn btn-primary font-semibold"
-                  disabled={!canSubmit || false}
+                  disabled={!canSubmit || disabled}
                   onClick={() => form.handleSubmit()}
                 >
-                  {false ? (
+                  {disabled ? (
                     <>
                       <IconDeviceFloppy className="size-4" />
                       Updating profile...
@@ -565,6 +543,7 @@ function RouteComponent() {
             to="/profile/$userId"
             params={{ userId: user.uid }}
             className="btn"
+            disabled={disabled}
             onClick={() => {
               form.reset();
             }}
