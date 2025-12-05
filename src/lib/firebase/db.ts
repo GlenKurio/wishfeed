@@ -285,3 +285,47 @@ export async function editUserProfile({
   const userProfileDocRef = doc(db, "users", updatedUserProfile.uid);
   await updateDoc(userProfileDocRef, updatedUserProfile);
 }
+
+/**
+ * Validates if a handle is available (not taken by another user)
+ * @param handle - The handle to validate
+ * @param currentUserHandle - The current user's handle (to allow keeping their own handle)
+ * @returns true if handle is available, false if taken
+ */
+export async function validateHandle(
+  handle: string,
+  currentUserProfile: UserProfile,
+): Promise<boolean> {
+  try {
+    const user = auth.currentUser;
+
+    if (!user || user.uid !== currentUserProfile.uid) {
+      throw new Error("Must be logged in to update a profile.");
+    }
+
+    const currentUserHandle = currentUserProfile.handle;
+    // If user is keeping their current handle, it's valid
+    if (currentUserHandle && handle === currentUserHandle) {
+      return true;
+    }
+
+    // Normalize handle (trim, lowercase for case-insensitive check)
+    const normalizedHandle = handle.trim().toLowerCase();
+
+    // Query Firestore for existing handles
+    const usersRef = collection(db, "users");
+    const q = query(
+      usersRef,
+      where("handle", "==", normalizedHandle), // Store lowercase version for querying
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    // If no documents found, handle is available
+    return querySnapshot.empty;
+  } catch (error) {
+    console.error("Error validating handle:", error);
+    // On error, assume handle is taken (fail safe)
+    return false;
+  }
+}

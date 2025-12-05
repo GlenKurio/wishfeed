@@ -1,11 +1,13 @@
 import { useAuth } from "@/hooks/use-auth";
 import { useEditProfile } from "@/hooks/use-edit-profile";
 import { profileQueryOptions } from "@/lib/api";
+import { validateHandle } from "@/lib/firebase/db";
 import { updateUserProfileSchema } from "@/lib/types";
 import { isoToDateInput } from "@/lib/utils";
 import {
   IconAt,
   IconCake,
+  IconCheck,
   IconDeviceFloppy,
   IconMessage,
   IconPhoto,
@@ -20,6 +22,8 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useRef } from "react";
 import { toast } from "sonner";
 
+// TODO: add ratelimit to form submission and after submission navigate to profile page
+// TODO: add loading states to fields and buttons
 export const Route = createFileRoute(
   "/_protected/profile/$userId/edit-profile/",
 )({
@@ -52,10 +56,38 @@ function RouteComponent() {
       birthday: isoToDateInput(userProfile?.birthday) || "",
       isPublic: userProfile?.isPublic ?? true,
     },
-    // TODO: add async validator to check for if user handle is unique!
-    // TODO: add ratelimit to form submission and after submission navigate to profile page
+
     validators: {
       onChange: updateUserProfileSchema,
+      // onChangeAsyncDebounceMs: 500,
+      // onChangeAsync: async ({ value }) => {
+      //   if (!value.handle || value.handle === userProfile?.handle) {
+      //     return;
+      //   }
+
+      //   // First, check sync validation (format, length, etc.)
+      //   const syncValidation = updateUserProfileSchema.shape.handle.safeParse(
+      //     value.handle,
+      //   );
+      //   // If sync validation fails, don't check availability
+      //   if (!syncValidation.success || !userProfile) {
+      //     return;
+      //   }
+
+      //   const isAvailable = await validateHandle(value.handle, userProfile);
+
+      //   console.log("IS AVAILABLE: ", isAvailable);
+
+      //   if (!isAvailable) {
+      //     return {
+      //       fields: {
+      //         handle: "This handle is already taken. Please try another one.",
+      //       },
+      //     };
+      //   }
+
+      //   return;
+      // },
     },
 
     onSubmit: async ({ value }) => {
@@ -263,10 +295,52 @@ function RouteComponent() {
           {/* Handle Field */}
           <form.Field
             name="handle"
+            validators={{
+              onChangeAsyncDebounceMs: 500,
+              onChangeAsync: async ({ value }) => {
+                // Skip if empty or unchanged
+                if (!value || value === userProfile?.handle) {
+                  return;
+                }
+
+                // Check if sync validation passes first
+                const syncValidation =
+                  updateUserProfileSchema.shape.handle.safeParse(value);
+                if (!syncValidation.success || !userProfile) {
+                  return; // Let sync validation handle the error
+                }
+
+                // Now check availability
+                const isAvailable = await validateHandle(value, userProfile);
+
+                console.log("IS AVAILABLE: ", isAvailable); // Debug
+
+                if (!isAvailable) {
+                  // Return error as plain string
+                  return "This handle is already taken. Please try another one.";
+                }
+
+                return; // Valid - return undefined
+              },
+            }}
             children={(field) => {
-              const { isTouched, errors } = field.state.meta;
+              const { isTouched, errors, isValidating } = field.state.meta;
+
               const hasError = isTouched && errors.length > 0;
-              const message = isTouched ? errors[0]?.message : null;
+
+              console.log("Field state:", {
+                isValidating,
+                value: field.state.value,
+                hasError,
+                errors,
+              });
+
+              // Fix: errors array contains strings directly
+              const message = hasError
+                ? typeof errors[0] === "string"
+                  ? errors[0]
+                  : errors[0]?.message
+                : null;
 
               return (
                 <div className="flex w-full flex-col">
@@ -274,6 +348,11 @@ function RouteComponent() {
                     <span className="label-text text-sm font-medium lg:text-base">
                       Handle
                     </span>
+                    {isValidating && (
+                      <span className="label-text-alt text-info text-xs">
+                        Checking availability...
+                      </span>
+                    )}
                   </label>
                   <label
                     className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
@@ -288,13 +367,18 @@ function RouteComponent() {
                       name={field.name}
                       type="text"
                       value={field.state.value}
-                      // disabled={isPending}
-                      placeholder="@username"
+                      placeholder="handle"
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                       aria-invalid={hasError}
                       className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
                     />
+                    {isValidating && (
+                      <span className="loading loading-spinner loading-xs text-primary" />
+                    )}
+                    {!isValidating && field.state.value && !hasError && (
+                      <IconCheck className="text-primary" size={20} />
+                    )}
                   </label>
                   {message && (
                     <div className="text-error mt-1.5 ml-1.5 text-xs">
