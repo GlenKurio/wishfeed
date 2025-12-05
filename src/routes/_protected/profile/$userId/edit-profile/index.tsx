@@ -53,6 +53,7 @@ function RouteComponent() {
       isPublic: userProfile?.isPublic ?? true,
     },
     // TODO: add async validator to check for if user handle is unique!
+    // TODO: add ratelimit to form submission and after submission navigate to profile page
     validators: {
       onChange: updateUserProfileSchema,
     },
@@ -69,10 +70,10 @@ function RouteComponent() {
   };
 
   return (
-    <div className="flex w-full flex-col">
-      <h2 className="mb-4 text-2xl font-bold">Edit Profile</h2>
-      <div>
-        <div className="flex w-full flex-col items-start gap-4">
+    <div className="flex w-full max-w-3xl flex-col">
+      <h2 className="mb-8 text-3xl font-bold">Edit Your Profile</h2>
+      <div className="flex flex-col gap-6">
+        <div className="flex w-full flex-col items-start gap-4 lg:gap-6">
           {/* Avatar Field  */}
           <form.Field
             name="photoUrl"
@@ -139,7 +140,7 @@ function RouteComponent() {
                 <div className="flex w-full flex-col">
                   <div className="flex flex-col">
                     <label className="label">
-                      <span className="label-text font-medium">
+                      <span className="label-text text-sm font-medium lg:text-base">
                         Profile Avatar
                       </span>
                     </label>
@@ -151,10 +152,10 @@ function RouteComponent() {
                     </div>
                   </div>
                   {/* Avatar Display with Actions */}
-                  <div className="mt-2 flex flex-col items-center gap-4">
+                  <div className="mt-2 flex flex-col items-center gap-4 lg:flex-row">
                     {/* Avatar Preview */}
                     <div className="avatar shrink-0">
-                      <div className="size-24 rounded-full">
+                      <div className="size-20 rounded-full">
                         {hasImage ? (
                           <img
                             src={value}
@@ -170,7 +171,7 @@ function RouteComponent() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex w-full flex-col gap-2">
+                    <div className="flex w-full flex-col gap-2 lg:w-auto">
                       <button
                         type="button"
                         onClick={handleUploadClick}
@@ -224,7 +225,9 @@ function RouteComponent() {
               return (
                 <div className="flex w-full flex-col">
                   <label className="label mb-1 ml-1">
-                    <span className="label-text font-medium">Full Name</span>
+                    <span className="label-text text-sm font-medium lg:text-base">
+                      Full Name
+                    </span>
                   </label>
                   <label
                     className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
@@ -268,7 +271,9 @@ function RouteComponent() {
               return (
                 <div className="flex w-full flex-col">
                   <label className="label mb-1 ml-1">
-                    <span className="label-text font-medium">Handle</span>
+                    <span className="label-text text-sm font-medium lg:text-base">
+                      Handle
+                    </span>
                   </label>
                   <label
                     className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
@@ -312,7 +317,9 @@ function RouteComponent() {
               return (
                 <div className="flex w-full flex-col">
                   <label className="label mb-1 ml-1">
-                    <span className="label-text font-medium">Bio</span>
+                    <span className="label-text text-sm font-medium lg:text-base">
+                      Bio (Optional)
+                    </span>
                   </label>
                   <label
                     className={`textarea textarea-bordered border-base-content flex w-full items-start gap-2 ${hasError ? "textarea-error border-error" : ""}`}
@@ -356,7 +363,7 @@ function RouteComponent() {
               return (
                 <div className="flex w-full flex-col">
                   <label className="label mb-1 ml-1">
-                    <span className="label-text font-medium">
+                    <span className="label-text text-sm font-medium lg:text-base">
                       Birthday (Optional)
                     </span>
                   </label>
@@ -397,30 +404,54 @@ function RouteComponent() {
             name="isPublic"
             children={(field) => {
               return (
-                <div className="border-base-content flex w-full items-center justify-between rounded-full border-2 px-3 py-1">
-                  <div className="flex items-center gap-3">
-                    <IconWorld width="20" height="20" />
-                    <div>
-                      <div className="font-medium">Public Profile</div>
-                      <div className="text-base-content/60 text-xs">
-                        Allow others to view your profile
+                <div className="flex w-full flex-col">
+                  <label className="label mb-1 ml-1">
+                    <span className="label-text text-sm font-medium lg:text-base">
+                      Profile visibility
+                    </span>
+                  </label>
+                  <div className="border-base-content flex w-full items-center justify-between rounded-full border-2 px-3 py-1">
+                    <div className="flex items-center gap-3">
+                      <IconWorld width="20" height="20" />
+                      <div>
+                        {field.state.value === true ? (
+                          <>
+                            {" "}
+                            <div className="text-sm font-medium lg:text-base">
+                              Public
+                            </div>
+                            <div className="text-base-content/60 text-xs">
+                              Users can find and view your profile
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            {" "}
+                            <div className="text-sm font-medium lg:text-base">
+                              Private
+                            </div>
+                            <div className="text-base-content/60 text-xs">
+                              Users cannot find and view your profile
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
+                    <input
+                      type="checkbox"
+                      className="toggle toggle-primary"
+                      checked={field.state.value}
+                      // disabled={isPending}
+                      onChange={(e) => field.handleChange(e.target.checked)}
+                      onBlur={field.handleBlur}
+                    />
                   </div>
-                  <input
-                    type="checkbox"
-                    className="toggle toggle-primary"
-                    checked={field.state.value}
-                    // disabled={isPending}
-                    onChange={(e) => field.handleChange(e.target.checked)}
-                    onBlur={field.handleBlur}
-                  />
                 </div>
               );
             }}
           />
         </div>
-        <div>
+        <div className="flex flex-col gap-2 lg:flex-row-reverse lg:justify-start">
           <form.Subscribe
             selector={(state) => [state.canSubmit]}
             children={([canSubmit]) => {
