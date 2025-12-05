@@ -6,6 +6,7 @@ import { uploadAvatar } from "../lib/firebase/storage";
 import { editUserProfile } from "../lib/firebase/db";
 import { Timestamp } from "firebase/firestore";
 import { toast } from "sonner";
+import { dateInputToISO } from "@/lib/utils";
 
 export function useEditProfile() {
   const authUser = useAuth();
@@ -22,10 +23,10 @@ export function useEditProfile() {
       throw new Error("User profile data not loaded");
     }
 
-    let avatarUrl = updatedUserProfile.avatar;
+    let avatarUrl = updatedUserProfile.photoUrl;
 
-    if (updatedUserProfile.avatar.startsWith("data:")) {
-      const base64Data = updatedUserProfile.avatar;
+    if (updatedUserProfile.photoUrl.startsWith("data:")) {
+      const base64Data = updatedUserProfile.photoUrl;
       const blob = await fetch(base64Data).then((r) => r.blob());
       const file = new File([blob], "image.jpg", { type: blob.type });
       avatarUrl = await uploadAvatar(file);
@@ -34,9 +35,12 @@ export function useEditProfile() {
     // Now TypeScript knows userProfile.data is defined
     const updatedProfile: UserProfile = {
       ...userProfile.data,
+      photoURL: avatarUrl,
       displayName: updatedUserProfile.displayName,
       handle: updatedUserProfile.handle,
-      photoURL: avatarUrl,
+      bio: updatedUserProfile.bio,
+      birthday: dateInputToISO(updatedUserProfile.birthday),
+      isPublic: updatedUserProfile.isPublic,
       updatedAt: Timestamp.now(), // Update timestamp
     };
 

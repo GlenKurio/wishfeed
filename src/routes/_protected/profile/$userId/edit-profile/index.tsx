@@ -1,12 +1,18 @@
 import { useAuth } from "@/hooks/use-auth";
+import { useEditProfile } from "@/hooks/use-edit-profile";
 import { profileQueryOptions } from "@/lib/api";
 import { updateUserProfileSchema } from "@/lib/types";
+import { isoToDateInput } from "@/lib/utils";
 import {
+  IconAt,
+  IconCake,
   IconDeviceFloppy,
+  IconMessage,
   IconPhoto,
   IconTrash,
   IconUpload,
   IconUser,
+  IconWorld,
 } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -32,31 +38,28 @@ export const Route = createFileRoute(
   component: RouteComponent,
 });
 
-// export const updateProfileAvatarSchema = z.object({
-//   photoUrl: z.string(),
-// });
-
 function RouteComponent() {
   const user = useAuth();
   const { data: userProfile } = useSuspenseQuery(profileQueryOptions(user.uid));
-  const fileInputRef = useRef<HTMLInputElement>(null); // Create a ref for the file input
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { editProfile } = useEditProfile();
   const form = useForm({
     defaultValues: {
       photoUrl: userProfile?.photoURL || user.photoURL || "",
       displayName: userProfile?.displayName || "",
       handle: userProfile?.handle || "",
       bio: userProfile?.bio || "",
-      birthday: userProfile?.birthday || null,
+      birthday: isoToDateInput(userProfile?.birthday) || "",
       isPublic: userProfile?.isPublic ?? true,
     },
+    // TODO: add async validator to check for if user handle is unique!
     validators: {
       onChange: updateUserProfileSchema,
     },
 
-    onSubmit: ({ value }) => {
-      // Handle your form submission logic here
+    onSubmit: async ({ value }) => {
       console.log("Form submitted with:", value);
+      editProfile({ updatedUserProfile: value });
       toast.success("Profile updated successfully!");
     },
   });
@@ -70,7 +73,7 @@ function RouteComponent() {
       <h2 className="mb-4 text-2xl font-bold">Edit Profile</h2>
       <div>
         <div className="flex w-full flex-col items-start gap-4">
-          {/* Avatar Field with TanStack Form */}
+          {/* Avatar Field  */}
           <form.Field
             name="photoUrl"
             children={(field) => {
@@ -249,6 +252,169 @@ function RouteComponent() {
                       {message}
                     </div>
                   )}
+                </div>
+              );
+            }}
+          />
+
+          {/* Handle Field */}
+          <form.Field
+            name="handle"
+            children={(field) => {
+              const { isTouched, errors } = field.state.meta;
+              const hasError = isTouched && errors.length > 0;
+              const message = isTouched ? errors[0]?.message : null;
+
+              return (
+                <div className="flex w-full flex-col">
+                  <label className="label mb-1 ml-1">
+                    <span className="label-text font-medium">Handle</span>
+                  </label>
+                  <label
+                    className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                  >
+                    <IconAt
+                      width="20"
+                      height="20"
+                      className={hasError ? "text-error" : ""}
+                    />
+                    <input
+                      id={field.name}
+                      name={field.name}
+                      type="text"
+                      value={field.state.value}
+                      // disabled={isPending}
+                      placeholder="@username"
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      aria-invalid={hasError}
+                      className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                    />
+                  </label>
+                  {message && (
+                    <div className="text-error mt-1.5 ml-1.5 text-xs">
+                      {message}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
+
+          {/* Bio Field */}
+          <form.Field
+            name="bio"
+            children={(field) => {
+              const { isTouched, errors } = field.state.meta;
+              const hasError = isTouched && errors.length > 0;
+              const message = isTouched ? errors[0]?.message : null;
+
+              return (
+                <div className="flex w-full flex-col">
+                  <label className="label mb-1 ml-1">
+                    <span className="label-text font-medium">Bio</span>
+                  </label>
+                  <label
+                    className={`textarea textarea-bordered border-base-content flex w-full items-start gap-2 ${hasError ? "textarea-error border-error" : ""}`}
+                  >
+                    <IconMessage
+                      width="20"
+                      height="20"
+                      className={`mt-1 ${hasError ? "text-error" : ""}`}
+                    />
+                    <textarea
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      // disabled={isPending}
+                      placeholder="Tell us about yourself..."
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      aria-invalid={hasError}
+                      rows={3}
+                      className={`grow resize-none ${hasError ? "placeholder:text-error/50" : ""}`}
+                    />
+                  </label>
+                  {message && (
+                    <div className="text-error mt-1.5 ml-1.5 text-xs">
+                      {message}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
+
+          {/* Birthday Field */}
+          <form.Field
+            name="birthday"
+            children={(field) => {
+              const { isTouched, errors } = field.state.meta;
+              const hasError = isTouched && errors.length > 0;
+              const message = isTouched ? errors[0]?.message : null;
+
+              return (
+                <div className="flex w-full flex-col">
+                  <label className="label mb-1 ml-1">
+                    <span className="label-text font-medium">
+                      Birthday (Optional)
+                    </span>
+                  </label>
+                  <label
+                    className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                  >
+                    <IconCake
+                      width="20"
+                      height="20"
+                      className={hasError ? "text-error" : ""}
+                    />
+
+                    <input
+                      id={field.name}
+                      name={field.name}
+                      type="date"
+                      value={field.state.value || ""} // Handle empty string
+                      // disabled={isPending}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      aria-invalid={hasError}
+                      max={new Date().toISOString().split("T")[0]} // Prevent future dates
+                      className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                    />
+                  </label>
+                  {message && (
+                    <div className="text-error mt-1.5 ml-1.5 text-xs">
+                      {message}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
+
+          {/* Privacy Toggle Field */}
+          <form.Field
+            name="isPublic"
+            children={(field) => {
+              return (
+                <div className="border-base-content flex w-full items-center justify-between rounded-full border-2 px-3 py-1">
+                  <div className="flex items-center gap-3">
+                    <IconWorld width="20" height="20" />
+                    <div>
+                      <div className="font-medium">Public Profile</div>
+                      <div className="text-base-content/60 text-xs">
+                        Allow others to view your profile
+                      </div>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-primary"
+                    checked={field.state.value}
+                    // disabled={isPending}
+                    onChange={(e) => field.handleChange(e.target.checked)}
+                    onBlur={field.handleBlur}
+                  />
                 </div>
               );
             }}

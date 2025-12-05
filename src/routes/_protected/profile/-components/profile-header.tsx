@@ -1,7 +1,5 @@
 import { Link } from "@tanstack/react-router";
 
-import { useRef } from "react";
-import EditProfileModal from "./edit-profile";
 import Avatar from "@/components/avatar";
 import { useFollowUser } from "@/hooks/use-follow-user";
 import type { UserProfile } from "@/lib/types";
@@ -14,7 +12,6 @@ export default function ProfileHeader({
   isOwner: boolean;
 }) {
   const { isFollowing } = useFollowUser({ userId: userProfile?.uid });
-  const modalRef = useRef<HTMLDialogElement>(null);
 
   return (
     <>
@@ -88,20 +85,12 @@ export default function ProfileHeader({
             <div className="flex w-full gap-2 sm:w-auto sm:min-w-[200px]">
               {isOwner ? (
                 <>
-                  <button
-                    onClick={() => {
-                      modalRef.current?.showModal();
-                    }}
-                    className="btn btn-sm md:btn-md flex-1 sm:flex-none"
-                  >
-                    Edit Profile
-                  </button>
                   <Link
                     to="/profile/$userId/edit-profile"
                     params={{ userId: userProfile?.uid }}
                     className="btn btn-sm md:btn-md flex-1 sm:flex-none"
                   >
-                    Settings
+                    Edit Profile
                   </Link>
                   <Link
                     to="/profile/$userId"
@@ -127,7 +116,6 @@ export default function ProfileHeader({
           </div>
         </div>
       </div>
-      <EditProfileModal modalRef={modalRef} />
     </>
   );
 }

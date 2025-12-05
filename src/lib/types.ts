@@ -115,7 +115,7 @@ export type UserProfile = {
   photoURL?: string;
   handle: string;
   bio?: string;
-  birthday?: string; // ISO date "YYYY-MM-DD"
+  birthday?: string | null; // ISO date "YYYY-MM-DD"
   isPublic: boolean;
   followers: string[];
   following: string[];
@@ -158,9 +158,7 @@ export const updateUserProfileSchema = z.object({
 
   // Birthday: Optional ISO date string (YYYY-MM-DD)
   // Also validates correct date format
-  birthday: z
-    .string({ message: "Birthday must be a valid date (YYYY-MM-DD)" })
-    .nullable(),
+  birthday: z.string(),
 
   // Avatar URL: Optional — user may keep old one or upload new one
   photoUrl: z.string(),
