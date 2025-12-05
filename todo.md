@@ -1,11 +1,7 @@
 - Get posts:
-  -- Refactor hook to get posts into route loader and suspense query for smooth navigation;
-  -- Can I refactor auth so I get authed user from router context only and not my custom hook?
-  -- Get user posts with ensureQueryData in loader and display in component with useSuspense Infinite query;
-  -- Get user feed posts in loader/preload and also get user profiles for posts? Profile later can be reused from cache in profile page layout loader? SHould I load all the profiles from feed or better to keep some data in post in db and just update it using firebase function when user updates the profile?
 
   -- Improve the profile page design:
-  -- Edit profile page - finish, how to use router context properly to pass user(static) and userProfile(dynamic, depending on params)?
+  -- Edit profile page - finish; How do I set the date in ui and validate it as a date in zod? and then when submitting, converting it to string? and saving? Then when displaying in the date field, convert it back to date?
 
   -- Allow to open the page with followers and following with search;
   -- Click on posts scrolls page to posts grid;
@@ -18,7 +14,9 @@
   -- Create post actions: one for author, one for other users;
 
   -- Add ui to get followers, following; Implement functionality to follow/unfollow;
-  -- Get Feed posts for user from people user follows
+
+  -- Get Feed posts for user from people user follows:
+  -- Get user feed posts in loader/preload and also get user profiles for posts? Profile later can be reused from cache in profile page layout loader? SHould I load all the profiles from feed or better to keep some data in post in db and just update it using firebase function when user updates the profile?
 
 - Finish post design:
   -- Like posts (add ratelimit to it)
