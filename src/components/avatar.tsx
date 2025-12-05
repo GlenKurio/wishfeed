@@ -4,7 +4,7 @@ export default function Avatar({
   src,
   className,
 }: {
-  src: string;
+  src: string | undefined;
   className?: string;
 }) {
   const fallback = "/avatar-placeholder.png";

@@ -151,20 +151,19 @@ export const updateUserProfileSchema = z.object({
   bio: z
     .string()
     .trim()
-    .max(150, { message: "Bio cannot exceed 150 characters" })
-    .optional(),
+    .max(250, { message: "Bio cannot exceed 250 characters" }),
 
   // Profile privacy
-  isPublic: z.boolean().default(true),
+  isPublic: z.boolean(),
 
   // Birthday: Optional ISO date string (YYYY-MM-DD)
   // Also validates correct date format
   birthday: z
-    .date({ message: "Birthday must be a valid date (YYYY-MM-DD)" })
-    .optional(),
+    .string({ message: "Birthday must be a valid date (YYYY-MM-DD)" })
+    .nullable(),
 
   // Avatar URL: Optional — user may keep old one or upload new one
-  avatar: z.string(),
+  photoUrl: z.string(),
 });
 
 export type UpdatedUserProfile = z.infer<typeof updateUserProfileSchema>;

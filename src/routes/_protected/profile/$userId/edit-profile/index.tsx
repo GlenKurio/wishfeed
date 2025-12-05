@@ -1,10 +1,18 @@
+import { useAuth } from "@/hooks/use-auth";
 import { profileQueryOptions } from "@/lib/api";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { updateUserProfileSchema } from "@/lib/types";
 import {
-  createFileRoute,
-  redirect,
-  useRouteContext,
-} from "@tanstack/react-router";
+  IconDeviceFloppy,
+  IconPhoto,
+  IconTrash,
+  IconUpload,
+  IconUser,
+} from "@tabler/icons-react";
+import { useForm } from "@tanstack/react-form";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { useRef } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/edit-profile/",
@@ -15,8 +23,8 @@ export const Route = createFileRoute(
 
     if (authUserId !== profileId) {
       throw redirect({
-        to: "/profile/$userId",
-        params: { userId: params.userId },
+        to: "/profile/$userId/edit-profile",
+        params: { userId: authUserId },
       });
     }
   },
@@ -24,196 +32,266 @@ export const Route = createFileRoute(
   component: RouteComponent,
 });
 
-function RouteComponent() {
-  const { userId } = Route.useParams();
-  const { user } = useRouteContext({ from: "/_protected" });
+// export const updateProfileAvatarSchema = z.object({
+//   photoUrl: z.string(),
+// });
 
-  const { data: userProfile } = useSuspenseQuery(profileQueryOptions(userId));
+function RouteComponent() {
+  const user = useAuth();
+  const { data: userProfile } = useSuspenseQuery(profileQueryOptions(user.uid));
+  const fileInputRef = useRef<HTMLInputElement>(null); // Create a ref for the file input
+
+  const form = useForm({
+    defaultValues: {
+      photoUrl: userProfile?.photoURL || user.photoURL || "",
+      displayName: userProfile?.displayName || "",
+      handle: userProfile?.handle || "",
+      bio: userProfile?.bio || "",
+      birthday: userProfile?.birthday || null,
+      isPublic: userProfile?.isPublic ?? true,
+    },
+    validators: {
+      onChange: updateUserProfileSchema,
+    },
+
+    onSubmit: ({ value }) => {
+      // Handle your form submission logic here
+      console.log("Form submitted with:", value);
+      toast.success("Profile updated successfully!");
+    },
+  });
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
-    <>
-      Edit profiel page: for user {user.displayName} and userProfile is:{" "}
-      {userProfile?.uid}
-    </>
+    <div className="flex w-full flex-col">
+      <h2 className="mb-4 text-2xl font-bold">Edit Profile</h2>
+      <div>
+        <div className="flex w-full flex-col items-start gap-4">
+          {/* Avatar Field with TanStack Form */}
+          <form.Field
+            name="photoUrl"
+            children={(field) => {
+              const value = field.state.value;
+              const hasImage = !!value;
+
+              const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+              const ACCEPTED_IMAGE_TYPES = [
+                "image/jpeg",
+                "image/jpg",
+                "image/png",
+                "image/webp",
+              ];
+
+              const handleFileChange = async (
+                e: React.ChangeEvent<HTMLInputElement>,
+              ) => {
+                const file = e.target.files?.[0];
+
+                if (file) {
+                  // Validate file type
+                  if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+                    field.form.setFieldMeta(field.name, (prev) => ({
+                      ...prev,
+                      errors: [
+                        "Please upload a valid image (JPEG, JPG, PNG, or WEBP)",
+                      ],
+                      isTouched: true,
+                    }));
+                    field.handleChange("");
+                    return;
+                  }
+
+                  // Validate file size
+                  if (file.size > MAX_FILE_SIZE) {
+                    field.form.setFieldMeta(field.name, (prev) => ({
+                      ...prev,
+                      errors: ["Image size must be less than 5MB"],
+                      isTouched: true,
+                    }));
+                    field.handleChange("");
+                    return;
+                  }
+
+                  // Convert to base64 string
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    field.handleChange(reader.result as string); // Store base64 string
+                  };
+                  reader.readAsDataURL(file);
+                }
+              };
+
+              const handleRemoveImage = () => {
+                field.handleChange("");
+              };
+
+              const { isTouched, errors } = field.state.meta;
+
+              const message = isTouched ? errors[0]?.message : null;
+
+              return (
+                <div className="flex w-full flex-col">
+                  <div className="flex flex-col">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Profile Avatar
+                      </span>
+                    </label>
+                    {/* Helper Text */}
+                    <div className="label">
+                      <span className="label-text-alt text-base-content/60 text-xs">
+                        Square image recommended. Max size: 5MB
+                      </span>
+                    </div>
+                  </div>
+                  {/* Avatar Display with Actions */}
+                  <div className="mt-2 flex flex-col items-center gap-4">
+                    {/* Avatar Preview */}
+                    <div className="avatar shrink-0">
+                      <div className="size-24 rounded-full">
+                        {hasImage ? (
+                          <img
+                            src={value}
+                            className="h-full w-full object-cover"
+                            alt="Avatar preview"
+                          />
+                        ) : (
+                          <div className="from-primary to-secondary flex h-full w-full items-center justify-center bg-linear-to-br">
+                            <IconPhoto className="h-12 w-12 text-white" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex w-full flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={handleUploadClick}
+                        className="btn btn-sm gap-2"
+                      >
+                        <IconUpload className="h-4 w-4" />
+                        {hasImage ? "Change Avatar" : "Select Avatar"}
+                      </button>
+
+                      {hasImage && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="btn btn-ghost btn-sm btn-error gap-2"
+                        >
+                          <IconTrash className="h-4 w-4" />
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Hidden File Input */}
+                    <input
+                      ref={fileInputRef} // Attach the ref here
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg,image/webp"
+                      className="hidden"
+                      onChange={handleFileChange}
+                      onBlur={field.handleBlur}
+                    />
+                  </div>
+
+                  {/* Error Message */}
+                  {message && (
+                    <div className="text-error mt-1.5 ml-1.5 text-xs">
+                      {message}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
+          {/* Display Name Field */}
+          <form.Field
+            name="displayName"
+            children={(field) => {
+              const { isTouched, errors } = field.state.meta;
+              const hasError = isTouched && errors.length > 0;
+              const message = isTouched ? errors[0]?.message : null;
+
+              return (
+                <div className="flex w-full flex-col">
+                  <label className="label mb-1 ml-1">
+                    <span className="label-text font-medium">Full Name</span>
+                  </label>
+                  <label
+                    className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                  >
+                    <IconUser
+                      width="20"
+                      height="20"
+                      className={hasError ? "text-error" : ""}
+                    />
+                    <input
+                      id={field.name}
+                      name={field.name}
+                      type="text"
+                      value={field.state.value}
+                      // disabled={isPending}
+                      placeholder="Enter your full name"
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onBlur={field.handleBlur}
+                      aria-invalid={hasError}
+                      className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                    />
+                  </label>
+                  {message && (
+                    <div className="text-error mt-1.5 ml-1.5 text-xs">
+                      {message}
+                    </div>
+                  )}
+                </div>
+              );
+            }}
+          />
+        </div>
+        <div>
+          <form.Subscribe
+            selector={(state) => [state.canSubmit]}
+            children={([canSubmit]) => {
+              return (
+                <button
+                  type="submit"
+                  className="btn btn-primary font-semibold"
+                  disabled={!canSubmit || false}
+                  onClick={() => form.handleSubmit()}
+                >
+                  {false ? (
+                    <>
+                      <IconDeviceFloppy className="size-4" />
+                      Updating profile...
+                    </>
+                  ) : (
+                    <>
+                      <IconDeviceFloppy className="size-4" />
+                      Update profile
+                    </>
+                  )}
+                </button>
+              );
+            }}
+          />
+          <Link
+            to="/profile/$userId"
+            params={{ userId: user.uid }}
+            className="btn"
+            onClick={() => {
+              form.reset();
+            }}
+          >
+            Cancel
+          </Link>
+        </div>
+      </div>
+    </div>
   );
-  // const authUser = useAuth();
-  // const { data } = useGetUserProfile({ userProfileId: authUser.uid });
-  // const [previewUrl, setPreviewUrl] = useState<string | undefined>(
-  //   data?.photoURL,
-  // );
-  // const form = useForm({
-  //   defaultValues: {
-  //     ...data,
-  //   },
-  //   validators: {
-  //     onChange: updateUserProfileSchema,
-  //   },
-  //   onSubmit: ({ value }) => {},
-  // });
-  // const isLoading = false;
-  // return (
-  //   <div className="flex h-full w-full flex-col gap-8 lg:gap-8">
-  //     {/* --- Image Upload Section --- */}
-  //     <div className="flex flex-col gap-4">
-  //       <div className="avatar">
-  //         <div className="ring-primary ring-offset-base-100 w-24 rounded-full ring ring-offset-2">
-  //           <img
-  //             src={previewUrl || "https://ui-avatars.com/api/?name=User"}
-  //             alt="Profile Preview"
-  //             className="object-cover"
-  //           />
-  //         </div>
-  //       </div>
-  //       <form.Field
-  //         name="photoURL"
-  //         children={(field) => {
-  //           const { errors } = field.state.meta;
-  //           return (
-  //             <div className="flex flex-col items-start">
-  //               <label className="btn btn-sm btn-outline gap-2">
-  //                 <IconPhoto className="size-4" />
-  //                 Change Photo
-  //                 <input
-  //                   type="file"
-  //                   className="hidden"
-  //                   accept="image/*"
-  //                   onChange={(e) => {
-  //                     const file = e.target.files?.[0];
-  //                     if (file) {
-  //                       field.handleChange(file);
-  //                       setPreviewUrl(URL.createObjectURL(file));
-  //                     }
-  //                   }}
-  //                 />
-  //               </label>
-  //               {errors.length > 0 && (
-  //                 <div className="text-error mt-1 text-xs">
-  //                   {errors[0]?.message}
-  //                 </div>
-  //               )}
-  //             </div>
-  //           );
-  //         }}
-  //       />
-  //     </div>
-  //     {/* --- Display Name Field --- */}
-  //     <form.Field
-  //       name="displayName"
-  //       children={(field) => {
-  //         const { isTouched, errors } = field.state.meta;
-  //         const hasError = isTouched && errors.length > 0;
-  //         return (
-  //           <div>
-  //             <label className="label">
-  //               <span className="label-text font-semibold">Display Name</span>
-  //             </label>
-  //             <label
-  //               className={`input input-bordered flex items-center gap-2 ${
-  //                 hasError ? "input-error" : ""
-  //               }`}
-  //             >
-  //               <IconUser className="size-4 opacity-70" />
-  //               <input
-  //                 id={field.name}
-  //                 name={field.name}
-  //                 type="text"
-  //                 value={field.state.value}
-  //                 disabled={isLoading}
-  //                 placeholder="Your Name"
-  //                 onChange={(e) => field.handleChange(e.target.value)}
-  //                 onBlur={field.handleBlur}
-  //                 className="grow"
-  //               />
-  //             </label>
-  //             {hasError && (
-  //               <div className="text-error mt-1.5 ml-1 text-xs">
-  //                 {errors[0]?.message}
-  //               </div>
-  //             )}
-  //           </div>
-  //         );
-  //       }}
-  //     />
-  //     {/* --- Handle Field --- */}
-  //     <form.Field
-  //       name="handle"
-  //       children={(field) => {
-  //         const { isTouched, errors } = field.state.meta;
-  //         const hasError = isTouched && errors.length > 0;
-  //         return (
-  //           <div>
-  //             <label className="label">
-  //               <span className="label-text font-semibold">Handle</span>
-  //             </label>
-  //             <label
-  //               className={`input input-bordered flex items-center gap-2 ${
-  //                 hasError ? "input-error" : ""
-  //               }`}
-  //             >
-  //               <IconAt className="size-4 opacity-70" />
-  //               <input
-  //                 id={field.name}
-  //                 name={field.name}
-  //                 type="text"
-  //                 value={field.state.value}
-  //                 disabled={isLoading}
-  //                 placeholder="username"
-  //                 onChange={(e) => field.handleChange(e.target.value)}
-  //                 onBlur={field.handleBlur}
-  //                 className="grow"
-  //               />
-  //             </label>
-  //             {hasError && (
-  //               <div className="text-error mt-1.5 ml-1 text-xs">
-  //                 {errors[0]?.message}
-  //               </div>
-  //             )}
-  //           </div>
-  //         );
-  //       }}
-  //     />
-  //     {/* --- Actions --- */}
-  //     <div className="flex gap-3 pt-4">
-  //       <button
-  //         type="button"
-  //         // onClick={onCancel}
-  //         disabled={isLoading}
-  //         className="btn flex-1"
-  //       >
-  //         Cancel
-  //       </button>
-  //       <form.Subscribe
-  //         selector={(state) => [state.canSubmit, state.isSubmitting]}
-  //         children={([canSubmit, isSubmitting]) => (
-  //           <button
-  //             type="submit"
-  //             className="btn btn-primary flex-1 gap-2"
-  //             disabled={!canSubmit || isSubmitting || isLoading}
-  //             onClick={() => form.handleSubmit()}
-  //           >
-  //             {isLoading ? (
-  //               <span className="loading loading-spinner loading-sm"></span>
-  //             ) : (
-  //               <IconDeviceFloppy className="size-4" />
-  //             )}
-  //             Save Changes
-  //           </button>
-  //         )}
-  //       />
-  //     </div>
-  //     {/* --- Loading Overlay (Matches your example) --- */}
-  //     {isLoading && (
-  //       <div className="absolute inset-0 z-50 flex min-h-screen items-center justify-center p-4 backdrop-blur-sm">
-  //         <div className="card bg-base-300 border-neutral/5 w-full max-w-sm border p-8 shadow-2xl">
-  //           <div className="flex flex-col items-center gap-4 text-center">
-  //             <span className="loading loading-ring loading-lg text-primary"></span>
-  //             <div>
-  //               <h2 className="text-lg font-bold">Updating Profile...</h2>
-  //               <p className="text-base-content/70 text-sm">Just a moment</p>
-  //             </div>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     )}
-  //   </div>
 }

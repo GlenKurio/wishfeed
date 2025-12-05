@@ -1,6 +1,6 @@
 import { profileQueryOptions } from "@/lib/api";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Suspense } from "react";
 import PostsGrid from "../-components/posts-grid";
 import ProfileHeader from "../-components/profile-header";
@@ -8,29 +8,22 @@ import Wishlists from "../-components/wishlists";
 import { useAuth } from "../../../../hooks/use-auth";
 
 export const Route = createFileRoute("/_protected/profile/$userId/")({
-  // loaderDeps: ({ search: { postId, wishlist } }) => ({ postId, wishlist }),
-  // loader: async ({ context, params, deps: { wishlist } }) => {
-  //   const isDrafts = wishlist === "drafts";
-  //   await context.queryClient.ensureInfiniteQueryData(
-  //     userPostsQueryOptions({
-  //       userId: params.userId,
-  //       published: !isDrafts,
-  //       wishlist,
-  //     }),
-  //   );
-  // },
   component: RouteComponent,
 });
-// Profile header with info and settings
-// Stats, followers, following
-// Collections circles - click on one and feed under changes to all the posts(wishes) in the list;
-//  Info where to send the gift
 function RouteComponent() {
   const authUser = useAuth();
+  const navigate = useNavigate();
 
   const { userId } = Route.useParams();
 
   const { data: userProfile } = useSuspenseQuery(profileQueryOptions(userId));
+
+  if (!userProfile) {
+    return navigate({
+      to: "/profile/$userId",
+      params: { userId: authUser.uid },
+    });
+  }
 
   const isOwner = authUser?.uid === userId;
 

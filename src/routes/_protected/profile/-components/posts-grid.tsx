@@ -1,7 +1,6 @@
-import { Link, useSearch } from "@tanstack/react-router";
-import { useUserPosts } from "../../../../hooks/use-user-posts";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { userPostsQueryOptions } from "@/lib/api";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { Link, useSearch } from "@tanstack/react-router";
 
 export default function PostsGrid({
   userId,
