@@ -62,9 +62,10 @@ function RouteComponent() {
     },
 
     onSubmit: async ({ value }) => {
-      console.log("Form submitted with:", value);
+      if (form.state.isDefaultValue) {
+        return toast.info("Looks like nothing was changed!");
+      }
       editProfile({ updatedUserProfile: value });
-      toast.success("Profile updated successfully!");
     },
   });
 

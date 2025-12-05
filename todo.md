@@ -1,7 +1,7 @@
 - Get posts:
 
   -- Improve the profile page design:
-  -- Edit profile page - finish; How do I set the date in ui and validate it as a date in zod? and then when submitting, converting it to string? and saving? Then when displaying in the date field, convert it back to date?
+  -- Edit profile page - finish; Add tanstack pacer to the rpoject and form to add ratelimitng;
 
   -- Allow to open the page with followers and following with search;
   -- Click on posts scrolls page to posts grid;
