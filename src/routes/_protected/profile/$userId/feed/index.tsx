@@ -65,7 +65,7 @@ function RouteComponent() {
   const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 
   return (
-    <div className="container mx-auto flex items-center justify-center px-4 py-6 lg:py-10">
+    <div className="container mx-auto flex items-center justify-center px-4 pb-6 lg:pb-10">
       {allPosts.length === 0 ? (
         <>Empty feed</>
       ) : (

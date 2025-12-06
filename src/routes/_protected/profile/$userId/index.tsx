@@ -28,7 +28,7 @@ function RouteComponent() {
   const isOwner = authUser?.uid === userId;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 md:py-12">
+    <div className="flex flex-col gap-6">
       <ProfileHeader userProfile={userProfile} isOwner={isOwner} />
       <Wishlists userId={userId} isOwner={isOwner} />
       <Suspense fallback={<>Loading posts!</>}>

@@ -15,7 +15,7 @@ export default function ProfileHeader({
 
   return (
     <>
-      <div className="bg-background w-full pb-4">
+      <div className="bg-background w-full">
         <div className="mx-auto">
           {/* Main profile section */}
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -82,17 +82,17 @@ export default function ProfileHeader({
               </div>
             </div>
 
-            <div className="flex w-full gap-2 sm:w-auto sm:min-w-[200px]">
+            <div className="">
               {isOwner ? (
                 <>
                   <Link
                     to="/profile/$userId/edit-profile"
                     params={{ userId: userProfile?.uid }}
-                    className="btn btn-sm md:btn-md flex-1 sm:flex-none"
+                    className="btn btn-sm md:btn-md w-full md:w-auto"
                   >
                     Edit Profile
                   </Link>
-                  <Link
+                  {/* <Link
                     to="/profile/$userId"
                     params={{ userId: "JyLsRANwzbSZukKtZ0WqYjY1moh2" }}
                     className="btn btn-sm md:btn-md flex-1 sm:flex-none"
@@ -105,7 +105,7 @@ export default function ProfileHeader({
                     className="btn btn-sm md:btn-md flex-1 sm:flex-none"
                   >
                     Go to another User Settings
-                  </Link>
+                  </Link> */}
                 </>
               ) : isFollowing ? (
                 <button className="btn w-full sm:w-auto">Unfollow</button>

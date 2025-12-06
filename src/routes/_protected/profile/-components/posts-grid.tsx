@@ -27,9 +27,9 @@ export default function PostsGrid({
   const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 
   return (
-    <div>
+    <div className="">
       {allPosts.length !== 0 ? (
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4">
+        <div className="grid w-full grid-cols-2 gap-2 md:grid-cols-3 md:gap-4">
           {allPosts.map((post) => (
             <Link
               key={post.id}
@@ -47,7 +47,7 @@ export default function PostsGrid({
           ))}
         </div>
       ) : (
-        <div className="border-border flex min-h-[400px] items-center justify-center rounded-lg border border-dashed">
+        <div className="border-border flex min-h-[400px] w-full items-center justify-center rounded-lg border border-dashed">
           <p className="text-muted-foreground">
             No posts in this collection yet
           </p>

@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
 
 function RouteComponent() {
   return (
-    <div className="container mx-auto flex items-center justify-center px-4 py-6 lg:py-10">
+    <div className="container mx-auto px-4 py-6 lg:py-10">
       <Suspense fallback={<div>Loading profile…</div>}>
         <Outlet />
       </Suspense>
