@@ -17,11 +17,11 @@ import {
   IconWorld,
 } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
+import { useRateLimitedCallback } from "@tanstack/react-pacer";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useRef } from "react";
 import { toast } from "sonner";
-import { rateLimit, useRateLimitedCallback } from "@tanstack/react-pacer";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/edit-profile/",

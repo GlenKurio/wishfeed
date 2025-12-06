@@ -1,11 +1,5 @@
 - Get posts:
 
-  -- Improve the profile page design:
-  -- Edit profile page - finish; Add tanstack pacer to the rpoject and form to add ratelimitng;
-
-  -- Allow to open the page with followers and following with search;
-  -- Click on posts scrolls page to posts grid;
-
   -- Allow to create wishlists; Write a function to get the wishlists; Edit wishlists; Delete wishlits;
 
   -- Display different actions on the proile page if visitor is not the profile owner;
@@ -14,6 +8,9 @@
   -- Create post actions: one for author, one for other users;
 
   -- Add ui to get followers, following; Implement functionality to follow/unfollow;
+
+  -- Allow to open the page with followers and following with search;
+  -- Click on posts scrolls page to posts grid;
 
   -- Get Feed posts for user from people user follows:
   -- Get user feed posts in loader/preload and also get user profiles for posts? Profile later can be reused from cache in profile page layout loader? SHould I load all the profiles from feed or better to keep some data in post in db and just update it using firebase function when user updates the profile?
