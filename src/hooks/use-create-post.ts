@@ -34,7 +34,7 @@ export function useCreatePost() {
     const affiliateLink = await swapUrl(newWishData.wish_url);
 
     // 3. Construct wish data with Cover image url, original product url and affiliate link
-    const wishData = {
+    const wishData: CreateWishType = {
       ...newWishData,
       wish_image: imageUrl,
     };

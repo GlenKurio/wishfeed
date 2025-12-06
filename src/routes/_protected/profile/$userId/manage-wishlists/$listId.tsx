@@ -1,10 +1,17 @@
 import PageHeading from "@/components/page-heading";
 import { createWishlistSchema } from "@/lib/types";
-import { IconPhoto, IconTrash, IconUpload } from "@tabler/icons-react";
+import {
+  IconFileText,
+  IconPhoto,
+  IconTag,
+  IconTrash,
+  IconUpload,
+} from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useRef } from "react";
 import { toast } from "sonner";
+import PostsGrid from "../../-components/posts-grid";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/manage-wishlists/$listId",
@@ -192,7 +199,102 @@ function RouteComponent() {
             );
           }}
         />
+        {/* Title Field */}
+        <form.Field
+          name="title"
+          children={(field) => {
+            const { isTouched, errors } = field.state.meta;
+            const hasError = isTouched && errors.length > 0;
+            const message = isTouched ? errors[0]?.message : null;
+            const charCount = field.state.value.length;
+
+            return (
+              <div className="w-full">
+                <label className="label mb-1 ml-1">
+                  <span className="label-text font-medium">Title</span>
+                  <span className="label-text-alt text-neutral/70">
+                    {charCount}/100
+                  </span>
+                </label>
+                <label
+                  className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                >
+                  <IconTag
+                    width="20"
+                    height="20"
+                    className={hasError ? "text-error" : ""}
+                  />
+                  <input
+                    id={field.name}
+                    name={field.name}
+                    type="text"
+                    value={field.state.value}
+                    placeholder="Wishlist title"
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    aria-invalid={hasError}
+                    className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                    disabled={disabled}
+                  />
+                </label>
+                {message && (
+                  <div className="text-error mt-1.5 ml-1.5 text-xs">
+                    {message}
+                  </div>
+                )}
+              </div>
+            );
+          }}
+        />
+        {/* Description Field */}
+        <form.Field
+          name="description"
+          children={(field) => {
+            const { isTouched, errors } = field.state.meta;
+            const hasError = isTouched && errors.length > 0;
+            const message = isTouched ? errors[0]?.message : null;
+            const charCount = field.state.value.length;
+
+            return (
+              <div className="w-full">
+                <label className="label mb-1 ml-1">
+                  <span className="label-text font-medium">Description</span>
+                  <span className="label-text-alt text-neutral/70">
+                    {charCount}/250
+                  </span>
+                </label>
+                <label
+                  className={`textarea textarea-bordered border-base-content flex w-full gap-2 p-3 ${hasError ? "textarea-error border-error" : ""}`}
+                >
+                  <IconFileText
+                    width="20"
+                    height="20"
+                    className={`shrink-0 ${hasError ? "text-error" : ""}`}
+                  />
+                  <textarea
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    placeholder="Describe your wish..."
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    aria-invalid={hasError}
+                    rows={3}
+                    className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                    disabled={disabled}
+                  />
+                </label>
+                {message && (
+                  <div className="text-error mt-1.5 ml-1.5 text-xs">
+                    {message}
+                  </div>
+                )}
+              </div>
+            );
+          }}
+        />
       </div>
+      <>{/* <PostsGrid /> */}</>
     </div>
   );
 }

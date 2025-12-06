@@ -80,7 +80,7 @@ export default function Wishlists({
               />
             </div>
           </div>
-          <p className="mt-2 text-center text-sm font-medium">All Wishes</p>
+          <p className="mt-2 text-center text-xs font-medium">All Wishes</p>
         </Link>
 
         {/* Wishlist Cards */}
@@ -106,7 +106,7 @@ export default function Wishlists({
               />
               <div className="from-primary/10 absolute inset-0 bg-linear-to-t to-transparent" />
             </div>
-            <p className="mt-2 text-center text-sm font-medium">{w.name}</p>
+            <p className="mt-2 text-center text-xs font-medium">{w.name}</p>
           </Link>
         ))}
 
@@ -135,7 +135,7 @@ export default function Wishlists({
                   />
                 </div>
               </div>
-              <p className="mt-2 text-center text-sm font-medium">Drafts</p>
+              <p className="mt-2 text-center text-xs font-medium">Drafts</p>
             </Link>
             <Link
               to="/profile/$userId/manage-wishlists"
@@ -145,7 +145,7 @@ export default function Wishlists({
               <div className="group hover:border-primary hover:bg-base-200 flex size-16 items-center justify-center rounded-3xl border-2 border-dashed border-gray-300 transition-colors">
                 <IconListDetails className="group-hover:text-primary size-8 text-gray-400 transition-colors" />
               </div>
-              <p className="mt-2 text-center text-sm font-medium text-gray-600">
+              <p className="mt-2 text-center text-xs font-medium text-gray-600">
                 Manage
               </p>
             </Link>

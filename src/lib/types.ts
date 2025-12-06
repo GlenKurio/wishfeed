@@ -195,3 +195,5 @@ export type DbWishlist = Omit<Wishlist, "createdAt" | "updatedAt"> & {
   createdAt: FieldValue;
   updatedAt: FieldValue;
 };
+
+export type CreateWishlist = z.infer<typeof createWishlistSchema>;

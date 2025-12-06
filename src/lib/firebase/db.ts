@@ -19,12 +19,15 @@ import {
   type DocumentData,
 } from "firebase/firestore";
 import { firebaseApp } from ".";
-import type {
-  CreateWishType,
-  DbPostType,
-  DbUserProfile,
-  PostType,
-  UserProfile,
+import {
+  createWishlistSchema,
+  type CreateWishlist,
+  type CreateWishType,
+  type DbPostType,
+  type DbUserProfile,
+  type DbWishlist,
+  type PostType,
+  type UserProfile,
 } from "../types";
 
 import { updateProfile, type User } from "firebase/auth";
@@ -327,5 +330,54 @@ export async function validateHandle(
     console.error("Error validating handle:", error);
     // On error, assume handle is taken (fail safe)
     return false;
+  }
+}
+
+export async function saveWishlistToDb(
+  wishlistData: CreateWishlist,
+  wishlistId?: string,
+) {
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("Must be logged in to create or update a wishlist.");
+  }
+
+  // Validate the incoming data
+  const validatedData = createWishlistSchema.parse(wishlistData);
+
+  if (wishlistId) {
+    // If a wishlistId is provided, update the existing wishlist
+    const wishlistRef = doc(db, "wishlists", wishlistId);
+
+    // Prepare the data for update, ensuring we don't try to update the 'id' or 'owner'
+    const { ...dataToUpdate } = validatedData;
+    const wishlistToUpdate: Partial<
+      Omit<DbWishlist, "id" | "owner" | "createdAt">
+    > = {
+      ...dataToUpdate,
+      updatedAt: serverTimestamp(),
+    };
+
+    await updateDoc(wishlistRef, wishlistToUpdate);
+    return { message: "updated" };
+  } else {
+    // If no wishlistId is provided, create a new wishlist
+
+    // 1. Create a reference for a new document to get its auto-generated ID
+    const newWishlistRef = doc(collection(db, "wishlists"));
+
+    // 2. Include the new document's ID in the object you're creating
+    const newWishlist: DbWishlist = {
+      id: newWishlistRef.id, // Assign the generated ID here
+      ...validatedData,
+      owner: user.uid,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    // 3. Use setDoc to save the complete object to the new document reference
+    await setDoc(newWishlistRef, newWishlist);
+    return { message: "created" };
   }
 }
