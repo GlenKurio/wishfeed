@@ -1,12 +1,14 @@
 - Profile:
   - Wishlists:
-    -- Improve the design of wishlists minis; Use illustrations for all, manage, drafts;
+
     -- Manage drafts somehow in DB or UI to show it only to owner user;
     -- Write a function to get the wishlists;
     -- Display wishlists in manage page;
     -- Allow to create wishlists:
     -- Edit wishlist;
     -- Delete wishlist;
+
+  -- Change $userId to handle;
 
   -- Display different actions on the proile page if visitor is not the profile owner;
 
