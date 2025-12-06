@@ -14,7 +14,7 @@ const wishlists = [
   {
     id: "design",
     name: "Design",
-    count: 2,
+    count: 0,
     image:
       "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=400&fit=crop",
   },
@@ -74,8 +74,12 @@ export default function Wishlists({
                 : "hover:scale-105"
             }`}
           >
-            <div className="from-primary absolute inset-0 flex items-center justify-center bg-linear-to-br to-rose-300">
-              <span className="text-xl font-bold text-white">All</span>
+            <div className="from-base-300 to-primary/10 absolute inset-0 flex items-center justify-center bg-linear-to-br">
+              <img
+                src="/ampersand.png"
+                alt="All wishes list"
+                className="size-12"
+              />
             </div>
           </div>
           <p className="mt-2 text-center text-sm font-medium">All Wishes</p>
@@ -88,7 +92,7 @@ export default function Wishlists({
             to="/profile/$userId"
             params={{ userId }}
             search={(prev) => ({ ...prev, wishlist: w.id })}
-            className="shrink-0"
+            className="relative shrink-0"
           >
             <div
               className={`relative size-16 overflow-hidden rounded-3xl transition-all ${
@@ -103,9 +107,6 @@ export default function Wishlists({
                 className="h-full w-full object-cover"
               />
               <div className="from-primary/10 absolute inset-0 bg-linear-to-t to-transparent" />
-              <div className="absolute right-2 bottom-2 rounded-full bg-white/90 px-2 py-1 text-xs font-semibold backdrop-blur-sm">
-                {w.count}
-              </div>
             </div>
             <p className="mt-2 text-center text-sm font-medium">{w.name}</p>
           </Link>
@@ -128,8 +129,12 @@ export default function Wishlists({
                     : "hover:scale-105"
                 }`}
               >
-                <div className="from-primary absolute inset-0 flex items-center justify-center bg-linear-to-br to-rose-300">
-                  <span className="text-xl font-bold text-white">Drafts</span>
+                <div className="from-base-300 to-primary/10 absolute inset-0 flex items-center justify-center bg-linear-to-br">
+                  <img
+                    src="/drafts.png"
+                    alt="All wishes list"
+                    className="size-12"
+                  />
                 </div>
               </div>
               <p className="mt-2 text-center text-sm font-medium">Drafts</p>

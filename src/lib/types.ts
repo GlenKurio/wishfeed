@@ -165,3 +165,26 @@ export const updateUserProfileSchema = z.object({
 });
 
 export type UpdatedUserProfile = z.infer<typeof updateUserProfileSchema>;
+
+export const createWishlistSchema = z.object({
+  cover_image: z.string(),
+  title: z.string(),
+  description: z.string(),
+  wishes: z.array(z.string()),
+});
+
+export type Wishlist = {
+  id: string;
+  cover_image: string;
+  title: string;
+  description: string;
+  posts: string[];
+  owner: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+export type DbWishlist = Omit<Wishlist, "createdAt" | "updatedAt"> & {
+  createdAt: FieldValue;
+  updatedAt: FieldValue;
+};
