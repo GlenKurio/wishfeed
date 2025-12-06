@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEditProfile } from "@/hooks/use-edit-profile";
 import { profileQueryOptions } from "@/lib/api";
 import { validateHandle } from "@/lib/firebase/db";
-import { updateUserProfileSchema } from "@/lib/types";
+import { updateUserProfileSchema, type UpdatedUserProfile } from "@/lib/types";
 import { isoToDateInput } from "@/lib/utils";
 import {
   IconAt,
@@ -21,8 +21,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useRef } from "react";
 import { toast } from "sonner";
-
-// TODO: add ratelimit to form submission and after submission navigate to profile page
+import { rateLimit, useRateLimitedCallback } from "@tanstack/react-pacer";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/edit-profile/",
@@ -47,6 +46,24 @@ function RouteComponent() {
   const { data: userProfile } = useSuspenseQuery(profileQueryOptions(user.uid));
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { editProfile, isPending } = useEditProfile();
+
+  const rateLimitedEdit = useRateLimitedCallback(
+    async (value: UpdatedUserProfile) => {
+      return editProfile({ updatedUserProfile: value });
+    },
+    {
+      limit: 5,
+      window: 60000, // 1 minute
+      windowType: "fixed",
+      onReject: () => {
+        console.warn(
+          "API rate limit reached. Please wait before trying again.",
+        );
+        toast.warning("Too many submissions! Try again in a few seconds.");
+      },
+    },
+  );
+
   const form = useForm({
     defaultValues: {
       photoUrl: userProfile?.photoURL || user.photoURL || "",
@@ -65,7 +82,8 @@ function RouteComponent() {
       if (form.state.isDefaultValue) {
         return toast.info("Looks like nothing was changed!");
       }
-      editProfile({ updatedUserProfile: value });
+
+      rateLimitedEdit(value);
     },
   });
 
