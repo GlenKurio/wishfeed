@@ -168,9 +168,16 @@ export type UpdatedUserProfile = z.infer<typeof updateUserProfileSchema>;
 
 export const createWishlistSchema = z.object({
   cover_image: z.string(),
-  title: z.string(),
-  description: z.string(),
-  wishes: z.array(z.string()),
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title is required")
+    .max(50, "Title cannot exceed 50 characters"),
+  description: z
+    .string()
+    .trim()
+    .max(250, { message: "Description cannot exceed 250 characters" }),
+  posts: z.array(z.string()),
 });
 
 export type Wishlist = {

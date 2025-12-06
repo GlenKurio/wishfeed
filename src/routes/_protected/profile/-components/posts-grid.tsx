@@ -1,3 +1,4 @@
+import EmptyFrame from "@/components/empty-frame";
 import { userPostsQueryOptions } from "@/lib/api";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { Link, useSearch } from "@tanstack/react-router";
@@ -47,11 +48,7 @@ export default function PostsGrid({
           ))}
         </div>
       ) : (
-        <div className="border-primary/50 flex min-h-[400px] w-full items-center justify-center rounded-3xl border border-dashed">
-          <p className="text-base-content/70">
-            No posts in this collection yet
-          </p>
-        </div>
+        <EmptyFrame text={"No posts in this collection yet."} />
       )}
 
       {hasNextPage && (

@@ -1,4 +1,6 @@
+import EmptyFrame from "@/components/empty-frame";
 import { Icons } from "@/components/icons";
+import PageHeading from "@/components/page-heading";
 import { useAuth } from "@/hooks/use-auth";
 import type { Wishlist } from "@/lib/types";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -58,12 +60,11 @@ function RouteComponent() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-base-content text-3xl font-bold">
-          Manage Your Wihslists
-        </h2>
+        <PageHeading title="Manage Your Wihslists" />
+        <h2 className="text-base-content text-3xl font-bold"></h2>
         <Link
-          to="/profile/$userId/manage-wishlists/create"
-          params={{ userId: user.uid }}
+          to="/profile/$userId/manage-wishlists/$listId"
+          params={{ userId: user.uid, listId: "new" }}
           className="btn btn-md tracking-wide"
         >
           New wishlist
@@ -80,7 +81,7 @@ function RouteComponent() {
                 listId: list.id,
                 userId: list.owner,
               }}
-              className="group/list bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-3xl"
+              className="group/list bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-4xl"
             >
               {/* Image (base layer) */}
               <img
@@ -100,7 +101,7 @@ function RouteComponent() {
           ))}
         </div>
       ) : (
-        <>Empty</>
+        <EmptyFrame text={"It's time to create your first wishlist!"} />
       )}
     </div>
   );

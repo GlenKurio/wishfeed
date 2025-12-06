@@ -8,6 +8,7 @@
     -- Edit wishlist;
     -- Delete wishlist;
 
+  -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
   -- Change $userId to handle;
   -- Add breadcrumbs and "Go back" actions to pages(header?)
 

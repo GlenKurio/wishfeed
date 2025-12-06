@@ -1,3 +1,4 @@
+import PageHeading from "@/components/page-heading";
 import { useAuth } from "@/hooks/use-auth";
 import { useEditProfile } from "@/hooks/use-edit-profile";
 import { profileQueryOptions } from "@/lib/api";
@@ -95,8 +96,9 @@ function RouteComponent() {
     isPending || form.state.isSubmitting || form.state.isValidating;
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col">
-      <h2 className="mb-8 text-3xl font-bold">Edit Your Profile</h2>
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+      <PageHeading title="Edit Your Profile" />
+
       <div className="flex flex-col gap-6">
         <div className="flex w-full flex-col items-start gap-4 lg:gap-6">
           {/* Avatar Field  */}

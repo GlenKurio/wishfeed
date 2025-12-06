@@ -1,7 +1,5 @@
-import { Link, useParams, useSearch } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
-import { useAuth } from "../../../../hooks/use-auth";
 import { IconListDetails } from "@tabler/icons-react";
+import { Link, useSearch } from "@tanstack/react-router";
 
 const wishlists = [
   {
@@ -56,7 +54,7 @@ export default function Wishlists({
   isOwner: boolean;
 }) {
   const search = useSearch({ from: "/_protected/profile/$userId" });
-
+  // TODO: display only not empty lists
   return (
     <div className="w-full overflow-x-auto">
       <div className="flex gap-4 p-2">
