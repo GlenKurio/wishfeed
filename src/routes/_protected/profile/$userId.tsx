@@ -29,6 +29,8 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
         wishlist,
       }),
     );
+
+    // TODO: fetch user wishlists
   },
 
   component: RouteComponent,

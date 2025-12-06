@@ -44,3 +44,9 @@ export const userPostsQueryOptions = ({
     enabled: !!userId,
     staleTime: 60 * 1000,
   });
+
+// TODO: finish the infinite query for wishlists
+export const userWishlistsQueryOptions = ({ userId }: { userId: string }) =>
+  infiniteQueryOptions({
+    queryKey: ["wishlists", "user", userId],
+  });

@@ -59,7 +59,7 @@ export function useCreateWishlist() {
   });
 
   return {
-    createPost: mutation.mutateAsync,
+    createWishlist: mutation.mutateAsync,
     isPending: mutation.isPending,
     data: mutation.data,
   };

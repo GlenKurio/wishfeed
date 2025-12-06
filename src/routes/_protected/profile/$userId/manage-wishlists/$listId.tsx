@@ -1,7 +1,9 @@
 import PageHeading from "@/components/page-heading";
+import { useCreateWishlist } from "@/hooks/use-create-wishlist";
 import { createWishlistSchema } from "@/lib/types";
 import {
   IconFileText,
+  IconHeartShare,
   IconPhoto,
   IconTag,
   IconTrash,
@@ -10,8 +12,6 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useRef } from "react";
-import { toast } from "sonner";
-import PostsGrid from "../../-components/posts-grid";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/manage-wishlists/$listId",
@@ -26,6 +26,9 @@ function RouteComponent() {
   const pageTitle =
     params.listId === "new" ? "Create Wishlist" : "Edit Wishlist";
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { createWishlist, isPending } = useCreateWishlist();
+
   const form = useForm({
     defaultValues: {
       cover_image: "",
@@ -39,7 +42,7 @@ function RouteComponent() {
     },
 
     onSubmit: async ({ value }) => {
-      toast.info("List is being created!");
+      createWishlist(value);
     },
   });
 
@@ -47,7 +50,8 @@ function RouteComponent() {
     fileInputRef.current?.click();
   };
 
-  const disabled = form.state.isSubmitting || form.state.isValidating;
+  const disabled =
+    isPending || form.state.isSubmitting || form.state.isValidating;
 
   return (
     <div className="mx-auto flex h-full w-full max-w-3xl flex-col gap-6">
@@ -290,6 +294,31 @@ function RouteComponent() {
                   </div>
                 )}
               </div>
+            );
+          }}
+        />
+      </div>
+      <div>
+        <form.Subscribe
+          selector={(state) => [state.canSubmit]}
+          children={([canSubmit]) => {
+            return (
+              <button
+                type="submit"
+                className="btn btn-block btn-primary mt-2 h-10 text-[14px] font-semibold"
+                disabled={!canSubmit || isPending}
+                onClick={() => form.handleSubmit()}
+              >
+                {isPending ? (
+                  <>
+                    Creating wishlist... <IconHeartShare className="size-4" />
+                  </>
+                ) : (
+                  <>
+                    Create wishlist <IconHeartShare className="size-4" />
+                  </>
+                )}
+              </button>
             );
           }}
         />
