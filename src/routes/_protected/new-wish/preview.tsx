@@ -7,6 +7,7 @@ import {
   IconPhoto,
   IconTag,
   IconTrash,
+  IconUpload,
 } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -50,7 +51,7 @@ function RouteComponent() {
   const scrapedWish = Route.useLoaderData();
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDialogElement>(null);
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { createPost, isPending } = useCreatePost();
 
   const form = useForm({
@@ -72,6 +73,10 @@ function RouteComponent() {
     },
   });
 
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const handleSaveToDrafts = () => {
     createPost({
       ...form.state.values,
@@ -87,6 +92,9 @@ function RouteComponent() {
       to: "/new-wish",
     });
   };
+
+  const disabled =
+    isPending || form.state.isSubmitting || form.state.isValidating;
 
   return (
     <div className="flex h-full w-full flex-col gap-6">
@@ -106,14 +114,46 @@ function RouteComponent() {
           name="wish_image"
           children={(field) => {
             const value = field.state.value;
-
             const hasImage = !!value;
+
+            const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+            const ACCEPTED_IMAGE_TYPES = [
+              "image/jpeg",
+              "image/jpg",
+              "image/png",
+              "image/webp",
+            ];
 
             const handleFileChange = async (
               e: React.ChangeEvent<HTMLInputElement>,
             ) => {
               const file = e.target.files?.[0];
+
               if (file) {
+                // Validate file type
+                if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+                  field.form.setFieldMeta(field.name, (prev) => ({
+                    ...prev,
+                    errors: [
+                      "Please upload a valid image (JPEG, JPG, PNG, or WEBP)",
+                    ],
+                    isTouched: true,
+                  }));
+                  field.handleChange("");
+                  return;
+                }
+
+                // Validate file size
+                if (file.size > MAX_FILE_SIZE) {
+                  field.form.setFieldMeta(field.name, (prev) => ({
+                    ...prev,
+                    errors: ["Image size must be less than 5MB"],
+                    isTouched: true,
+                  }));
+                  field.handleChange("");
+                  return;
+                }
+
                 // Convert to base64 string
                 const reader = new FileReader();
                 reader.onloadend = () => {
@@ -128,54 +168,82 @@ function RouteComponent() {
             };
 
             const { isTouched, errors } = field.state.meta;
-            const hasError = isTouched && errors.length > 0;
+
             const message = isTouched ? errors[0]?.message : null;
 
             return (
-              <div className="w-full md:max-w-[250px]">
-                <label className="label mb-1 ml-1">
-                  <span className="label-text font-medium">
-                    Wish Cover Image
-                  </span>
-                </label>
+              <div className="flex w-full flex-col">
+                <div className="flex flex-col">
+                  <label className="label">
+                    <span className="label-text text-sm font-medium lg:text-base">
+                      Wishlist Cover
+                    </span>
+                  </label>
+                  {/* Helper Text */}
+                  <div className="label">
+                    <span className="label-text-alt text-base-content/60 text-xs">
+                      Square image recommended. Max size: 10MB
+                    </span>
+                  </div>
+                </div>
 
-                {hasImage ? (
-                  <div className="relative aspect-square overflow-hidden rounded-lg border-2">
-                    <img
-                      src={field.state.value}
-                      className="h-full w-full object-cover object-center"
-                      alt="Preview"
-                    />
+                {/* Cover Display with Actions */}
+                <div className="mt-2 flex w-full flex-col items-start gap-4 sm:flex-row sm:items-center">
+                  {/* Cover Preview */}
+                  <div className="avatar shrink-0">
+                    <div className="border-primary size-50 rounded-3xl border-2 border-dashed lg:size-80">
+                      {hasImage ? (
+                        <img
+                          src={value}
+                          className="h-full w-full rounded-3xl object-cover"
+                          alt="Cover preview"
+                        />
+                      ) : (
+                        <div className="from-base-300 to-primary/30 flex h-full w-full items-center justify-center rounded-3xl bg-linear-to-br">
+                          <IconPhoto className="text-primary h-12 w-12 lg:h-24 lg:w-24" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex w-full flex-col gap-2 md:w-auto">
                     <button
                       type="button"
-                      onClick={handleRemoveImage}
-                      className="btn btn-error btn-circle btn-sm absolute top-2 right-2"
+                      onClick={handleUploadClick}
+                      className="btn btn-sm gap-2 sm:w-auto"
+                      disabled={disabled}
                     >
-                      ✕
+                      <IconUpload className="h-4 w-4" />
+                      {hasImage ? "Change Cover" : "Select Cover"}
                     </button>
+
+                    {hasImage && (
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={handleRemoveImage}
+                        className="btn btn-ghost btn-sm btn-error gap-2 sm:w-auto"
+                      >
+                        <IconTrash className="h-4 w-4" />
+                        Remove
+                      </button>
+                    )}
                   </div>
-                ) : (
-                  <label
-                    className={`hover:bg-base-200 flex aspect-square w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed ${
-                      hasError ? "border-error" : "border-base-content"
-                    }`}
-                  >
-                    <IconPhoto width="48" height="48" />
-                    <p className="mb-2 text-sm">
-                      Click to upload or drag and drop
-                    </p>
-                    <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
 
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleFileChange}
-                      onBlur={field.handleBlur}
-                    />
-                  </label>
-                )}
+                  {/* Hidden File Input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    onBlur={field.handleBlur}
+                    disabled={disabled}
+                  />
+                </div>
 
+                {/* Error Message */}
                 {message && (
                   <div className="text-error mt-1.5 ml-1.5 text-xs">
                     {message}
@@ -217,6 +285,7 @@ function RouteComponent() {
                     onBlur={field.handleBlur}
                     aria-invalid={hasError}
                     className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                    disabled={disabled}
                   />
                 </label>
                 {message && (
@@ -264,6 +333,7 @@ function RouteComponent() {
                     onBlur={field.handleBlur}
                     aria-invalid={hasError}
                     className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                    disabled={disabled}
                   />
                 </label>
                 {message && (
@@ -311,6 +381,7 @@ function RouteComponent() {
                     aria-invalid={hasError}
                     rows={3}
                     className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                    disabled={disabled}
                   />
                 </label>
                 {message && (
@@ -356,6 +427,7 @@ function RouteComponent() {
                       onBlur={field.handleBlur}
                       aria-invalid={hasError}
                       className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                      disabled={disabled}
                     />
                   </label>
                   {message && (
@@ -401,6 +473,7 @@ function RouteComponent() {
                       onBlur={field.handleBlur}
                       aria-invalid={hasError}
                       className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                      disabled={disabled}
                     />
                   </label>
                   {message && (

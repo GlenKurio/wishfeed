@@ -48,7 +48,7 @@ function RouteComponent() {
 
       <div className="flex w-full flex-col items-start gap-4">
         {/* Image File Field with Preview */}
-        {/* Avatar Field  */}
+
         <form.Field
           name="cover_image"
           children={(field) => {
