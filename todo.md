@@ -1,16 +1,23 @@
-- Get posts:
-
-  -- Allow to create wishlists; Write a function to get the wishlists; Edit wishlists; Delete wishlits;
+- Profile:
+  - Wishlists:
+    -- Improve the design of wishlists minis; Use illustrations for all, manage, drafts;
+    -- Manage drafts somehow in DB or UI to show it only to owner user;
+    -- Write a function to get the wishlists;
+    -- Display wishlists in manage page;
+    -- Allow to create wishlists:
+    -- Edit wishlist;
+    -- Delete wishlist;
 
   -- Display different actions on the proile page if visitor is not the profile owner;
 
   -- On hover of the post in proifle show actions (same actions that in full feed post card).
+  -- Show info and allow actions based on user profile privacy settings;
+
   -- Create post actions: one for author, one for other users;
 
   -- Add ui to get followers, following; Implement functionality to follow/unfollow;
 
   -- Allow to open the page with followers and following with search;
-  -- Click on posts scrolls page to posts grid;
 
   -- Get Feed posts for user from people user follows:
   -- Get user feed posts in loader/preload and also get user profiles for posts? Profile later can be reused from cache in profile page layout loader? SHould I load all the profiles from feed or better to keep some data in post in db and just update it using firebase function when user updates the profile?
