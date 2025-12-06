@@ -1,3 +1,4 @@
+import { Icons } from "@/components/icons";
 import { useAuth } from "@/hooks/use-auth";
 import type { Wishlist } from "@/lib/types";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -57,13 +58,16 @@ function RouteComponent() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold">Manage Your Wihslists</h2>
+        <h2 className="text-base-content text-3xl font-bold">
+          Manage Your Wihslists
+        </h2>
         <Link
           to="/profile/$userId/manage-wishlists/create"
           params={{ userId: user.uid }}
-          className="btn"
+          className="btn btn-md tracking-wide"
         >
-          Create wishlist
+          New wishlist
+          <Icons.wishlist className="size-4" />
         </Link>
       </div>
       {dummyWishlists.length !== 0 ? (
@@ -76,13 +80,22 @@ function RouteComponent() {
                 listId: list.id,
                 userId: list.owner,
               }}
-              className="group bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-3xl transition-all hover:opacity-90"
+              className="group/list bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-3xl"
             >
+              {/* Image (base layer) */}
               <img
                 src={list.cover_image || "/placeholder.svg"}
                 alt={`Post ${list.id}`}
-                className="h-full w-full object-cover object-center transition-transform group-hover:scale-105"
+                className="h-full w-full object-cover object-center transition-transform duration-300 group-hover/list:scale-105"
               />
+
+              {/* Gradient overlay (smooth fade in) */}
+              <div className="from-primary/40 via-primary/10 pointer-events-none absolute inset-0 z-10 bg-linear-to-b to-transparent opacity-0 transition-opacity duration-300 group-hover/list:opacity-100" />
+
+              {/* Title (smooth fade + slide up) */}
+              <p className="text-base-100 pointer-events-none absolute top-3 left-3 z-20 translate-y-1 font-bold opacity-0 transition-all duration-300 group-hover/list:translate-y-0 group-hover/list:opacity-100">
+                {list.title}
+              </p>
             </Link>
           ))}
         </div>

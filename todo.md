@@ -9,6 +9,7 @@
     -- Delete wishlist;
 
   -- Change $userId to handle;
+  -- Add breadcrumbs and "Go back" actions to pages(header?)
 
   -- Display different actions on the proile page if visitor is not the profile owner;
 

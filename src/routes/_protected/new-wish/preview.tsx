@@ -429,12 +429,12 @@ function RouteComponent() {
               >
                 {isPending ? (
                   <>
-                    Publishing Your Wish...{" "}
+                    Publishing your wish...{" "}
                     <IconHeartShare className="size-4" />
                   </>
                 ) : (
                   <>
-                    Publish Wish <IconHeartShare className="size-4" />
+                    Publish wish <IconHeartShare className="size-4" />
                   </>
                 )}
               </button>
