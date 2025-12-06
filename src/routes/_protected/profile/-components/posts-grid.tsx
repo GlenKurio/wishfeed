@@ -47,8 +47,8 @@ export default function PostsGrid({
           ))}
         </div>
       ) : (
-        <div className="border-border flex min-h-[400px] w-full items-center justify-center rounded-lg border border-dashed">
-          <p className="text-muted-foreground">
+        <div className="border-primary/50 flex min-h-[400px] w-full items-center justify-center rounded-3xl border border-dashed">
+          <p className="text-base-content/70">
             No posts in this collection yet
           </p>
         </div>

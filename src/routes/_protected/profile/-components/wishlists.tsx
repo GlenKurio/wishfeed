@@ -1,6 +1,7 @@
 import { Link, useParams, useSearch } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useAuth } from "../../../../hooks/use-auth";
+import { IconListDetails } from "@tabler/icons-react";
 
 const wishlists = [
   {
@@ -111,21 +112,41 @@ export default function Wishlists({
         ))}
 
         {/* Create New Wishlist */}
+        {/* TODO: place drafts here too, so only the owner of the proifle can see them. Make sure they are not available from editing url; */}
         {isOwner && (
-          <button
-            className="shrink-0"
-            onClick={() => {
-              // Handle create wishlist logic
-              console.log("Create new wishlist");
-            }}
-          >
-            <div className="hover:border-primary hover:bg-base-200 flex size-16 items-center justify-center rounded-3xl border-2 border-dashed border-gray-300 transition-all">
-              <Plus className="h-12 w-12 text-gray-400" />
-            </div>
-            <p className="mt-2 text-center text-sm font-medium text-gray-600">
-              New List
-            </p>
-          </button>
+          <>
+            <Link
+              to="/profile/$userId"
+              params={{ userId }}
+              search={(prev) => ({ ...prev, wishlist: "drafts" })}
+              className="shrink-0"
+            >
+              <div
+                className={`relative size-16 overflow-hidden rounded-3xl transition-all ${
+                  search.wishlist === "drafts" || !search.wishlist
+                    ? "ring-primary scale-105 shadow-lg ring-2"
+                    : "hover:scale-105"
+                }`}
+              >
+                <div className="from-primary absolute inset-0 flex items-center justify-center bg-linear-to-br to-rose-300">
+                  <span className="text-xl font-bold text-white">Drafts</span>
+                </div>
+              </div>
+              <p className="mt-2 text-center text-sm font-medium">Drafts</p>
+            </Link>
+            <Link
+              to="/profile/$userId/manage-wishlists"
+              params={{ userId: userId }}
+              className="shrink-0"
+            >
+              <div className="group hover:border-primary hover:bg-base-200 flex size-16 items-center justify-center rounded-3xl border-2 border-dashed border-gray-300 transition-colors">
+                <IconListDetails className="group-hover:text-primary size-8 text-gray-400 transition-colors" />
+              </div>
+              <p className="mt-2 text-center text-sm font-medium text-gray-600">
+                Manage
+              </p>
+            </Link>
+          </>
         )}
       </div>
     </div>

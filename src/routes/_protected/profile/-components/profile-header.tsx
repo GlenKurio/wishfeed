@@ -92,6 +92,13 @@ export default function ProfileHeader({
                   >
                     Edit Profile
                   </Link>
+                  <Link
+                    to="/profile/$userId"
+                    params={{ userId: "JyLsRANwzbSZukKtZ0WqYjY1moh2" }}
+                    className="btn btn-sm md:btn-md flex-1 sm:flex-none"
+                  >
+                    Go to another User
+                  </Link>
                   {/* <Link
                     to="/profile/$userId"
                     params={{ userId: "JyLsRANwzbSZukKtZ0WqYjY1moh2" }}
