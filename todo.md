@@ -1,18 +1,22 @@
 - Profile:
   - Wishlists:
+    -- Write a function to get the wishlists; Finish infinite query options and create a db function; Load them in parallel in profile layout in loader with userProfile;
 
     -- Manage drafts somehow in DB or UI to show it only to owner user;
-    -- Write a function to get the wishlists;
     -- Display wishlists in manage page;
     -- Allow to create wishlists:
     -- Edit wishlist;
     -- Delete wishlist;
+    -- allow to add wishes from edit wishlist page; Open a dialog with all wishes list and allow to select; Make wishes a scrollable section with minis, click/tap on mini triggers removeWishFromList action, and triggers a dialog to confirm; Has add wish button as last mini; Edit list button opens the dialog with list to select/deselect wishes;
+
+    -- Remove empty wishlists from scrollable area;
+    -- Add a title on hover to the post mini;
 
   -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
   -- Change $userId to handle;
   -- Add breadcrumbs and "Go back" actions to pages(header?)
 
-  -- Display different actions on the proile page if visitor is not the profile owner;
+  -- Display different actions on the proile page if visitor is not the profile owner; -- In post actions for owner allow to select wishlists to add post to;
 
   -- On hover of the post in proifle show actions (same actions that in full feed post card).
   -- Show info and allow actions based on user profile privacy settings;
