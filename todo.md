@@ -1,6 +1,6 @@
 - Profile:
+  -- Change $userId to handle;
   - Wishlists:
-
     -- Allow to create wishlists:
     -- Pass the selected wishlist into edit page;
     -- Edit wishlist;
@@ -11,7 +11,7 @@
     -- Add a title on hover to the post mini;
 
   -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
-  -- Change $userId to handle;
+
   -- Add breadcrumbs and "Go back" actions to pages(header?)
 
   -- Display different actions on the proile page if visitor is not the profile owner; -- In post actions for owner allow to select wishlists to add post to;

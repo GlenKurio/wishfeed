@@ -17,21 +17,21 @@ import { Route as LegalTermsRouteImport } from './routes/legal/terms'
 import { Route as AuthFinishRouteImport } from './routes/auth/finish'
 import { Route as ProtectedNewWishRouteRouteImport } from './routes/_protected/new-wish/route'
 import { Route as ProtectedNewWishIndexRouteImport } from './routes/_protected/new-wish/index'
-import { Route as ProtectedProfileUserIdRouteImport } from './routes/_protected/profile/$userId'
+import { Route as ProtectedProfileUserRouteImport } from './routes/_protected/profile/$user'
 import { Route as ProtectedNewWishPreviewRouteImport } from './routes/_protected/new-wish/preview'
 import { Route as ProtectedsearchSearchRouteImport } from './routes/_protected/(search)/search'
 import { Route as ProtectednotificationsNotificationsRouteImport } from './routes/_protected/(notifications)/notifications'
 import { Route as ProtectedhomeHomeRouteImport } from './routes/_protected/(home)/home'
 import { Route as ProtectedgiftsGiftsRouteImport } from './routes/_protected/(gifts)/gifts'
-import { Route as ProtectedProfileUserIdWishlistRouteImport } from './routes/_protected/profile/$userId/$wishlist'
-import { Route as ProtectedProfileUserIdManageWishlistsRouteRouteImport } from './routes/_protected/profile/$userId/manage-wishlists/route'
-import { Route as ProtectedProfileUserIdManageWishlistsIndexRouteImport } from './routes/_protected/profile/$userId/manage-wishlists/index'
-import { Route as ProtectedProfileUserIdFollowingIndexRouteImport } from './routes/_protected/profile/$userId/following/index'
-import { Route as ProtectedProfileUserIdFollowersIndexRouteImport } from './routes/_protected/profile/$userId/followers/index'
-import { Route as ProtectedProfileUserIdEditProfileIndexRouteImport } from './routes/_protected/profile/$userId/edit-profile/index'
-import { Route as ProtectedProfileUserIdWishlistIndexRouteImport } from './routes/_protected/profile/$userId/$wishlist/index'
-import { Route as ProtectedProfileUserIdManageWishlistsListIdRouteImport } from './routes/_protected/profile/$userId/manage-wishlists/$listId'
-import { Route as ProtectedProfileUserIdWishlistFeedRouteImport } from './routes/_protected/profile/$userId/$wishlist/feed'
+import { Route as ProtectedProfileUserWishlistRouteImport } from './routes/_protected/profile/$user/$wishlist'
+import { Route as ProtectedProfileUserManageWishlistsRouteRouteImport } from './routes/_protected/profile/$user/manage-wishlists/route'
+import { Route as ProtectedProfileUserManageWishlistsIndexRouteImport } from './routes/_protected/profile/$user/manage-wishlists/index'
+import { Route as ProtectedProfileUserFollowingIndexRouteImport } from './routes/_protected/profile/$user/following/index'
+import { Route as ProtectedProfileUserFollowersIndexRouteImport } from './routes/_protected/profile/$user/followers/index'
+import { Route as ProtectedProfileUserEditProfileIndexRouteImport } from './routes/_protected/profile/$user/edit-profile/index'
+import { Route as ProtectedProfileUserWishlistIndexRouteImport } from './routes/_protected/profile/$user/$wishlist/index'
+import { Route as ProtectedProfileUserManageWishlistsListIdRouteImport } from './routes/_protected/profile/$user/manage-wishlists/$listId'
+import { Route as ProtectedProfileUserWishlistFeedRouteImport } from './routes/_protected/profile/$user/$wishlist/feed'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
@@ -72,9 +72,9 @@ const ProtectedNewWishIndexRoute = ProtectedNewWishIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProtectedNewWishRouteRoute,
 } as any)
-const ProtectedProfileUserIdRoute = ProtectedProfileUserIdRouteImport.update({
-  id: '/profile/$userId',
-  path: '/profile/$userId',
+const ProtectedProfileUserRoute = ProtectedProfileUserRouteImport.update({
+  id: '/profile/$user',
+  path: '/profile/$user',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
 const ProtectedNewWishPreviewRoute = ProtectedNewWishPreviewRouteImport.update({
@@ -103,59 +103,59 @@ const ProtectedgiftsGiftsRoute = ProtectedgiftsGiftsRouteImport.update({
   path: '/gifts',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
-const ProtectedProfileUserIdWishlistRoute =
-  ProtectedProfileUserIdWishlistRouteImport.update({
+const ProtectedProfileUserWishlistRoute =
+  ProtectedProfileUserWishlistRouteImport.update({
     id: '/$wishlist',
     path: '/$wishlist',
-    getParentRoute: () => ProtectedProfileUserIdRoute,
+    getParentRoute: () => ProtectedProfileUserRoute,
   } as any)
-const ProtectedProfileUserIdManageWishlistsRouteRoute =
-  ProtectedProfileUserIdManageWishlistsRouteRouteImport.update({
+const ProtectedProfileUserManageWishlistsRouteRoute =
+  ProtectedProfileUserManageWishlistsRouteRouteImport.update({
     id: '/manage-wishlists',
     path: '/manage-wishlists',
-    getParentRoute: () => ProtectedProfileUserIdRoute,
+    getParentRoute: () => ProtectedProfileUserRoute,
   } as any)
-const ProtectedProfileUserIdManageWishlistsIndexRoute =
-  ProtectedProfileUserIdManageWishlistsIndexRouteImport.update({
+const ProtectedProfileUserManageWishlistsIndexRoute =
+  ProtectedProfileUserManageWishlistsIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => ProtectedProfileUserIdManageWishlistsRouteRoute,
+    getParentRoute: () => ProtectedProfileUserManageWishlistsRouteRoute,
   } as any)
-const ProtectedProfileUserIdFollowingIndexRoute =
-  ProtectedProfileUserIdFollowingIndexRouteImport.update({
+const ProtectedProfileUserFollowingIndexRoute =
+  ProtectedProfileUserFollowingIndexRouteImport.update({
     id: '/following/',
     path: '/following/',
-    getParentRoute: () => ProtectedProfileUserIdRoute,
+    getParentRoute: () => ProtectedProfileUserRoute,
   } as any)
-const ProtectedProfileUserIdFollowersIndexRoute =
-  ProtectedProfileUserIdFollowersIndexRouteImport.update({
+const ProtectedProfileUserFollowersIndexRoute =
+  ProtectedProfileUserFollowersIndexRouteImport.update({
     id: '/followers/',
     path: '/followers/',
-    getParentRoute: () => ProtectedProfileUserIdRoute,
+    getParentRoute: () => ProtectedProfileUserRoute,
   } as any)
-const ProtectedProfileUserIdEditProfileIndexRoute =
-  ProtectedProfileUserIdEditProfileIndexRouteImport.update({
+const ProtectedProfileUserEditProfileIndexRoute =
+  ProtectedProfileUserEditProfileIndexRouteImport.update({
     id: '/edit-profile/',
     path: '/edit-profile/',
-    getParentRoute: () => ProtectedProfileUserIdRoute,
+    getParentRoute: () => ProtectedProfileUserRoute,
   } as any)
-const ProtectedProfileUserIdWishlistIndexRoute =
-  ProtectedProfileUserIdWishlistIndexRouteImport.update({
+const ProtectedProfileUserWishlistIndexRoute =
+  ProtectedProfileUserWishlistIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => ProtectedProfileUserIdWishlistRoute,
+    getParentRoute: () => ProtectedProfileUserWishlistRoute,
   } as any)
-const ProtectedProfileUserIdManageWishlistsListIdRoute =
-  ProtectedProfileUserIdManageWishlistsListIdRouteImport.update({
+const ProtectedProfileUserManageWishlistsListIdRoute =
+  ProtectedProfileUserManageWishlistsListIdRouteImport.update({
     id: '/$listId',
     path: '/$listId',
-    getParentRoute: () => ProtectedProfileUserIdManageWishlistsRouteRoute,
+    getParentRoute: () => ProtectedProfileUserManageWishlistsRouteRoute,
   } as any)
-const ProtectedProfileUserIdWishlistFeedRoute =
-  ProtectedProfileUserIdWishlistFeedRouteImport.update({
+const ProtectedProfileUserWishlistFeedRoute =
+  ProtectedProfileUserWishlistFeedRouteImport.update({
     id: '/feed',
     path: '/feed',
-    getParentRoute: () => ProtectedProfileUserIdWishlistRoute,
+    getParentRoute: () => ProtectedProfileUserWishlistRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -170,17 +170,17 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof ProtectednotificationsNotificationsRoute
   '/search': typeof ProtectedsearchSearchRoute
   '/new-wish/preview': typeof ProtectedNewWishPreviewRoute
-  '/profile/$userId': typeof ProtectedProfileUserIdRouteWithChildren
+  '/profile/$user': typeof ProtectedProfileUserRouteWithChildren
   '/new-wish/': typeof ProtectedNewWishIndexRoute
-  '/profile/$userId/manage-wishlists': typeof ProtectedProfileUserIdManageWishlistsRouteRouteWithChildren
-  '/profile/$userId/$wishlist': typeof ProtectedProfileUserIdWishlistRouteWithChildren
-  '/profile/$userId/$wishlist/feed': typeof ProtectedProfileUserIdWishlistFeedRoute
-  '/profile/$userId/manage-wishlists/$listId': typeof ProtectedProfileUserIdManageWishlistsListIdRoute
-  '/profile/$userId/$wishlist/': typeof ProtectedProfileUserIdWishlistIndexRoute
-  '/profile/$userId/edit-profile': typeof ProtectedProfileUserIdEditProfileIndexRoute
-  '/profile/$userId/followers': typeof ProtectedProfileUserIdFollowersIndexRoute
-  '/profile/$userId/following': typeof ProtectedProfileUserIdFollowingIndexRoute
-  '/profile/$userId/manage-wishlists/': typeof ProtectedProfileUserIdManageWishlistsIndexRoute
+  '/profile/$user/manage-wishlists': typeof ProtectedProfileUserManageWishlistsRouteRouteWithChildren
+  '/profile/$user/$wishlist': typeof ProtectedProfileUserWishlistRouteWithChildren
+  '/profile/$user/$wishlist/feed': typeof ProtectedProfileUserWishlistFeedRoute
+  '/profile/$user/manage-wishlists/$listId': typeof ProtectedProfileUserManageWishlistsListIdRoute
+  '/profile/$user/$wishlist/': typeof ProtectedProfileUserWishlistIndexRoute
+  '/profile/$user/edit-profile': typeof ProtectedProfileUserEditProfileIndexRoute
+  '/profile/$user/followers': typeof ProtectedProfileUserFollowersIndexRoute
+  '/profile/$user/following': typeof ProtectedProfileUserFollowingIndexRoute
+  '/profile/$user/manage-wishlists/': typeof ProtectedProfileUserManageWishlistsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -192,15 +192,15 @@ export interface FileRoutesByTo {
   '/notifications': typeof ProtectednotificationsNotificationsRoute
   '/search': typeof ProtectedsearchSearchRoute
   '/new-wish/preview': typeof ProtectedNewWishPreviewRoute
-  '/profile/$userId': typeof ProtectedProfileUserIdRouteWithChildren
+  '/profile/$user': typeof ProtectedProfileUserRouteWithChildren
   '/new-wish': typeof ProtectedNewWishIndexRoute
-  '/profile/$userId/$wishlist/feed': typeof ProtectedProfileUserIdWishlistFeedRoute
-  '/profile/$userId/manage-wishlists/$listId': typeof ProtectedProfileUserIdManageWishlistsListIdRoute
-  '/profile/$userId/$wishlist': typeof ProtectedProfileUserIdWishlistIndexRoute
-  '/profile/$userId/edit-profile': typeof ProtectedProfileUserIdEditProfileIndexRoute
-  '/profile/$userId/followers': typeof ProtectedProfileUserIdFollowersIndexRoute
-  '/profile/$userId/following': typeof ProtectedProfileUserIdFollowingIndexRoute
-  '/profile/$userId/manage-wishlists': typeof ProtectedProfileUserIdManageWishlistsIndexRoute
+  '/profile/$user/$wishlist/feed': typeof ProtectedProfileUserWishlistFeedRoute
+  '/profile/$user/manage-wishlists/$listId': typeof ProtectedProfileUserManageWishlistsListIdRoute
+  '/profile/$user/$wishlist': typeof ProtectedProfileUserWishlistIndexRoute
+  '/profile/$user/edit-profile': typeof ProtectedProfileUserEditProfileIndexRoute
+  '/profile/$user/followers': typeof ProtectedProfileUserFollowersIndexRoute
+  '/profile/$user/following': typeof ProtectedProfileUserFollowingIndexRoute
+  '/profile/$user/manage-wishlists': typeof ProtectedProfileUserManageWishlistsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -216,17 +216,17 @@ export interface FileRoutesById {
   '/_protected/(notifications)/notifications': typeof ProtectednotificationsNotificationsRoute
   '/_protected/(search)/search': typeof ProtectedsearchSearchRoute
   '/_protected/new-wish/preview': typeof ProtectedNewWishPreviewRoute
-  '/_protected/profile/$userId': typeof ProtectedProfileUserIdRouteWithChildren
+  '/_protected/profile/$user': typeof ProtectedProfileUserRouteWithChildren
   '/_protected/new-wish/': typeof ProtectedNewWishIndexRoute
-  '/_protected/profile/$userId/manage-wishlists': typeof ProtectedProfileUserIdManageWishlistsRouteRouteWithChildren
-  '/_protected/profile/$userId/$wishlist': typeof ProtectedProfileUserIdWishlistRouteWithChildren
-  '/_protected/profile/$userId/$wishlist/feed': typeof ProtectedProfileUserIdWishlistFeedRoute
-  '/_protected/profile/$userId/manage-wishlists/$listId': typeof ProtectedProfileUserIdManageWishlistsListIdRoute
-  '/_protected/profile/$userId/$wishlist/': typeof ProtectedProfileUserIdWishlistIndexRoute
-  '/_protected/profile/$userId/edit-profile/': typeof ProtectedProfileUserIdEditProfileIndexRoute
-  '/_protected/profile/$userId/followers/': typeof ProtectedProfileUserIdFollowersIndexRoute
-  '/_protected/profile/$userId/following/': typeof ProtectedProfileUserIdFollowingIndexRoute
-  '/_protected/profile/$userId/manage-wishlists/': typeof ProtectedProfileUserIdManageWishlistsIndexRoute
+  '/_protected/profile/$user/manage-wishlists': typeof ProtectedProfileUserManageWishlistsRouteRouteWithChildren
+  '/_protected/profile/$user/$wishlist': typeof ProtectedProfileUserWishlistRouteWithChildren
+  '/_protected/profile/$user/$wishlist/feed': typeof ProtectedProfileUserWishlistFeedRoute
+  '/_protected/profile/$user/manage-wishlists/$listId': typeof ProtectedProfileUserManageWishlistsListIdRoute
+  '/_protected/profile/$user/$wishlist/': typeof ProtectedProfileUserWishlistIndexRoute
+  '/_protected/profile/$user/edit-profile/': typeof ProtectedProfileUserEditProfileIndexRoute
+  '/_protected/profile/$user/followers/': typeof ProtectedProfileUserFollowersIndexRoute
+  '/_protected/profile/$user/following/': typeof ProtectedProfileUserFollowingIndexRoute
+  '/_protected/profile/$user/manage-wishlists/': typeof ProtectedProfileUserManageWishlistsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -242,17 +242,17 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/search'
     | '/new-wish/preview'
-    | '/profile/$userId'
+    | '/profile/$user'
     | '/new-wish/'
-    | '/profile/$userId/manage-wishlists'
-    | '/profile/$userId/$wishlist'
-    | '/profile/$userId/$wishlist/feed'
-    | '/profile/$userId/manage-wishlists/$listId'
-    | '/profile/$userId/$wishlist/'
-    | '/profile/$userId/edit-profile'
-    | '/profile/$userId/followers'
-    | '/profile/$userId/following'
-    | '/profile/$userId/manage-wishlists/'
+    | '/profile/$user/manage-wishlists'
+    | '/profile/$user/$wishlist'
+    | '/profile/$user/$wishlist/feed'
+    | '/profile/$user/manage-wishlists/$listId'
+    | '/profile/$user/$wishlist/'
+    | '/profile/$user/edit-profile'
+    | '/profile/$user/followers'
+    | '/profile/$user/following'
+    | '/profile/$user/manage-wishlists/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -264,15 +264,15 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/search'
     | '/new-wish/preview'
-    | '/profile/$userId'
+    | '/profile/$user'
     | '/new-wish'
-    | '/profile/$userId/$wishlist/feed'
-    | '/profile/$userId/manage-wishlists/$listId'
-    | '/profile/$userId/$wishlist'
-    | '/profile/$userId/edit-profile'
-    | '/profile/$userId/followers'
-    | '/profile/$userId/following'
-    | '/profile/$userId/manage-wishlists'
+    | '/profile/$user/$wishlist/feed'
+    | '/profile/$user/manage-wishlists/$listId'
+    | '/profile/$user/$wishlist'
+    | '/profile/$user/edit-profile'
+    | '/profile/$user/followers'
+    | '/profile/$user/following'
+    | '/profile/$user/manage-wishlists'
   id:
     | '__root__'
     | '/'
@@ -287,17 +287,17 @@ export interface FileRouteTypes {
     | '/_protected/(notifications)/notifications'
     | '/_protected/(search)/search'
     | '/_protected/new-wish/preview'
-    | '/_protected/profile/$userId'
+    | '/_protected/profile/$user'
     | '/_protected/new-wish/'
-    | '/_protected/profile/$userId/manage-wishlists'
-    | '/_protected/profile/$userId/$wishlist'
-    | '/_protected/profile/$userId/$wishlist/feed'
-    | '/_protected/profile/$userId/manage-wishlists/$listId'
-    | '/_protected/profile/$userId/$wishlist/'
-    | '/_protected/profile/$userId/edit-profile/'
-    | '/_protected/profile/$userId/followers/'
-    | '/_protected/profile/$userId/following/'
-    | '/_protected/profile/$userId/manage-wishlists/'
+    | '/_protected/profile/$user/manage-wishlists'
+    | '/_protected/profile/$user/$wishlist'
+    | '/_protected/profile/$user/$wishlist/feed'
+    | '/_protected/profile/$user/manage-wishlists/$listId'
+    | '/_protected/profile/$user/$wishlist/'
+    | '/_protected/profile/$user/edit-profile/'
+    | '/_protected/profile/$user/followers/'
+    | '/_protected/profile/$user/following/'
+    | '/_protected/profile/$user/manage-wishlists/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -365,11 +365,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedNewWishIndexRouteImport
       parentRoute: typeof ProtectedNewWishRouteRoute
     }
-    '/_protected/profile/$userId': {
-      id: '/_protected/profile/$userId'
-      path: '/profile/$userId'
-      fullPath: '/profile/$userId'
-      preLoaderRoute: typeof ProtectedProfileUserIdRouteImport
+    '/_protected/profile/$user': {
+      id: '/_protected/profile/$user'
+      path: '/profile/$user'
+      fullPath: '/profile/$user'
+      preLoaderRoute: typeof ProtectedProfileUserRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
     '/_protected/new-wish/preview': {
@@ -407,68 +407,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedgiftsGiftsRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
-    '/_protected/profile/$userId/$wishlist': {
-      id: '/_protected/profile/$userId/$wishlist'
+    '/_protected/profile/$user/$wishlist': {
+      id: '/_protected/profile/$user/$wishlist'
       path: '/$wishlist'
-      fullPath: '/profile/$userId/$wishlist'
-      preLoaderRoute: typeof ProtectedProfileUserIdWishlistRouteImport
-      parentRoute: typeof ProtectedProfileUserIdRoute
+      fullPath: '/profile/$user/$wishlist'
+      preLoaderRoute: typeof ProtectedProfileUserWishlistRouteImport
+      parentRoute: typeof ProtectedProfileUserRoute
     }
-    '/_protected/profile/$userId/manage-wishlists': {
-      id: '/_protected/profile/$userId/manage-wishlists'
+    '/_protected/profile/$user/manage-wishlists': {
+      id: '/_protected/profile/$user/manage-wishlists'
       path: '/manage-wishlists'
-      fullPath: '/profile/$userId/manage-wishlists'
-      preLoaderRoute: typeof ProtectedProfileUserIdManageWishlistsRouteRouteImport
-      parentRoute: typeof ProtectedProfileUserIdRoute
+      fullPath: '/profile/$user/manage-wishlists'
+      preLoaderRoute: typeof ProtectedProfileUserManageWishlistsRouteRouteImport
+      parentRoute: typeof ProtectedProfileUserRoute
     }
-    '/_protected/profile/$userId/manage-wishlists/': {
-      id: '/_protected/profile/$userId/manage-wishlists/'
+    '/_protected/profile/$user/manage-wishlists/': {
+      id: '/_protected/profile/$user/manage-wishlists/'
       path: '/'
-      fullPath: '/profile/$userId/manage-wishlists/'
-      preLoaderRoute: typeof ProtectedProfileUserIdManageWishlistsIndexRouteImport
-      parentRoute: typeof ProtectedProfileUserIdManageWishlistsRouteRoute
+      fullPath: '/profile/$user/manage-wishlists/'
+      preLoaderRoute: typeof ProtectedProfileUserManageWishlistsIndexRouteImport
+      parentRoute: typeof ProtectedProfileUserManageWishlistsRouteRoute
     }
-    '/_protected/profile/$userId/following/': {
-      id: '/_protected/profile/$userId/following/'
+    '/_protected/profile/$user/following/': {
+      id: '/_protected/profile/$user/following/'
       path: '/following'
-      fullPath: '/profile/$userId/following'
-      preLoaderRoute: typeof ProtectedProfileUserIdFollowingIndexRouteImport
-      parentRoute: typeof ProtectedProfileUserIdRoute
+      fullPath: '/profile/$user/following'
+      preLoaderRoute: typeof ProtectedProfileUserFollowingIndexRouteImport
+      parentRoute: typeof ProtectedProfileUserRoute
     }
-    '/_protected/profile/$userId/followers/': {
-      id: '/_protected/profile/$userId/followers/'
+    '/_protected/profile/$user/followers/': {
+      id: '/_protected/profile/$user/followers/'
       path: '/followers'
-      fullPath: '/profile/$userId/followers'
-      preLoaderRoute: typeof ProtectedProfileUserIdFollowersIndexRouteImport
-      parentRoute: typeof ProtectedProfileUserIdRoute
+      fullPath: '/profile/$user/followers'
+      preLoaderRoute: typeof ProtectedProfileUserFollowersIndexRouteImport
+      parentRoute: typeof ProtectedProfileUserRoute
     }
-    '/_protected/profile/$userId/edit-profile/': {
-      id: '/_protected/profile/$userId/edit-profile/'
+    '/_protected/profile/$user/edit-profile/': {
+      id: '/_protected/profile/$user/edit-profile/'
       path: '/edit-profile'
-      fullPath: '/profile/$userId/edit-profile'
-      preLoaderRoute: typeof ProtectedProfileUserIdEditProfileIndexRouteImport
-      parentRoute: typeof ProtectedProfileUserIdRoute
+      fullPath: '/profile/$user/edit-profile'
+      preLoaderRoute: typeof ProtectedProfileUserEditProfileIndexRouteImport
+      parentRoute: typeof ProtectedProfileUserRoute
     }
-    '/_protected/profile/$userId/$wishlist/': {
-      id: '/_protected/profile/$userId/$wishlist/'
+    '/_protected/profile/$user/$wishlist/': {
+      id: '/_protected/profile/$user/$wishlist/'
       path: '/'
-      fullPath: '/profile/$userId/$wishlist/'
-      preLoaderRoute: typeof ProtectedProfileUserIdWishlistIndexRouteImport
-      parentRoute: typeof ProtectedProfileUserIdWishlistRoute
+      fullPath: '/profile/$user/$wishlist/'
+      preLoaderRoute: typeof ProtectedProfileUserWishlistIndexRouteImport
+      parentRoute: typeof ProtectedProfileUserWishlistRoute
     }
-    '/_protected/profile/$userId/manage-wishlists/$listId': {
-      id: '/_protected/profile/$userId/manage-wishlists/$listId'
+    '/_protected/profile/$user/manage-wishlists/$listId': {
+      id: '/_protected/profile/$user/manage-wishlists/$listId'
       path: '/$listId'
-      fullPath: '/profile/$userId/manage-wishlists/$listId'
-      preLoaderRoute: typeof ProtectedProfileUserIdManageWishlistsListIdRouteImport
-      parentRoute: typeof ProtectedProfileUserIdManageWishlistsRouteRoute
+      fullPath: '/profile/$user/manage-wishlists/$listId'
+      preLoaderRoute: typeof ProtectedProfileUserManageWishlistsListIdRouteImport
+      parentRoute: typeof ProtectedProfileUserManageWishlistsRouteRoute
     }
-    '/_protected/profile/$userId/$wishlist/feed': {
-      id: '/_protected/profile/$userId/$wishlist/feed'
+    '/_protected/profile/$user/$wishlist/feed': {
+      id: '/_protected/profile/$user/$wishlist/feed'
       path: '/feed'
-      fullPath: '/profile/$userId/$wishlist/feed'
-      preLoaderRoute: typeof ProtectedProfileUserIdWishlistFeedRouteImport
-      parentRoute: typeof ProtectedProfileUserIdWishlistRoute
+      fullPath: '/profile/$user/$wishlist/feed'
+      preLoaderRoute: typeof ProtectedProfileUserWishlistFeedRouteImport
+      parentRoute: typeof ProtectedProfileUserWishlistRoute
     }
   }
 }
@@ -488,68 +488,65 @@ const ProtectedNewWishRouteRouteWithChildren =
     ProtectedNewWishRouteRouteChildren,
   )
 
-interface ProtectedProfileUserIdManageWishlistsRouteRouteChildren {
-  ProtectedProfileUserIdManageWishlistsListIdRoute: typeof ProtectedProfileUserIdManageWishlistsListIdRoute
-  ProtectedProfileUserIdManageWishlistsIndexRoute: typeof ProtectedProfileUserIdManageWishlistsIndexRoute
+interface ProtectedProfileUserManageWishlistsRouteRouteChildren {
+  ProtectedProfileUserManageWishlistsListIdRoute: typeof ProtectedProfileUserManageWishlistsListIdRoute
+  ProtectedProfileUserManageWishlistsIndexRoute: typeof ProtectedProfileUserManageWishlistsIndexRoute
 }
 
-const ProtectedProfileUserIdManageWishlistsRouteRouteChildren: ProtectedProfileUserIdManageWishlistsRouteRouteChildren =
+const ProtectedProfileUserManageWishlistsRouteRouteChildren: ProtectedProfileUserManageWishlistsRouteRouteChildren =
   {
-    ProtectedProfileUserIdManageWishlistsListIdRoute:
-      ProtectedProfileUserIdManageWishlistsListIdRoute,
-    ProtectedProfileUserIdManageWishlistsIndexRoute:
-      ProtectedProfileUserIdManageWishlistsIndexRoute,
+    ProtectedProfileUserManageWishlistsListIdRoute:
+      ProtectedProfileUserManageWishlistsListIdRoute,
+    ProtectedProfileUserManageWishlistsIndexRoute:
+      ProtectedProfileUserManageWishlistsIndexRoute,
   }
 
-const ProtectedProfileUserIdManageWishlistsRouteRouteWithChildren =
-  ProtectedProfileUserIdManageWishlistsRouteRoute._addFileChildren(
-    ProtectedProfileUserIdManageWishlistsRouteRouteChildren,
+const ProtectedProfileUserManageWishlistsRouteRouteWithChildren =
+  ProtectedProfileUserManageWishlistsRouteRoute._addFileChildren(
+    ProtectedProfileUserManageWishlistsRouteRouteChildren,
   )
 
-interface ProtectedProfileUserIdWishlistRouteChildren {
-  ProtectedProfileUserIdWishlistFeedRoute: typeof ProtectedProfileUserIdWishlistFeedRoute
-  ProtectedProfileUserIdWishlistIndexRoute: typeof ProtectedProfileUserIdWishlistIndexRoute
+interface ProtectedProfileUserWishlistRouteChildren {
+  ProtectedProfileUserWishlistFeedRoute: typeof ProtectedProfileUserWishlistFeedRoute
+  ProtectedProfileUserWishlistIndexRoute: typeof ProtectedProfileUserWishlistIndexRoute
 }
 
-const ProtectedProfileUserIdWishlistRouteChildren: ProtectedProfileUserIdWishlistRouteChildren =
+const ProtectedProfileUserWishlistRouteChildren: ProtectedProfileUserWishlistRouteChildren =
   {
-    ProtectedProfileUserIdWishlistFeedRoute:
-      ProtectedProfileUserIdWishlistFeedRoute,
-    ProtectedProfileUserIdWishlistIndexRoute:
-      ProtectedProfileUserIdWishlistIndexRoute,
+    ProtectedProfileUserWishlistFeedRoute:
+      ProtectedProfileUserWishlistFeedRoute,
+    ProtectedProfileUserWishlistIndexRoute:
+      ProtectedProfileUserWishlistIndexRoute,
   }
 
-const ProtectedProfileUserIdWishlistRouteWithChildren =
-  ProtectedProfileUserIdWishlistRoute._addFileChildren(
-    ProtectedProfileUserIdWishlistRouteChildren,
+const ProtectedProfileUserWishlistRouteWithChildren =
+  ProtectedProfileUserWishlistRoute._addFileChildren(
+    ProtectedProfileUserWishlistRouteChildren,
   )
 
-interface ProtectedProfileUserIdRouteChildren {
-  ProtectedProfileUserIdManageWishlistsRouteRoute: typeof ProtectedProfileUserIdManageWishlistsRouteRouteWithChildren
-  ProtectedProfileUserIdWishlistRoute: typeof ProtectedProfileUserIdWishlistRouteWithChildren
-  ProtectedProfileUserIdEditProfileIndexRoute: typeof ProtectedProfileUserIdEditProfileIndexRoute
-  ProtectedProfileUserIdFollowersIndexRoute: typeof ProtectedProfileUserIdFollowersIndexRoute
-  ProtectedProfileUserIdFollowingIndexRoute: typeof ProtectedProfileUserIdFollowingIndexRoute
+interface ProtectedProfileUserRouteChildren {
+  ProtectedProfileUserManageWishlistsRouteRoute: typeof ProtectedProfileUserManageWishlistsRouteRouteWithChildren
+  ProtectedProfileUserWishlistRoute: typeof ProtectedProfileUserWishlistRouteWithChildren
+  ProtectedProfileUserEditProfileIndexRoute: typeof ProtectedProfileUserEditProfileIndexRoute
+  ProtectedProfileUserFollowersIndexRoute: typeof ProtectedProfileUserFollowersIndexRoute
+  ProtectedProfileUserFollowingIndexRoute: typeof ProtectedProfileUserFollowingIndexRoute
 }
 
-const ProtectedProfileUserIdRouteChildren: ProtectedProfileUserIdRouteChildren =
-  {
-    ProtectedProfileUserIdManageWishlistsRouteRoute:
-      ProtectedProfileUserIdManageWishlistsRouteRouteWithChildren,
-    ProtectedProfileUserIdWishlistRoute:
-      ProtectedProfileUserIdWishlistRouteWithChildren,
-    ProtectedProfileUserIdEditProfileIndexRoute:
-      ProtectedProfileUserIdEditProfileIndexRoute,
-    ProtectedProfileUserIdFollowersIndexRoute:
-      ProtectedProfileUserIdFollowersIndexRoute,
-    ProtectedProfileUserIdFollowingIndexRoute:
-      ProtectedProfileUserIdFollowingIndexRoute,
-  }
+const ProtectedProfileUserRouteChildren: ProtectedProfileUserRouteChildren = {
+  ProtectedProfileUserManageWishlistsRouteRoute:
+    ProtectedProfileUserManageWishlistsRouteRouteWithChildren,
+  ProtectedProfileUserWishlistRoute:
+    ProtectedProfileUserWishlistRouteWithChildren,
+  ProtectedProfileUserEditProfileIndexRoute:
+    ProtectedProfileUserEditProfileIndexRoute,
+  ProtectedProfileUserFollowersIndexRoute:
+    ProtectedProfileUserFollowersIndexRoute,
+  ProtectedProfileUserFollowingIndexRoute:
+    ProtectedProfileUserFollowingIndexRoute,
+}
 
-const ProtectedProfileUserIdRouteWithChildren =
-  ProtectedProfileUserIdRoute._addFileChildren(
-    ProtectedProfileUserIdRouteChildren,
-  )
+const ProtectedProfileUserRouteWithChildren =
+  ProtectedProfileUserRoute._addFileChildren(ProtectedProfileUserRouteChildren)
 
 interface ProtectedRouteRouteChildren {
   ProtectedNewWishRouteRoute: typeof ProtectedNewWishRouteRouteWithChildren
@@ -557,7 +554,7 @@ interface ProtectedRouteRouteChildren {
   ProtectedhomeHomeRoute: typeof ProtectedhomeHomeRoute
   ProtectednotificationsNotificationsRoute: typeof ProtectednotificationsNotificationsRoute
   ProtectedsearchSearchRoute: typeof ProtectedsearchSearchRoute
-  ProtectedProfileUserIdRoute: typeof ProtectedProfileUserIdRouteWithChildren
+  ProtectedProfileUserRoute: typeof ProtectedProfileUserRouteWithChildren
 }
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
@@ -567,7 +564,7 @@ const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
   ProtectednotificationsNotificationsRoute:
     ProtectednotificationsNotificationsRoute,
   ProtectedsearchSearchRoute: ProtectedsearchSearchRoute,
-  ProtectedProfileUserIdRoute: ProtectedProfileUserIdRouteWithChildren,
+  ProtectedProfileUserRoute: ProtectedProfileUserRouteWithChildren,
 }
 
 const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(

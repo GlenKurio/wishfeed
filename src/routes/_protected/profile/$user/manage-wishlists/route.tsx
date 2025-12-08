@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
-  "/_protected/profile/$userId/manage-wishlists",
+  "/_protected/profile/$user/manage-wishlists",
 )({
   beforeLoad: ({ context, params }) => {
     const authUserId = context.user?.uid;

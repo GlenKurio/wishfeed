@@ -2,7 +2,7 @@ import { profileQueryOptions, userWishlistsQueryOptions } from "@/lib/api";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Suspense } from "react";
 
-export const Route = createFileRoute("/_protected/profile/$userId")({
+export const Route = createFileRoute("/_protected/profile/$user")({
   beforeLoad: async ({ context, params }) => {
     const userProfile = await context.queryClient.ensureQueryData(
       profileQueryOptions(params.userId),

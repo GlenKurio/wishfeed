@@ -10,7 +10,7 @@ import { useEffect, useRef } from "react";
 import Feed from "@/components/feed-posts/feed";
 
 export const Route = createFileRoute(
-  "/_protected/profile/$userId/$wishlist/feed",
+  "/_protected/profile/$user/$wishlist/feed",
 )({
   beforeLoad: async ({ context, params }) => {
     const isDrafts = params.wishlist === "drafts";

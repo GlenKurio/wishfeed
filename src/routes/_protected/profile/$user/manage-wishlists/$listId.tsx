@@ -14,7 +14,7 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useRef } from "react";
 
 export const Route = createFileRoute(
-  "/_protected/profile/$userId/manage-wishlists/$listId",
+  "/_protected/profile/$user/manage-wishlists/$listId",
 )({
   component: RouteComponent,
 });
