@@ -8,11 +8,10 @@ import { Suspense } from "react";
 import z from "zod";
 
 export const Route = createFileRoute("/_protected/profile/$userId")({
-  validateSearch: z.object({
-    wishlist: z.string().optional().default("all"),
-    postId: z.string().optional(),
-  }),
-  loaderDeps: ({ search: { postId, wishlist } }) => ({ postId, wishlist }),
+  // validateSearch: z.object({
+  //   postId: z.string().optional(),
+  // }),
+  // loaderDeps: ({ search: { postId } }) => ({ postId }),
   beforeLoad: async ({ context, params, search }) => {
     const userProfile = await context.queryClient.ensureQueryData(
       profileQueryOptions(params.userId),
@@ -23,33 +22,14 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
         to: "/profile/$userId",
         params: { userId: context.user.uid },
       });
-
-    const isDrafts = search.wishlist === "drafts";
-    if (isDrafts && params.userId !== context.user.uid) {
-      throw redirect({
-        to: "/profile/$userId",
-        params: { userId: params.userId },
-        search: { wishlist: "all" }, // Redirect to "all" instead
-      });
-    }
   },
 
-  loader: async ({ context, params, deps: { wishlist } }) => {
-    const isDrafts = wishlist === "drafts";
-    await Promise.all([
-      context.queryClient.ensureInfiniteQueryData(
-        userPostsQueryOptions({
-          userId: params.userId,
-          published: !isDrafts,
-          wishlist,
-        }),
-      ),
-      context.queryClient.ensureQueryData(
-        userWishlistsQueryOptions({
-          userId: params.userId,
-        }),
-      ),
-    ]);
+  loader: async ({ context, params }) => {
+    await context.queryClient.ensureQueryData(
+      userWishlistsQueryOptions({
+        userId: params.userId,
+      }),
+    );
   },
   errorComponent: ({ error }) => {
     return (

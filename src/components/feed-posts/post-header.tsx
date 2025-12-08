@@ -17,7 +17,10 @@ export default function PostHeader(post: PostType) {
   // If profile is deleted show skeletons fallabcks and that profile is deleted?
   return (
     <div className="flex w-full items-center justify-between px-2">
-      <Link to="/profile/$userId" params={{ userId: authorProfile?.uid || "" }}>
+      <Link
+        to="/profile/$userId/$wishlist"
+        params={{ userId: authorProfile?.uid || "", wishlist: "all" }}
+      >
         <div className="flex items-center gap-2">
           <div className="avatar">
             <div className="w-8 rounded-full">

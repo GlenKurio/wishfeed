@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
 
 import Avatar from "@/components/avatar";
 import { useFollowUser } from "@/hooks/use-follow-user";
@@ -12,7 +12,10 @@ export default function ProfileHeader({
   isOwner: boolean;
 }) {
   const { isFollowing } = useFollowUser({ userId: userProfile?.uid });
-
+  const params = useParams({
+    from: "/_protected/profile/$userId/$wishlist",
+  });
+  const wishlist = params.wishlist || "all";
   return (
     <>
       <div className="bg-background w-full">
@@ -68,9 +71,10 @@ export default function ProfileHeader({
                   <div className="bg-neutral/10 h-10 w-px" />
                   {/* TODO: if user has no posts do not allow navigation*/}
                   <Link
-                    to="/profile/$userId/feed"
+                    to="/profile/$userId/$wishlist/feed"
                     params={{
                       userId: userProfile?.uid,
+                      wishlist: wishlist,
                     }}
                   >
                     <p className="text-foreground text-lg font-bold md:text-xl">
@@ -93,8 +97,11 @@ export default function ProfileHeader({
                     Edit Profile
                   </Link>
                   <Link
-                    to="/profile/$userId"
-                    params={{ userId: "JyLsRANwzbSZukKtZ0WqYjY1moh2" }}
+                    to="/profile/$userId/$wishlist"
+                    params={{
+                      userId: "JyLsRANwzbSZukKtZ0WqYjY1moh2",
+                      wishlist: "all",
+                    }}
                     className="btn btn-sm md:btn-md flex-1 sm:flex-none"
                   >
                     Go to another User

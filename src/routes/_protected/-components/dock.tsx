@@ -51,14 +51,15 @@ export default function Dock() {
         </div>
         <div className="lg:tooltip tooltip-primary" data-tip={"Profile"}>
           <Link
-            to="/profile/$userId"
+            to="/profile/$userId/$wishlist"
             params={{
               userId: user.uid,
+              wishlist: "all",
             }}
             className="btn btn-ghost rounded-full p-2.5"
           >
             <IconUser
-              className={`size-4 md:size-5 ${pathname === `/profile/${user.uid}` ? "text-primary" : ""}`}
+              className={`size-4 md:size-5 ${pathname.includes(`/profile/${user.uid}`) ? "text-primary" : ""}`}
             />
             <span className="sr-only">Profile</span>
           </Link>

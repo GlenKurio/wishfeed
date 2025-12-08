@@ -1,7 +1,7 @@
 import EmptyFrame from "@/components/empty-frame";
 import { userPostsQueryOptions } from "@/lib/api";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { Link, useSearch } from "@tanstack/react-router";
+import { Link, useParams, useSearch } from "@tanstack/react-router";
 
 export default function PostsGrid({
   userId,
@@ -10,13 +10,13 @@ export default function PostsGrid({
   userId: string;
   isOwner: boolean;
 }) {
-  const { wishlist } = useSearch({
-    from: "/_protected/profile/$userId",
+  const { wishlist } = useParams({
+    from: "/_protected/profile/$userId/$wishlist",
   });
 
   const isDrafts = wishlist === "drafts";
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, error } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(
       userPostsQueryOptions({
         userId: userId,
@@ -24,8 +24,6 @@ export default function PostsGrid({
         wishlist,
       }),
     );
-
-  if (error) return <>{error.message}</>;
 
   const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 
@@ -36,9 +34,9 @@ export default function PostsGrid({
           {allPosts.map((post) => (
             <Link
               key={post.id}
-              to="/profile/$userId/feed"
-              params={{ userId }}
-              search={{ postId: post.id, wishlist }}
+              to="/profile/$userId/$wishlist/feed"
+              params={{ userId, wishlist }}
+              search={{ postId: post.id }}
               className="group bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-3xl transition-all hover:opacity-90"
             >
               <img

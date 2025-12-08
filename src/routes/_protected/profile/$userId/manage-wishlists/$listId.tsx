@@ -25,8 +25,12 @@ function RouteComponent() {
   });
   const pageTitle =
     params.listId === "new" ? "Create Wishlist" : "Edit Wishlist";
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // TODO: get the wishlist by id and return its data in default values
+  // When updated updte in hook in query cache;
+  // Allow to delete wishlist
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { createWishlist, isPending } = useCreateWishlist();
 
   const form = useForm({

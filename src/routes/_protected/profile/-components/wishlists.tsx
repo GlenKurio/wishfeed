@@ -1,7 +1,7 @@
 import { userWishlistsQueryOptions } from "@/lib/api";
 import { IconListDetails } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useSearch } from "@tanstack/react-router";
+import { Link, useParams, useSearch } from "@tanstack/react-router";
 
 // const wishlists = [
 //   {
@@ -50,13 +50,13 @@ import { Link, useSearch } from "@tanstack/react-router";
 
 export default function Wishlists({
   userId,
+  wishlist,
   isOwner,
 }: {
   userId: string;
+  wishlist: string;
   isOwner: boolean;
 }) {
-  const search = useSearch({ from: "/_protected/profile/$userId" });
-
   const { data: wishlists } = useSuspenseQuery(
     userWishlistsQueryOptions({ userId }),
   );
@@ -66,14 +66,13 @@ export default function Wishlists({
       <div className="flex gap-4 p-2">
         {/* All Tab */}
         <Link
-          to="/profile/$userId"
-          params={{ userId }}
-          search={(prev) => ({ ...prev, wishlist: "all" })}
+          to="/profile/$userId/$wishlist"
+          params={{ userId, wishlist: "all" }}
           className="shrink-0"
         >
           <div
             className={`relative size-16 overflow-hidden rounded-3xl transition-all ${
-              search.wishlist === "all" || !search.wishlist
+              wishlist === "all" || !wishlist
                 ? "ring-primary scale-105 shadow-lg ring-2"
                 : "hover:scale-105"
             }`}
@@ -93,14 +92,13 @@ export default function Wishlists({
         {wishListsToDisplay.map((w) => (
           <Link
             key={w.id}
-            to="/profile/$userId"
-            params={{ userId }}
-            search={(prev) => ({ ...prev, wishlist: w.title })}
+            to="/profile/$userId/$wishlist"
+            params={{ userId, wishlist: w.title }}
             className="relative shrink-0"
           >
             <div
               className={`relative size-16 overflow-hidden rounded-3xl transition-all ${
-                search.wishlist === w.title
+                wishlist === w.title
                   ? "ring-primary scale-105 shadow-lg ring-2"
                   : "hover:scale-105"
               }`}
@@ -119,14 +117,13 @@ export default function Wishlists({
         {isOwner && (
           <>
             <Link
-              to="/profile/$userId"
-              params={{ userId }}
-              search={(prev) => ({ ...prev, wishlist: "drafts" })}
+              to="/profile/$userId/$wishlist"
+              params={{ userId, wishlist: "drafts" }}
               className="shrink-0"
             >
               <div
                 className={`relative size-16 overflow-hidden rounded-3xl transition-all ${
-                  search.wishlist === "drafts" || !search.wishlist
+                  wishlist === "drafts" || !wishlist
                     ? "ring-primary scale-105 shadow-lg ring-2"
                     : "hover:scale-105"
                 }`}

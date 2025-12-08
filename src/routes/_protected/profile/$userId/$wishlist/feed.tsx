@@ -7,19 +7,20 @@ import {
   useSearch,
 } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import Feed from "../../../../../components/feed-posts/feed";
-import { useAuth } from "../../../../../hooks/use-auth";
+import Feed from "@/components/feed-posts/feed";
 
-export const Route = createFileRoute("/_protected/profile/$userId/feed/")({
-  beforeLoad: async ({ context, params, search }) => {
-    const isDrafts = search.wishlist === "drafts";
+export const Route = createFileRoute(
+  "/_protected/profile/$userId/$wishlist/feed",
+)({
+  beforeLoad: async ({ context, params }) => {
+    const isDrafts = params.wishlist === "drafts";
 
     // Ensure the data is loaded
     const data = await context.queryClient.ensureInfiniteQueryData(
       userPostsQueryOptions({
         userId: params.userId,
         published: !isDrafts,
-        wishlist: search.wishlist,
+        wishlist: params.wishlist,
       }),
     );
 
@@ -37,11 +38,12 @@ export const Route = createFileRoute("/_protected/profile/$userId/feed/")({
 });
 
 function RouteComponent() {
-  const authUser = useAuth();
-  const { userId } = useParams({ from: "/_protected/profile/$userId/feed/" });
-  const isOwner = authUser?.uid === userId;
-  const { wishlist, postId } = useSearch({
-    from: "/_protected/profile/$userId/feed/",
+  const { userId, wishlist } = useParams({
+    from: "/_protected/profile/$userId/$wishlist/feed",
+  });
+
+  const { postId } = useSearch({
+    from: "/_protected/profile/$userId/$wishlist/feed",
   });
 
   const isDrafts = wishlist === "drafts";
