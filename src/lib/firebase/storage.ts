@@ -1,7 +1,7 @@
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import { firebaseApp } from ".";
 import { v4 as uuid } from "uuid";
-const storage = getStorage(firebaseApp);
+export const storage = getStorage(firebaseApp);
 
 export async function uploadPostImage(file: File): Promise<string> {
   if (!file) throw new Error("No file provided");

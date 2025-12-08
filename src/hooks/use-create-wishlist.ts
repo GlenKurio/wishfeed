@@ -65,6 +65,10 @@ export function useCreateWishlist() {
         params: { userId: user.uid },
       });
     },
+
+    onError: () => {
+      toast.error("Cannot create or update wishlist. Try again");
+    },
   });
 
   return {

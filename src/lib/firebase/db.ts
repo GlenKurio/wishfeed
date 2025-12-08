@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -34,6 +35,8 @@ import {
 
 import { updateProfile, type User } from "firebase/auth";
 import { auth } from "./auth";
+import { deleteObject, ref } from "firebase/storage";
+import { storage } from "./storage";
 
 export const db = getFirestore(firebaseApp);
 
@@ -393,7 +396,7 @@ export async function getUserWishlists({
 }): Promise<Wishlist[]> {
   const user = auth.currentUser;
   if (!user) {
-    throw new Error("Must be logged in to save posts.");
+    throw new Error("Must be logged in to get wishlists.");
   }
 
   const wishlistsRef = collection(db, "wishlists");
@@ -415,5 +418,45 @@ export async function getUserWishlists({
   return lists;
 }
 
+/**
+ * Deletes a wishlist document from Firestore and its associated cover image from Storage.
+ * @param {object} params - The parameters for the function.
+ * @param {Wishlist} params.wishlist - The wishlist object to be deleted.
+ */
+export async function deleteWishlist({ wishlist }: { wishlist: Wishlist }) {
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("Must be logged in to delete a wishlist.");
+  }
+
+  if (wishlist.owner !== user.uid) {
+    throw new Error("You can only delete your own wishlists.");
+  }
+
+  try {
+    // Create a reference to the Firestore document
+    const wishlistDocRef = doc(db, "wishlists", wishlist.id);
+
+    // Prepare the deletion promises
+    const deletionPromises: Promise<void>[] = [];
+
+    // Add the Firestore document deletion to the list of promises
+    deletionPromises.push(deleteDoc(wishlistDocRef));
+
+    // If a cover image URL exists, create a reference and add its deletion to the promises
+    if (wishlist.cover_image) {
+      const imageRef = ref(storage, wishlist.cover_image);
+      deletionPromises.push(deleteObject(imageRef));
+    }
+
+    // Execute all delete operations concurrently
+    await Promise.all(deletionPromises);
+  } catch (error) {
+    console.error("Error during wishlist deletion: ", error);
+
+    throw new Error("Failed to delete the wishlist and its resources.");
+  }
+}
 export async function addWishToList() {}
 export async function removeWishFromList() {}

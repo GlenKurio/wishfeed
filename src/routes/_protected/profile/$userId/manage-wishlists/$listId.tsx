@@ -2,6 +2,7 @@ import { Icons } from "@/components/icons";
 import PageHeading from "@/components/page-heading";
 import { useAuth } from "@/hooks/use-auth";
 import { useCreateWishlist } from "@/hooks/use-create-wishlist";
+import { useDeleteWishlist } from "@/hooks/use-delete-wishlist";
 import { userWishlistsQueryOptions } from "@/lib/api";
 import { createWishlistSchema } from "@/lib/types";
 import {
@@ -19,7 +20,6 @@ import {
   useParams,
 } from "@tanstack/react-router";
 import { useRef } from "react";
-import { toast } from "sonner";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/manage-wishlists/$listId",
@@ -33,7 +33,7 @@ function RouteComponent() {
     from: "/_protected/profile/$userId/manage-wishlists/$listId",
   });
   const navigate = useNavigate();
-
+  const modalRef = useRef<HTMLDialogElement>(null);
   const { data: wishlists } = useSuspenseQuery(
     userWishlistsQueryOptions({ userId: user.uid }),
   );
@@ -41,7 +41,7 @@ function RouteComponent() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { createWishlist, isPending } = useCreateWishlist();
-
+  const { deleteWishlist, isDeleting } = useDeleteWishlist();
   const form = useForm({
     defaultValues: {
       cover_image: currentWishlist?.cover_image || "",
@@ -64,11 +64,15 @@ function RouteComponent() {
   };
 
   const handleDeleteList = () => {
-    return toast.success("List was deleted");
+    if (!currentWishlist) return;
+    deleteWishlist({ wishlist: currentWishlist });
   };
 
   const disabled =
-    isPending || form.state.isSubmitting || form.state.isValidating;
+    isPending ||
+    form.state.isSubmitting ||
+    form.state.isValidating ||
+    isDeleting;
 
   const isCreating = params.listId === "new";
   const pageTitle = isCreating
@@ -328,7 +332,7 @@ function RouteComponent() {
               <button
                 type="submit"
                 className="btn btn-block btn-primary mt-2 h-10 text-[14px] font-semibold"
-                disabled={!canSubmit || isPending}
+                disabled={!canSubmit || isPending || isDeleting}
                 onClick={() => form.handleSubmit()}
               >
                 {isPending ? (
@@ -357,13 +361,35 @@ function RouteComponent() {
         {!isCreating && (
           <button
             className="btn btn-error btn-block btn-ghost"
-            onClick={handleDeleteList}
+            onClick={() => modalRef.current?.showModal()}
+            disabled={isDeleting}
           >
             Delete
           </button>
         )}
       </div>
       <>{/* <PostsGrid /> */}</>
+
+      <dialog ref={modalRef} id="my_modal_2" className="modal">
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">
+            Confirm {currentWishlist?.title} deletion
+          </h3>
+          <p className="py-10">
+            You are about to delete wishlist named {currentWishlist?.title}.
+            Please confirm this action. Note: this action cannot be undone!
+          </p>
+          <div className="flex w-full flex-col gap-2">
+            <button className="btn btn-error btn-sm" onClick={handleDeleteList}>
+              Delete Wishlist
+            </button>
+
+            <form method="dialog" className="w-full">
+              <button className="btn btn-sm btn-ghost w-full">Cancel</button>
+            </form>
+          </div>
+        </div>
+      </dialog>
     </div>
   );
 }
