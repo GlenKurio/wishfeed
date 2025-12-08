@@ -1,4 +1,8 @@
-import { profileQueryOptions, userPostsQueryOptions } from "@/lib/api";
+import {
+  profileQueryOptions,
+  userPostsQueryOptions,
+  userWishlistsQueryOptions,
+} from "@/lib/api";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Suspense } from "react";
 import z from "zod";
@@ -22,15 +26,20 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
   loaderDeps: ({ search: { postId, wishlist } }) => ({ postId, wishlist }),
   loader: async ({ context, params, deps: { wishlist } }) => {
     const isDrafts = wishlist === "drafts";
-    await context.queryClient.ensureInfiniteQueryData(
-      userPostsQueryOptions({
-        userId: params.userId,
-        published: !isDrafts,
-        wishlist,
-      }),
-    );
-
-    // TODO: fetch user wishlists
+    await Promise.all([
+      context.queryClient.ensureInfiniteQueryData(
+        userPostsQueryOptions({
+          userId: params.userId,
+          published: !isDrafts,
+          wishlist,
+        }),
+      ),
+      context.queryClient.ensureQueryData(
+        userWishlistsQueryOptions({
+          userId: params.userId,
+        }),
+      ),
+    ]);
   },
 
   component: RouteComponent,

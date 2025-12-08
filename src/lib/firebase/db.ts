@@ -28,6 +28,7 @@ import {
   type DbWishlist,
   type PostType,
   type UserProfile,
+  type Wishlist,
 } from "../types";
 
 import { updateProfile, type User } from "firebase/auth";
@@ -380,4 +381,33 @@ export async function saveWishlistToDb(
     await setDoc(newWishlistRef, newWishlist);
     return { message: "created" };
   }
+}
+
+export async function getUserWishlists({
+  userId,
+}: {
+  userId: string;
+}): Promise<Wishlist[]> {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to save posts.");
+  }
+
+  const wishlistsRef = collection(db, "wishlists");
+
+  const q = query(
+    wishlistsRef,
+    where("owner", "==", userId),
+    orderBy("createdAt", "desc"),
+    limit(100),
+  );
+
+  const querySnapshot = await getDocs(q);
+  const docs = querySnapshot.docs;
+  const lists = docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Wishlist[];
+
+  return lists;
 }

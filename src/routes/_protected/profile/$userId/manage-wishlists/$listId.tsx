@@ -217,7 +217,7 @@ function RouteComponent() {
                 <label className="label mb-1 ml-1">
                   <span className="label-text font-medium">Title</span>
                   <span className="label-text-alt text-neutral/70">
-                    {charCount}/100
+                    {charCount}/20
                   </span>
                 </label>
                 <label
@@ -264,7 +264,7 @@ function RouteComponent() {
                 <label className="label mb-1 ml-1">
                   <span className="label-text font-medium">Description</span>
                   <span className="label-text-alt text-neutral/70">
-                    {charCount}/250
+                    {charCount}/150
                   </span>
                 </label>
                 <label

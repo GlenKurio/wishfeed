@@ -172,11 +172,11 @@ export const createWishlistSchema = z.object({
     .string()
     .trim()
     .min(1, "Title is required")
-    .max(50, "Title cannot exceed 50 characters"),
+    .max(20, "Title cannot exceed 20 characters"),
   description: z
     .string()
     .trim()
-    .max(250, { message: "Description cannot exceed 250 characters" }),
+    .max(150, { message: "Description cannot exceed 150 characters" }),
   posts: z.array(z.string()),
 });
 

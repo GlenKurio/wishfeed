@@ -2,7 +2,9 @@ import EmptyFrame from "@/components/empty-frame";
 import { Icons } from "@/components/icons";
 import PageHeading from "@/components/page-heading";
 import { useAuth } from "@/hooks/use-auth";
+import { userWishlistsQueryOptions } from "@/lib/api";
 import type { Wishlist } from "@/lib/types";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Timestamp } from "firebase/firestore";
 
@@ -57,6 +59,10 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const user = useAuth();
+
+  const { data: wishlists } = useSuspenseQuery(
+    userWishlistsQueryOptions({ userId: user.uid }),
+  );
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
@@ -71,9 +77,9 @@ function RouteComponent() {
           <Icons.wishlist className="size-4" />
         </Link>
       </div>
-      {dummyWishlists.length !== 0 ? (
+      {wishlists.length !== 0 ? (
         <div className="grid w-full grid-cols-2 gap-2 md:grid-cols-3 md:gap-4">
-          {dummyWishlists.map((list) => (
+          {wishlists.map((list) => (
             <Link
               key={list.id}
               to="/profile/$userId/manage-wishlists/$listId"

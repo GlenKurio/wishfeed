@@ -1,6 +1,10 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
-import { getUserPostsPaginated, getUserProfileById } from "./firebase/db";
+import {
+  getUserPostsPaginated,
+  getUserProfileById,
+  getUserWishlists,
+} from "./firebase/db";
 import type { UserProfile } from "./types";
 
 export const profileQueryOptions = (userProfileId: string) =>
@@ -45,8 +49,10 @@ export const userPostsQueryOptions = ({
     staleTime: 60 * 1000,
   });
 
-// TODO: finish the infinite query for wishlists
 export const userWishlistsQueryOptions = ({ userId }: { userId: string }) =>
-  infiniteQueryOptions({
+  queryOptions({
     queryKey: ["wishlists", "user", userId],
+    queryFn: () => getUserWishlists({ userId }),
+    enabled: !!userId,
+    staleTime: 60 * 1000,
   });

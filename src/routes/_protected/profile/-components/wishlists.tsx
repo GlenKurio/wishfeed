@@ -1,50 +1,52 @@
+import { userWishlistsQueryOptions } from "@/lib/api";
 import { IconListDetails } from "@tabler/icons-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useSearch } from "@tanstack/react-router";
 
-const wishlists = [
-  {
-    id: "favorites",
-    name: "Favorites",
-    count: 3,
-    image:
-      "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&h=400&fit=crop",
-  },
-  {
-    id: "design",
-    name: "Design",
-    count: 0,
-    image:
-      "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=400&fit=crop",
-  },
-  {
-    id: "drafts",
-    name: "Drafts",
-    count: 3,
-    image:
-      "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400&h=400&fit=crop",
-  },
-  {
-    id: "tech",
-    name: "Tech",
-    count: 5,
-    image:
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=400&fit=crop",
-  },
-  {
-    id: "books",
-    name: "Books",
-    count: 8,
-    image:
-      "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=400&fit=crop",
-  },
-  {
-    id: "travel",
-    name: "Travel",
-    count: 4,
-    image:
-      "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=400&fit=crop",
-  },
-];
+// const wishlists = [
+//   {
+//     id: "favorites",
+//     name: "Favorites",
+//     count: 3,
+//     image:
+//       "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&h=400&fit=crop",
+//   },
+//   {
+//     id: "design",
+//     name: "Design",
+//     count: 0,
+//     image:
+//       "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=400&fit=crop",
+//   },
+//   {
+//     id: "drafts",
+//     name: "Drafts",
+//     count: 3,
+//     image:
+//       "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400&h=400&fit=crop",
+//   },
+//   {
+//     id: "tech",
+//     name: "Tech",
+//     count: 5,
+//     image:
+//       "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=400&fit=crop",
+//   },
+//   {
+//     id: "books",
+//     name: "Books",
+//     count: 8,
+//     image:
+//       "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=400&fit=crop",
+//   },
+//   {
+//     id: "travel",
+//     name: "Travel",
+//     count: 4,
+//     image:
+//       "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=400&fit=crop",
+//   },
+// ];
 
 export default function Wishlists({
   userId,
@@ -54,7 +56,10 @@ export default function Wishlists({
   isOwner: boolean;
 }) {
   const search = useSearch({ from: "/_protected/profile/$userId" });
-  // TODO: display only not empty lists
+
+  const { data: wishlists } = useSuspenseQuery(
+    userWishlistsQueryOptions({ userId }),
+  );
   return (
     <div className="w-full overflow-x-auto">
       <div className="flex gap-4 p-2">
@@ -100,13 +105,13 @@ export default function Wishlists({
               }`}
             >
               <img
-                src={w.image}
-                alt={w.name}
+                src={w.cover_image}
+                alt={w.title}
                 className="h-full w-full object-cover"
               />
               <div className="from-primary/10 absolute inset-0 bg-linear-to-t to-transparent" />
             </div>
-            <p className="mt-2 text-center text-xs font-medium">{w.name}</p>
+            <p className="mt-2 text-center text-xs font-medium">{w.title}</p>
           </Link>
         ))}
 
