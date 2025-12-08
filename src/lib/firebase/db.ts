@@ -203,11 +203,13 @@ export async function getUserPostsPaginated({
   if (!user) {
     throw new Error("Must be logged in to view posts.");
   }
-
+  if (!published && user.uid !== userId) {
+    throw new Error("You can only view your own drafts.");
+  }
   const postsRef = collection(db, "posts");
 
   const queryConstraints: QueryConstraint[] = [
-    where("userUid", "==", userId),
+    where("createdBy", "==", userId),
     where("isPublished", "==", published),
     orderBy("createdAt", "desc"),
     limit(pageSize + 1),
@@ -412,3 +414,6 @@ export async function getUserWishlists({
 
   return lists;
 }
+
+export async function addWishToList() {}
+export async function removeWishFromList() {}

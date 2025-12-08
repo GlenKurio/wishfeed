@@ -1,7 +1,6 @@
 - Profile:
   - Wishlists:
 
-    -- Manage drafts somehow in DB or UI to show it only to owner user;
     -- Display wishlists in manage page;
     -- Allow to create wishlists:
     -- Edit wishlist;

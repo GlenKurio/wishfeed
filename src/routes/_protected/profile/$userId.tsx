@@ -26,6 +26,13 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
   loaderDeps: ({ search: { postId, wishlist } }) => ({ postId, wishlist }),
   loader: async ({ context, params, deps: { wishlist } }) => {
     const isDrafts = wishlist === "drafts";
+    if (isDrafts && params.userId !== context.user.uid) {
+      throw redirect({
+        to: "/profile/$userId",
+        params: { userId: params.userId },
+        search: { wishlist: "all" }, // Redirect to "all" instead
+      });
+    }
     await Promise.all([
       context.queryClient.ensureInfiniteQueryData(
         userPostsQueryOptions({
@@ -41,7 +48,16 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
       ),
     ]);
   },
-
+  errorComponent: ({ error }) => {
+    return (
+      <div className="container mx-auto px-4 py-6">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <h2 className="text-lg font-semibold text-red-900">Error</h2>
+          <p className="text-red-700">{error.message}</p>
+        </div>
+      </div>
+    );
+  },
   component: RouteComponent,
 });
 

@@ -67,7 +67,7 @@ function RouteComponent() {
 
     validators: {
       onChange: newWishSchema,
-      onBlur: newWishSchema,
+      // onBlur: newWishSchema,
     },
     onSubmit: async ({ value }) => {
       createPost({ ...value, isPublished: true });

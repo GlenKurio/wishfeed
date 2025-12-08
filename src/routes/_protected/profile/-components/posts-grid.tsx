@@ -16,7 +16,7 @@ export default function PostsGrid({
 
   const isDrafts = wishlist === "drafts";
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, error } =
     useSuspenseInfiniteQuery(
       userPostsQueryOptions({
         userId: userId,
@@ -24,6 +24,8 @@ export default function PostsGrid({
         wishlist,
       }),
     );
+
+  if (error) return <>{error.message}</>;
 
   const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 

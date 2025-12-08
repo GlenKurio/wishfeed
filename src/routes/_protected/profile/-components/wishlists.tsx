@@ -60,6 +60,7 @@ export default function Wishlists({
   const { data: wishlists } = useSuspenseQuery(
     userWishlistsQueryOptions({ userId }),
   );
+  const wishListsToDisplay = wishlists.filter((w) => w.posts.length > 0);
   return (
     <div className="w-full overflow-x-auto">
       <div className="flex gap-4 p-2">
@@ -89,17 +90,17 @@ export default function Wishlists({
         </Link>
 
         {/* Wishlist Cards */}
-        {wishlists.map((w) => (
+        {wishListsToDisplay.map((w) => (
           <Link
             key={w.id}
             to="/profile/$userId"
             params={{ userId }}
-            search={(prev) => ({ ...prev, wishlist: w.id })}
+            search={(prev) => ({ ...prev, wishlist: w.title })}
             className="relative shrink-0"
           >
             <div
               className={`relative size-16 overflow-hidden rounded-3xl transition-all ${
-                search.wishlist === w.id
+                search.wishlist === w.title
                   ? "ring-primary scale-105 shadow-lg ring-2"
                   : "hover:scale-105"
               }`}
@@ -115,8 +116,6 @@ export default function Wishlists({
           </Link>
         ))}
 
-        {/* Create New Wishlist */}
-        {/* TODO: place drafts here too, so only the owner of the proifle can see them. Make sure they are not available from editing url; */}
         {isOwner && (
           <>
             <Link
