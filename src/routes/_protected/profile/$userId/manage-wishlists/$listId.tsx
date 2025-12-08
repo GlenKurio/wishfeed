@@ -1,17 +1,25 @@
+import { Icons } from "@/components/icons";
 import PageHeading from "@/components/page-heading";
+import { useAuth } from "@/hooks/use-auth";
 import { useCreateWishlist } from "@/hooks/use-create-wishlist";
+import { userWishlistsQueryOptions } from "@/lib/api";
 import { createWishlistSchema } from "@/lib/types";
 import {
   IconFileText,
-  IconHeartShare,
   IconPhoto,
   IconTag,
   IconTrash,
   IconUpload,
 } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  createFileRoute,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
 import { useRef } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/manage-wishlists/$listId",
@@ -20,25 +28,26 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
+  const user = useAuth();
   const params = useParams({
     from: "/_protected/profile/$userId/manage-wishlists/$listId",
   });
-  const pageTitle =
-    params.listId === "new" ? "Create Wishlist" : "Edit Wishlist";
+  const navigate = useNavigate();
 
-  // TODO: get the wishlist by id and return its data in default values
-  // When updated updte in hook in query cache;
-  // Allow to delete wishlist
+  const { data: wishlists } = useSuspenseQuery(
+    userWishlistsQueryOptions({ userId: user.uid }),
+  );
+  const currentWishlist = wishlists.find((w) => w.id === params.listId);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { createWishlist, isPending } = useCreateWishlist();
 
   const form = useForm({
     defaultValues: {
-      cover_image: "",
-      title: "",
-      description: "",
-      posts: [] as string[],
+      cover_image: currentWishlist?.cover_image || "",
+      title: currentWishlist?.title || "",
+      description: currentWishlist?.description || "",
+      posts: currentWishlist?.posts || ([] as string[]),
     },
 
     validators: {
@@ -46,7 +55,7 @@ function RouteComponent() {
     },
 
     onSubmit: async ({ value }) => {
-      createWishlist(value);
+      createWishlist({ wishlistData: value, wishlistId: currentWishlist?.id });
     },
   });
 
@@ -54,8 +63,17 @@ function RouteComponent() {
     fileInputRef.current?.click();
   };
 
+  const handleDeleteList = () => {
+    return toast.success("List was deleted");
+  };
+
   const disabled =
     isPending || form.state.isSubmitting || form.state.isValidating;
+
+  const isCreating = params.listId === "new";
+  const pageTitle = isCreating
+    ? "Create Wishlist"
+    : `Edit Wishlist "${currentWishlist?.title}"`;
 
   return (
     <div className="mx-auto flex h-full w-full max-w-3xl flex-col gap-6">
@@ -302,7 +320,7 @@ function RouteComponent() {
           }}
         />
       </div>
-      <div>
+      <div className="flex flex-col gap-4">
         <form.Subscribe
           selector={(state) => [state.canSubmit]}
           children={([canSubmit]) => {
@@ -315,17 +333,35 @@ function RouteComponent() {
               >
                 {isPending ? (
                   <>
-                    Creating wishlist... <IconHeartShare className="size-4" />
+                    {isCreating
+                      ? "Creating wishlist..."
+                      : "Updating wishlist..."}{" "}
+                    <Icons.wishlist className="size-4" />
                   </>
                 ) : (
                   <>
-                    Create wishlist <IconHeartShare className="size-4" />
+                    {isCreating ? "Create wishlist" : "Update wishlist"}{" "}
+                    <Icons.wishlist className="size-4" />
                   </>
                 )}
               </button>
             );
           }}
         />
+        <button
+          className="btn btn-block"
+          onClick={() => navigate({ to: ".." })}
+        >
+          Go back
+        </button>
+        {!isCreating && (
+          <button
+            className="btn btn-error btn-block btn-ghost"
+            onClick={handleDeleteList}
+          >
+            Delete
+          </button>
+        )}
       </div>
       <>{/* <PostsGrid /> */}</>
     </div>

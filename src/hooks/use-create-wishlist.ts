@@ -10,7 +10,10 @@ export function useCreateWishlist() {
   const user = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const createWishlist = async (wishlistData: CreateWishlist) => {
+  const createWishlist = async (
+    wishlistData: CreateWishlist,
+    wishlistId?: string,
+  ) => {
     // 1. Handle image upload if needed
     let imageUrl = wishlistData.cover_image;
 
@@ -33,16 +36,22 @@ export function useCreateWishlist() {
     };
 
     // 4. Save the post to Firestore
-    const result = await saveWishlistToDb(wishlistDataWithImage);
+    const result = await saveWishlistToDb(wishlistDataWithImage, wishlistId);
     return { result };
   };
 
   const mutation = useMutation({
-    mutationFn: createWishlist,
+    mutationFn: ({
+      wishlistData,
+      wishlistId,
+    }: {
+      wishlistData: CreateWishlist;
+      wishlistId?: string;
+    }) => createWishlist(wishlistData, wishlistId),
 
     onSuccess: ({ result }) => {
       if (result.message === "updated") {
-        return toast.success("Wishlist updated!");
+        toast.success("Wishlist updated!");
       } else {
         toast.success("Wishlist created!");
       }
