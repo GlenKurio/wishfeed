@@ -62,6 +62,7 @@ function RouteComponent() {
       wish_image: scrapedWish?.wish_image || "",
       wish_price: scrapedWish?.wish_price || 0,
       brand: scrapedWish?.brand || "",
+      isPublished: false,
     },
 
     validators: {

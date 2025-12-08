@@ -1,6 +1,5 @@
 - Profile:
   - Wishlists:
-    -- Write a function to get the wishlists; Finish infinite query options and create a db function; Load them in parallel in profile layout in loader with userProfile;
 
     -- Manage drafts somehow in DB or UI to show it only to owner user;
     -- Display wishlists in manage page;

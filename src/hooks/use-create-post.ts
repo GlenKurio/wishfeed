@@ -8,13 +8,13 @@ import {
   clearScrapedWish,
   SCRAPED_WISH_KEY,
 } from "../lib/scraped-wish-storage";
-import type { CreateWishType } from "../lib/types";
+import type { NewWishType } from "../lib/types";
 
 export function useCreatePost() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const createPost = async (newWishData: CreateWishType) => {
+  const createPost = async (newWishData: NewWishType) => {
     // 1. Handle image upload if needed
     let imageUrl = newWishData.wish_image;
 
@@ -34,7 +34,7 @@ export function useCreatePost() {
     const affiliateLink = await swapUrl(newWishData.wish_url);
 
     // 3. Construct wish data with Cover image url, original product url and affiliate link
-    const wishData: CreateWishType = {
+    const wishData: NewWishType = {
       ...newWishData,
       wish_image: imageUrl,
     };

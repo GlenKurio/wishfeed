@@ -21,11 +21,12 @@ import {
 import { firebaseApp } from ".";
 import {
   createWishlistSchema,
+  newWishSchema,
   type CreateWishlist,
-  type CreateWishType,
   type DbPostType,
   type DbUserProfile,
   type DbWishlist,
+  type NewWishType,
   type PostType,
   type UserProfile,
   type Wishlist,
@@ -70,14 +71,14 @@ export async function createUserProfile(user: User) {
 }
 
 export async function saveWishPostToDb(
-  wishData: CreateWishType,
+  wishData: NewWishType,
   affiliateLink: string,
 ) {
   const user = auth.currentUser;
   if (!user) {
     throw new Error("Must be logged in to save posts.");
   }
-
+  const validatedData = newWishSchema.parse(wishData);
   // 1. Get a new write batch
   const batch = writeBatch(db);
 
@@ -91,19 +92,19 @@ export async function saveWishPostToDb(
   const fullPost: DbPostType = {
     id: newPostRef.id, // Store the auto-generated ID right in the document
     createdBy: user.uid, // Crucial for querying posts by user
-    image: wishData.wish_image as string,
-    title: wishData.wish_title,
-    description: wishData.wish_description,
-    price: wishData.wish_price,
-    brand: wishData.brand,
-    wishUrlOriginal: wishData.wish_url,
+    image: validatedData.wish_image as string,
+    title: validatedData.wish_title,
+    description: validatedData.wish_description,
+    price: validatedData.wish_price,
+    brand: validatedData.brand,
+    wishUrlOriginal: validatedData.wish_url,
     wishUrlAffiliate: affiliateLink,
     likes: [],
     saves: [],
     wishlists: [],
     gifted: false,
-    isPublished: wishData.isPublished,
-    ...(wishData.isPublished
+    isPublished: validatedData.isPublished,
+    ...(validatedData.isPublished
       ? { publishedAt: serverTimestamp() }
       : { publishedAt: null }),
     createdAt: serverTimestamp(),
@@ -116,7 +117,7 @@ export async function saveWishPostToDb(
   // 5. In the batch, update the user's profile to increment the postCount
   // This is an atomic operation that happens on the Firestore server.
   // We no longer need to fetch the user profile first, which saves a read operation.
-  if (wishData.isPublished) {
+  if (validatedData.isPublished) {
     batch.update(userProfileRef, {
       postCount: increment(1),
     });

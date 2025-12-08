@@ -101,12 +101,10 @@ export const newWishSchema = z.object({
     .min(1, { message: "Brand is required." })
     .max(50, { message: "Brand cannot exceed 50 characters." }),
   wish_url: z.url().min(1, { message: "Url to your wish is required." }),
+  isPublished: z.boolean(),
 });
 
 export type NewWishType = z.infer<typeof newWishSchema>;
-export type CreateWishType = NewWishType & {
-  isPublished: boolean;
-};
 
 export type UserProfile = {
   uid: string;
@@ -172,7 +170,11 @@ export const createWishlistSchema = z.object({
     .string()
     .trim()
     .min(1, "Title is required")
-    .max(20, "Title cannot exceed 20 characters"),
+    .max(20, "Title cannot exceed 20 characters")
+    .refine((val) => val.toLowerCase() !== "drafts", {
+      message:
+        "'drafts' is a booked keyword in the app and cannot be used as a title.",
+    }),
   description: z
     .string()
     .trim()
