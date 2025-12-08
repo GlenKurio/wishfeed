@@ -3,53 +3,8 @@ import { Icons } from "@/components/icons";
 import PageHeading from "@/components/page-heading";
 import { useAuth } from "@/hooks/use-auth";
 import { userWishlistsQueryOptions } from "@/lib/api";
-import type { Wishlist } from "@/lib/types";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Timestamp } from "firebase/firestore";
-
-export const dummyWishlists: Wishlist[] = [
-  {
-    id: "wishlist_2",
-    cover_image: "https://images.unsplash.com/photo-1556228720-195a672e8a03",
-    title: "My Reading List",
-    description: "Books I want to read this year.",
-    posts: ["post_201", "post_202"],
-    owner: "vJDEKsrRAvYYxNOShVtYCPvIvBA2",
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  },
-  {
-    id: "wishlist_3",
-    cover_image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
-    title: "Gadgets & Tech",
-    description: "Cool gadgets, electronics, and tech accessories I’m eyeing.",
-    posts: ["post_301", "post_302", "post_303", "post_304"],
-    owner: "vJDEKsrRAvYYxNOShVtYCPvIvBA2",
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  },
-  {
-    id: "wishlist_4",
-    cover_image: "https://images.unsplash.com/photo-1481349518771-20055b2a7b24",
-    title: "Dream Wardrobe",
-    description: "Clothes and outfits I want to buy eventually.",
-    posts: ["post_401"],
-    owner: "vJDEKsrRAvYYxNOShVtYCPvIvBA2",
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  },
-  {
-    id: "wishlist_5",
-    cover_image: "https://images.unsplash.com/photo-1519999482648-25049ddd37b1",
-    title: "Home & Interior",
-    description: "Furniture and decor ideas for my future home.",
-    posts: ["post_501", "post_502", "post_503"],
-    owner: "vJDEKsrRAvYYxNOShVtYCPvIvBA2",
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  },
-];
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/manage-wishlists/",
@@ -89,9 +44,10 @@ function RouteComponent() {
               }}
               className="group/list bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-4xl"
             >
+              {/* TODO: make cover to use 'frame image with font-family-cursive text in the center with list title!' */}
               {/* Image (base layer) */}
               <img
-                src={list.cover_image || "/placeholder.svg"}
+                src={list.cover_image || "/placeholder-whishlist.png"}
                 alt={`Post ${list.id}`}
                 className="h-full w-full object-cover object-center transition-transform duration-300 group-hover/list:scale-105"
               />

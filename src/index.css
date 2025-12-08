@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Annie+Use+Your+Telescope&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @plugin "daisyui";
@@ -39,6 +39,7 @@
 
 @theme {
   --font-family-sans: "Nunito", sans-serif;
+  --font-family-cursive: "Annie Use Your Telescope", cursive;
 }
 
 .grainy {

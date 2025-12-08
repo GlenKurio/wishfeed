@@ -15,7 +15,7 @@ export default function Wishlists({
   const { data: wishlists } = useSuspenseQuery(
     userWishlistsQueryOptions({ userId }),
   );
-  const wishListsToDisplay = wishlists.filter((w) => w.posts.length > 0);
+  const wishListsToDisplay = wishlists.filter((w) => w.posts.length >= 0);
   return (
     <div className="w-full overflow-x-auto">
       <div className="flex gap-4 p-2">
@@ -58,8 +58,9 @@ export default function Wishlists({
                   : "hover:scale-105"
               }`}
             >
+              {/* TODO: make mini placeholder look good too. */}
               <img
-                src={w.cover_image}
+                src={w.cover_image || "/public/placeholder-whishlist.png"}
                 alt={w.title}
                 className="h-full w-full object-cover"
               />
