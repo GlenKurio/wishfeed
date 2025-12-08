@@ -1,5 +1,4 @@
 - Profile:
-  -- Change $userId to handle;
   - Wishlists:
     -- Allow to create wishlists:
     -- Pass the selected wishlist into edit page;

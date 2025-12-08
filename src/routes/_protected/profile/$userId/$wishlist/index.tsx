@@ -7,7 +7,7 @@ import PostsGrid from "../../-components/posts-grid";
 import ProfileHeader from "../../-components/profile-header";
 import Wishlists from "../../-components/wishlists";
 
-export const Route = createFileRoute("/_protected/profile/$user/$wishlist/")({
+export const Route = createFileRoute("/_protected/profile/$userId/$wishlist/")({
   component: RouteComponent,
 });
 

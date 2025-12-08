@@ -52,7 +52,7 @@ export const dummyWishlists: Wishlist[] = [
 ];
 
 export const Route = createFileRoute(
-  "/_protected/profile/$user/manage-wishlists/",
+  "/_protected/profile/$userId/manage-wishlists/",
 )({
   component: RouteComponent,
 });

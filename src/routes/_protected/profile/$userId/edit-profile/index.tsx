@@ -25,7 +25,7 @@ import { useRef } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute(
-  "/_protected/profile/$user/edit-profile/",
+  "/_protected/profile/$userId/edit-profile/",
 )({
   beforeLoad: ({ context, params }) => {
     const authUserId = context.user?.uid;

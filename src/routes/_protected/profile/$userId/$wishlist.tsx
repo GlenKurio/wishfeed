@@ -2,7 +2,7 @@ import { userPostsQueryOptions } from "@/lib/api";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import z from "zod";
 
-export const Route = createFileRoute("/_protected/profile/$user/$wishlist")({
+export const Route = createFileRoute("/_protected/profile/$userId/$wishlist")({
   validateSearch: z.object({
     postId: z.string().optional(),
   }),

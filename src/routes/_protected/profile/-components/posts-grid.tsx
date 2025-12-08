@@ -5,7 +5,7 @@ import { Link, useParams } from "@tanstack/react-router";
 
 export default function PostsGrid({ userId }: { userId: string }) {
   const { wishlist } = useParams({
-    from: "/_protected/profile/$user/$wishlist",
+    from: "/_protected/profile/$userId/$wishlist",
   });
 
   const isDrafts = wishlist === "drafts";
@@ -28,8 +28,8 @@ export default function PostsGrid({ userId }: { userId: string }) {
           {allPosts.map((post) => (
             <Link
               key={post.id}
-              to="/profile/$user/$wishlist/feed"
-              params={{ user: user, wishlist }}
+              to="/profile/$userId/$wishlist/feed"
+              params={{ userId, wishlist }}
               search={{ postId: post.id }}
               className="group bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-3xl transition-all hover:opacity-90"
             >
