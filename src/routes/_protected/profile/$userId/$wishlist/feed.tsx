@@ -29,8 +29,8 @@ export const Route = createFileRoute(
 
     if (!hasPost) {
       throw redirect({
-        to: "/profile/$userId",
-        params: { userId: params.userId },
+        to: "/profile/$userId/$wishlist",
+        params: { userId: params.userId, wishlist: "all" },
       });
     }
   },
