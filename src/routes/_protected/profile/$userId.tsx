@@ -12,7 +12,8 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
     wishlist: z.string().optional().default("all"),
     postId: z.string().optional(),
   }),
-  beforeLoad: async ({ context, params }) => {
+  loaderDeps: ({ search: { postId, wishlist } }) => ({ postId, wishlist }),
+  beforeLoad: async ({ context, params, search }) => {
     const userProfile = await context.queryClient.ensureQueryData(
       profileQueryOptions(params.userId),
     );
@@ -22,10 +23,8 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
         to: "/profile/$userId",
         params: { userId: context.user.uid },
       });
-  },
-  loaderDeps: ({ search: { postId, wishlist } }) => ({ postId, wishlist }),
-  loader: async ({ context, params, deps: { wishlist } }) => {
-    const isDrafts = wishlist === "drafts";
+
+    const isDrafts = search.wishlist === "drafts";
     if (isDrafts && params.userId !== context.user.uid) {
       throw redirect({
         to: "/profile/$userId",
@@ -33,6 +32,10 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
         search: { wishlist: "all" }, // Redirect to "all" instead
       });
     }
+  },
+
+  loader: async ({ context, params, deps: { wishlist } }) => {
+    const isDrafts = wishlist === "drafts";
     await Promise.all([
       context.queryClient.ensureInfiniteQueryData(
         userPostsQueryOptions({
