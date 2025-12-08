@@ -1,15 +1,9 @@
 import EmptyFrame from "@/components/empty-frame";
 import { userPostsQueryOptions } from "@/lib/api";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { Link, useParams, useSearch } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
 
-export default function PostsGrid({
-  userId,
-  isOwner,
-}: {
-  userId: string;
-  isOwner: boolean;
-}) {
+export default function PostsGrid({ userId }: { userId: string }) {
   const { wishlist } = useParams({
     from: "/_protected/profile/$userId/$wishlist",
   });

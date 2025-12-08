@@ -33,7 +33,7 @@ function RouteComponent() {
       <ProfileHeader userProfile={userProfile} isOwner={isOwner} />
       <Wishlists userId={userId} isOwner={isOwner} wishlist={wishlist} />
       <Suspense fallback={<>Loading posts!</>}>
-        <PostsGrid userId={userId} isOwner={isOwner} />
+        <PostsGrid userId={userId} />
       </Suspense>
     </div>
   );

@@ -1,52 +1,7 @@
 import { userWishlistsQueryOptions } from "@/lib/api";
 import { IconListDetails } from "@tabler/icons-react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link, useParams, useSearch } from "@tanstack/react-router";
-
-// const wishlists = [
-//   {
-//     id: "favorites",
-//     name: "Favorites",
-//     count: 3,
-//     image:
-//       "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&h=400&fit=crop",
-//   },
-//   {
-//     id: "design",
-//     name: "Design",
-//     count: 0,
-//     image:
-//       "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=400&fit=crop",
-//   },
-//   {
-//     id: "drafts",
-//     name: "Drafts",
-//     count: 3,
-//     image:
-//       "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?w=400&h=400&fit=crop",
-//   },
-//   {
-//     id: "tech",
-//     name: "Tech",
-//     count: 5,
-//     image:
-//       "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=400&fit=crop",
-//   },
-//   {
-//     id: "books",
-//     name: "Books",
-//     count: 8,
-//     image:
-//       "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=400&h=400&fit=crop",
-//   },
-//   {
-//     id: "travel",
-//     name: "Travel",
-//     count: 4,
-//     image:
-//       "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=400&fit=crop",
-//   },
-// ];
+import { Link } from "@tanstack/react-router";
 
 export default function Wishlists({
   userId,

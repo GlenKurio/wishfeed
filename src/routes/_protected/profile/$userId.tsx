@@ -1,18 +1,9 @@
-import {
-  profileQueryOptions,
-  userPostsQueryOptions,
-  userWishlistsQueryOptions,
-} from "@/lib/api";
+import { profileQueryOptions, userWishlistsQueryOptions } from "@/lib/api";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { Suspense } from "react";
-import z from "zod";
 
 export const Route = createFileRoute("/_protected/profile/$userId")({
-  // validateSearch: z.object({
-  //   postId: z.string().optional(),
-  // }),
-  // loaderDeps: ({ search: { postId } }) => ({ postId }),
-  beforeLoad: async ({ context, params, search }) => {
+  beforeLoad: async ({ context, params }) => {
     const userProfile = await context.queryClient.ensureQueryData(
       profileQueryOptions(params.userId),
     );
