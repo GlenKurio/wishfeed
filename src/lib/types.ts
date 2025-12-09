@@ -117,7 +117,7 @@ export type UserProfile = {
   isPublic: boolean;
   followers: string[];
   following: string[];
-  posts: number;
+  postsCount: number;
   updatedAt: Timestamp;
   createdAt: Timestamp;
 };

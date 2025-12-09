@@ -2,10 +2,6 @@
   - Wishlists:
     -- TODO: on wishlist update remove old cover from storage;
 
-    -- Add the description of the wishlist to the mini in manage on hover and on the top of the feed with list title;
-
-    -- Add a title on hover to the post mini;
-
   -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
 
   -- Add breadcrumbs and "Go back" actions to pages(header?)

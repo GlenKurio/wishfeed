@@ -1,4 +1,4 @@
-import { Link, useParams } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 
 import Avatar from "@/components/avatar";
 import { useFollowUser } from "@/hooks/use-follow-user";
@@ -12,10 +12,7 @@ export default function ProfileHeader({
   isOwner: boolean;
 }) {
   const { isFollowing } = useFollowUser({ userId: userProfile?.uid });
-  const params = useParams({
-    from: "/_protected/profile/$userId/$wishlist",
-  });
-  const wishlist = params.wishlist || "all";
+
   return (
     <>
       <div className="bg-background w-full">
@@ -69,18 +66,23 @@ export default function ProfileHeader({
                   </Link>
 
                   <div className="bg-neutral/10 h-10 w-px" />
-                  {/* TODO: if user has no posts do not allow navigation*/}
+
                   <Link
                     to="/profile/$userId/$wishlist/feed"
                     params={{
                       userId: userProfile?.uid,
-                      wishlist: wishlist,
+                      wishlist: "all",
                     }}
+                    disabled={
+                      !userProfile.postsCount || userProfile.postsCount === 0
+                    }
                   >
                     <p className="text-foreground text-lg font-bold md:text-xl">
-                      {userProfile?.posts || 0}
+                      {userProfile?.postsCount || 0}
                     </p>
-                    <p className="text-muted-foreground text-sm">Posts</p>
+                    <p className="text-muted-foreground text-sm">
+                      {userProfile?.postsCount === 1 ? "Post" : "Posts"}
+                    </p>
                   </Link>
                 </div>
               </div>
@@ -106,20 +108,6 @@ export default function ProfileHeader({
                   >
                     Go to another User
                   </Link>
-                  {/* <Link
-                    to="/profile/$userId"
-                    params={{ userId: "JyLsRANwzbSZukKtZ0WqYjY1moh2" }}
-                    className="btn btn-sm md:btn-md flex-1 sm:flex-none"
-                  >
-                    Go to another User
-                  </Link>
-                  <Link
-                    to="/profile/$userId/edit-profile"
-                    params={{ userId: "JyLsRANwzbSZukKtZ0WqYjY1moh2" }}
-                    className="btn btn-sm md:btn-md flex-1 sm:flex-none"
-                  >
-                    Go to another User Settings
-                  </Link> */}
                 </>
               ) : isFollowing ? (
                 <button className="btn w-full sm:w-auto">Unfollow</button>

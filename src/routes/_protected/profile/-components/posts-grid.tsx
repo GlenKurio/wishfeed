@@ -1,7 +1,11 @@
 import EmptyFrame from "@/components/empty-frame";
-import { userPostsQueryOptions } from "@/lib/api";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { userPostsQueryOptions, userWishlistsQueryOptions } from "@/lib/api";
+import {
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
+import { GridHeader } from "./grid-header";
 
 export default function PostsGrid({ userId }: { userId: string }) {
   const { wishlist } = useParams({
@@ -21,9 +25,19 @@ export default function PostsGrid({ userId }: { userId: string }) {
     );
 
   const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
-
+  const { data: wishlists } = useSuspenseQuery(
+    userWishlistsQueryOptions({ userId: userId }),
+  );
+  const currentWishlist = wishlists.find((w) => w.id === wishlist);
   return (
-    <div className="">
+    <div className="-mt-2">
+      {wishlist && (
+        <GridHeader
+          wishlist={wishlist}
+          currentWishlist={currentWishlist}
+          userId={userId}
+        />
+      )}
       {allPosts.length !== 0 ? (
         <div className="grid w-full grid-cols-2 gap-2 md:grid-cols-3 md:gap-4">
           {allPosts.map((post) => (
