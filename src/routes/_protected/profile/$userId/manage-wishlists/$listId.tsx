@@ -20,6 +20,7 @@ import {
   useParams,
 } from "@tanstack/react-router";
 import { useRef } from "react";
+import PostsManagement from "../../-components/posts-management";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/manage-wishlists/$listId",
@@ -247,12 +248,12 @@ function RouteComponent() {
                   </span>
                 </label>
                 <label
-                  className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                  className={`input input-bordered border-base-content/50 flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
                 >
                   <IconTag
                     width="20"
                     height="20"
-                    className={hasError ? "text-error" : ""}
+                    className={hasError ? "text-error" : "text-base-content/50"}
                   />
                   <input
                     id={field.name}
@@ -294,12 +295,12 @@ function RouteComponent() {
                   </span>
                 </label>
                 <label
-                  className={`textarea textarea-bordered border-base-content flex w-full gap-2 p-3 ${hasError ? "textarea-error border-error" : ""}`}
+                  className={`textarea textarea-bordered border-base-content/50 flex w-full gap-2 p-3 ${hasError ? "textarea-error border-error" : ""}`}
                 >
                   <IconFileText
                     width="20"
                     height="20"
-                    className={`shrink-0 ${hasError ? "text-error" : ""}`}
+                    className={`text-base-content/50 shrink-0 ${hasError ? "text-error" : ""}`}
                   />
                   <textarea
                     id={field.name}
@@ -323,6 +324,7 @@ function RouteComponent() {
             );
           }}
         />
+        <PostsManagement form={form} disabled={disabled} />
       </div>
       <div className="flex flex-col gap-4">
         <form.Subscribe
@@ -368,7 +370,6 @@ function RouteComponent() {
           </button>
         )}
       </div>
-      <>{/* <PostsGrid /> */}</>
 
       <dialog ref={modalRef} id="my_modal_2" className="modal">
         <div className="modal-box">
@@ -383,12 +384,19 @@ function RouteComponent() {
             <button className="btn btn-error btn-sm" onClick={handleDeleteList}>
               Delete Wishlist
             </button>
-
-            <form method="dialog" className="w-full">
-              <button className="btn btn-sm btn-ghost w-full">Cancel</button>
-            </form>
+            <button
+              className="btn btn-sm btn-ghost w-full"
+              onClick={() => {
+                modalRef.current?.close();
+              }}
+            >
+              Cancel
+            </button>
           </div>
         </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>Cancel</button>
+        </form>
       </dialog>
     </div>
   );

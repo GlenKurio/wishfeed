@@ -1,6 +1,6 @@
 - Profile:
   - Wishlists:
-    -- Finish wishlists covers design with brand font;
+    -- TODO: on update remove old cover from storage;
     -- allow to add wishes from edit wishlist page; Open a dialog with all wishes list and allow to select; Make wishes a scrollable section with minis, click/tap on mini triggers removeWishFromList action, and triggers a dialog to confirm; Has add wish button as last mini; Edit list button opens the dialog with list to select/deselect wishes;
     -- Add the description of the wishlist to the mini in manage on hover and on the top of the feed with list title;
 
