@@ -47,7 +47,7 @@ function RouteComponent() {
   });
 
   const isDrafts = wishlist === "drafts";
-
+  // TODO: implement fetching the next page on scroll
   const { data } = useSuspenseInfiniteQuery(
     userPostsQueryOptions({
       userId: userId,

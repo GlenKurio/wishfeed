@@ -9,12 +9,13 @@ export default function PostsGrid({ userId }: { userId: string }) {
   });
 
   const isDrafts = wishlist === "drafts";
-
+  // TODO: implement fetching the next page on scroll
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useSuspenseInfiniteQuery(
       userPostsQueryOptions({
         userId: userId,
         published: !isDrafts,
+        pageSize: 3,
         wishlist,
       }),
     );
