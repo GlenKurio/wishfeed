@@ -46,7 +46,7 @@ function RouteComponent() {
   // TODO: while pending show the loading overlay before redirecting to next step;
 
   return (
-    <div className="flex h-full w-full flex-col gap-8 lg:gap-8">
+    <div className="flex h-full w-full flex-col gap-8 lg:gap-6">
       <picture className="mx-auto max-w-[200px] lg:mb-10 lg:max-w-[300px]">
         <img
           src="/create-wish/step-1.png"
@@ -73,12 +73,12 @@ function RouteComponent() {
           return (
             <div>
               <label
-                className={`input input-bordered border-base-content w-full ${hasError ? "input-error border-error" : ""}`}
+                className={`input input-bordered border-base-content/50 w-full ${hasError ? "input-error border-error" : ""}`}
               >
                 <IconLink
                   width="20"
                   height="20"
-                  className={hasError ? "text-error" : ""}
+                  className={hasError ? "text-error" : "text-base-content/50"}
                 />
                 <input
                   id={field.name}
@@ -86,7 +86,7 @@ function RouteComponent() {
                   type="text"
                   disabled={isPending}
                   value={field.state.value}
-                  placeholder="https://your-product-link.com"
+                  placeholder="https://link-to-your-wish"
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   aria-invalid={hasError}
