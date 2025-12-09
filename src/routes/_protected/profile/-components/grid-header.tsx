@@ -35,7 +35,7 @@ export function GridHeader({
     presetDescriptions[wishlist] ?? currentWishlist?.description ?? "";
 
   return (
-    <div className="border-primary/50 bg-base-200/50 mb-6 flex flex-col rounded-3xl border-2 border-dashed px-5 pt-2 pb-4 lg:mb-8">
+    <div className="bg-base-200 mb-6 flex flex-col rounded-3xl px-5 pt-2 pb-4 lg:mb-8">
       {/* Title */}
       <h3
         className="font-family-cursive text-primary/50 truncate text-4xl leading-11 md:text-5xl lg:text-6xl lg:leading-20"
