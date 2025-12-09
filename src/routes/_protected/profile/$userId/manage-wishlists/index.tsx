@@ -53,11 +53,18 @@ function RouteComponent() {
 
               {/* Gradient overlay (smooth fade in) */}
               <div className="from-primary/40 via-primary/10 pointer-events-none absolute inset-0 z-10 bg-linear-to-b to-transparent opacity-0 transition-opacity duration-300 group-hover/list:opacity-100" />
-
               {/* Title (smooth fade + slide up) */}
-              <p className="text-base-100 pointer-events-none absolute top-3 left-3 z-20 translate-y-1 text-xl font-bold opacity-0 transition-all duration-300 group-hover/list:translate-y-0 group-hover/list:opacity-100">
-                {list.title}
-              </p>
+              <div className="text-base-100 pointer-events-none absolute top-3 left-3 z-20 translate-y-1 pr-3 opacity-0 transition-all duration-300 group-hover/list:translate-y-0 group-hover/list:opacity-100">
+                <p className="text-xl leading-tight font-bold">
+                  {list.title} ({list.posts.length})
+                </p>
+
+                {list.description && (
+                  <p className="text-base-300 mt-1 line-clamp-2 text-sm leading-snug">
+                    {list.description}
+                  </p>
+                )}
+              </div>
             </Link>
           ))}
         </div>
