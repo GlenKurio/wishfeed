@@ -19,12 +19,12 @@ export const userPostsQueryOptions = ({
   userId,
   published = true,
   pageSize = 15,
-  wishlist,
+  wishlist = "all",
 }: {
   userId: string;
   published?: boolean;
   pageSize?: number;
-  wishlist: string;
+  wishlist?: string;
 }) =>
   infiniteQueryOptions({
     queryKey: ["posts", "user", userId, pageSize, wishlist] as const,

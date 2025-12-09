@@ -3,59 +3,36 @@ import PageHeading from "@/components/page-heading";
 import { useAuth } from "@/hooks/use-auth";
 import { useCreateWishlist } from "@/hooks/use-create-wishlist";
 import { useDeleteWishlist } from "@/hooks/use-delete-wishlist";
-import { userWishlistsQueryOptions } from "@/lib/api";
+import { userPostsQueryOptions, userWishlistsQueryOptions } from "@/lib/api";
 import { createWishlistSchema } from "@/lib/types";
 import {
+  IconCheck,
   IconFileText,
   IconHeartPlus,
   IconPhoto,
-  IconPlus,
+  IconSearch,
   IconTag,
   IconTrash,
   IconUpload,
+  IconX,
 } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import {
   createFileRoute,
   useNavigate,
   useParams,
 } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import PostsManagement from "../../-components/posts-management";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/manage-wishlists/$listId",
 )({
   component: RouteComponent,
 });
-
-const availablePosts = [
-  {
-    id: "post1",
-    title: "Amazing Product 1",
-    image: "https://placehold.co/100",
-  },
-  { id: "post2", title: "Cool Item 2", image: "https://placehold.co/100" },
-  { id: "post3", title: "Must Have 3", image: "https://placehold.co/100" },
-  { id: "post4", title: "Great Find 4", image: "https://placehold.co/100" },
-  {
-    id: "post1",
-    title: "Amazing Product 1",
-    image: "https://placehold.co/100",
-  },
-  { id: "post2", title: "Cool Item 2", image: "https://placehold.co/100" },
-  { id: "post3", title: "Must Have 3", image: "https://placehold.co/100" },
-  { id: "post4", title: "Great Find 4", image: "https://placehold.co/100" },
-  {
-    id: "post1",
-    title: "Amazing Product 1",
-    image: "https://placehold.co/100",
-  },
-  { id: "post2", title: "Cool Item 2", image: "https://placehold.co/100" },
-  { id: "post3", title: "Must Have 3", image: "https://placehold.co/100" },
-  { id: "post4", title: "Great Find 4", image: "https://placehold.co/100" },
-];
 
 function RouteComponent() {
   const user = useAuth();
@@ -67,24 +44,35 @@ function RouteComponent() {
   const { data: wishlists } = useSuspenseQuery(
     userWishlistsQueryOptions({ userId: user.uid }),
   );
-
-  // Drag scroll state
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-
   const currentWishlist = wishlists.find((w) => w.id === params.listId);
+
+  const { data: allPostsData } = useSuspenseInfiniteQuery(
+    userPostsQueryOptions({
+      userId: user.uid,
+      published: true,
+      pageSize: 20,
+    }),
+  );
+
+  // Flatten paginated results into a single array
+  const allUserPosts = allPostsData.pages.flatMap((page) => page.posts || page);
+  const currentWishlistPostIds = currentWishlist?.posts || [];
+
+  const [imageError, setImageError] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [tempSelectedIds, setTempSelectedIds] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { createWishlist, isPending } = useCreateWishlist();
   const { deleteWishlist, isDeleting } = useDeleteWishlist();
+
   const form = useForm({
     defaultValues: {
       cover_image: currentWishlist?.cover_image || "",
       title: currentWishlist?.title || "",
       description: currentWishlist?.description || "",
-      posts: availablePosts || ([] as string[]),
+      posts: currentWishlistPostIds,
     },
 
     validators: {
@@ -360,46 +348,58 @@ function RouteComponent() {
             );
           }}
         />
+
         <form.Field
           name="posts"
           children={(field) => {
             const selectedPostIds = field.state.value || [];
-            const isAddingPost = false;
 
-            const handleMouseDown = (e: React.MouseEvent) => {
-              if (!scrollRef.current) return;
-              setIsDragging(true);
-              setStartX(e.pageX - scrollRef.current.offsetLeft);
-              setScrollLeft(scrollRef.current.scrollLeft);
-              scrollRef.current.style.cursor = "grabbing";
+            // Get actual post objects for selected IDs
+            const selectedPosts = allUserPosts.filter(
+              (post) => post?.id && selectedPostIds.includes(post.id),
+            );
+
+            // Filter posts for search (exclude already selected)
+            const availablePosts = allUserPosts.filter(
+              (post) => post?.id && !selectedPostIds.includes(post.id),
+            );
+
+            const filteredPosts = availablePosts.filter((post) =>
+              post.title.toLowerCase().includes(searchQuery.toLowerCase()),
+            );
+
+            const handleOpenDialog = () => {
+              setTempSelectedIds([...selectedPostIds]);
+              setSearchQuery("");
+              dialogRef.current?.showModal();
             };
 
-            const handleMouseLeave = () => {
-              setIsDragging(false);
-              if (scrollRef.current) {
-                scrollRef.current.style.cursor = "grab";
-              }
+            const handleTogglePost = (postId: string) => {
+              setTempSelectedIds((prev) =>
+                prev.includes(postId)
+                  ? prev.filter((id) => id !== postId)
+                  : [...prev, postId],
+              );
+            };
+            const handleConfirmSelection = () => {
+              field.handleChange(tempSelectedIds);
+              dialogRef.current?.close();
             };
 
-            const handleMouseUp = () => {
-              setIsDragging(false);
-              if (scrollRef.current) {
-                scrollRef.current.style.cursor = "grab";
-              }
+            const handleCancelSelection = () => {
+              setTempSelectedIds([...selectedPostIds]);
+              setSearchQuery("");
+              dialogRef.current?.close();
             };
 
-            const handleMouseMove = (e: React.MouseEvent) => {
-              if (!isDragging || !scrollRef.current) return;
-              e.preventDefault();
-              const x = e.pageX - scrollRef.current.offsetLeft;
-              const walk = (x - startX) * 1; // Multiply for faster scroll
-              scrollRef.current.scrollLeft = scrollLeft - walk;
+            const handleRemovePost = (postId: string) => {
+              field.handleChange(selectedPostIds.filter((id) => id !== postId));
             };
-            // TODO: on add wish show modal with list of wishes.
-            // allow to select/deselect many
-            // confirm selection/deselection with one button in dialog
-            // click on wish mini removes it
-            // Add a post title under the mini image
+
+            const hasChanges =
+              JSON.stringify([...tempSelectedIds].sort()) !==
+              JSON.stringify([...selectedPostIds].sort());
+
             return (
               <div className="w-full">
                 <div className="mb-2 flex items-center justify-between">
@@ -408,41 +408,177 @@ function RouteComponent() {
                       Wishes ({selectedPostIds.length})
                     </span>
                   </label>
-                  {!isAddingPost && (
-                    <button
-                      type="button"
-                      className="btn btn-sm btn-ghost gap-2"
-                      disabled={disabled}
-                    >
-                      <IconHeartPlus className="h-4 w-4" />
-                      Add Wish
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={handleOpenDialog}
+                    className="btn btn-sm btn-ghost gap-2"
+                    disabled={disabled}
+                  >
+                    <IconHeartPlus className="h-4 w-4" />
+                    Add Wishes
+                  </button>
                 </div>
-                <div
-                  ref={scrollRef}
-                  className="w-full cursor-grab overflow-x-auto select-none active:cursor-grabbing"
-                  onMouseDown={handleMouseDown}
-                  onMouseLeave={handleMouseLeave}
-                  onMouseUp={handleMouseUp}
-                  onMouseMove={handleMouseMove}
-                >
-                  <div className="flex gap-4 p-2">
-                    {selectedPostIds.map((wish) => (
-                      <div
-                        key={wish.id}
-                        className="bg-base-300 pointer-events-none relative flex size-18 shrink-0 items-center overflow-hidden rounded-3xl transition-all hover:scale-105"
-                      >
-                        {wish.title}
-                      </div>
-                    ))}
+
+                {/* Selected Posts List - Scrollable with max height */}
+                {selectedPosts.length > 0 ? (
+                  <div className="mb-4 max-h-80 space-y-2 overflow-y-auto pr-2">
+                    {selectedPosts.map((post) => {
+                      const hasValidImage =
+                        post.image && post.image !== "" && !imageError;
+
+                      return (
+                        <div
+                          key={post.id}
+                          className="border-primary/20 bg-base-200 hover:bg-base-300 flex items-center gap-3 rounded-3xl border p-3 transition-colors"
+                        >
+                          {hasValidImage ? (
+                            <img
+                              src={post.image}
+                              alt={post.title}
+                              className="size-12 rounded-2xl object-cover"
+                              onError={() => setImageError(true)}
+                            />
+                          ) : (
+                            <div className="from-base-300 to-primary/30 flex size-12 items-center justify-center rounded-2xl bg-linear-to-br">
+                              <IconPhoto className="text-primary size-6" />
+                            </div>
+                          )}
+
+                          <span className="flex-1 text-sm">{post.title}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePost(post.id!)}
+                            className="btn btn-ghost btn-sm btn-circle btn-error"
+                            disabled={disabled}
+                          >
+                            <IconX className="h-4 w-4" />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
+                ) : (
+                  <div className="text-base-content/60 border-base-300 rounded-lg border border-dashed py-8 text-center text-sm">
+                    No posts added yet. Click "Add Posts" to get started.
+                  </div>
+                )}
+
+                {/* Add Posts Dialog */}
+                <dialog ref={dialogRef} className="modal">
+                  <div className="modal-box max-w-2xl p-2 lg:p-6">
+                    <h3 className="mb-4 pt-4 pl-2 text-lg font-bold">
+                      Select Posts
+                    </h3>
+
+                    {/* Search Bar */}
+                    <label className="input input-bordered border-base-content/50 mb-4 flex w-full items-center gap-2">
+                      <IconSearch className="text-base-content/50 h-4 w-4" />
+                      <input
+                        type="text"
+                        placeholder="Search posts..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full grow"
+                      />
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery("")}
+                          className="btn btn-ghost btn-xs btn-circle"
+                        >
+                          <IconX className="h-3 w-3" />
+                        </button>
+                      )}
+                    </label>
+
+                    {/* Available Posts Grid - Scrollable */}
+                    <div className="mb-4 max-h-96 space-y-2 overflow-y-auto pr-2">
+                      {filteredPosts.length > 0 ? (
+                        filteredPosts.map((post) => {
+                          const isSelected = tempSelectedIds.includes(post.id!);
+                          const hasValidImage =
+                            post.image && post.image !== "" && !imageError;
+
+                          return (
+                            <button
+                              key={post.id}
+                              type="button"
+                              onClick={() => handleTogglePost(post.id!)}
+                              className={`flex w-full items-center gap-3 rounded-3xl border p-3 text-left transition-all ${
+                                isSelected
+                                  ? "border-primary bg-primary/10"
+                                  : "border-primary/20 bg-base-200 hover:bg-base-300"
+                              }`}
+                            >
+                              {hasValidImage ? (
+                                <img
+                                  src={post.image}
+                                  alt={post.title}
+                                  className="size-12 rounded-2xl object-cover"
+                                  onError={() => setImageError(true)}
+                                />
+                              ) : (
+                                <div className="from-base-300 to-primary/30 flex size-12 items-center justify-center rounded-2xl bg-linear-to-br">
+                                  <IconPhoto className="text-primary size-6" />
+                                </div>
+                              )}
+                              <span className="flex-1 text-sm">
+                                {post.title}
+                              </span>
+                              <div
+                                className={`flex h-5 w-5 items-center justify-center rounded-lg border-2 transition-colors ${
+                                  isSelected
+                                    ? "bg-primary border-primary"
+                                    : "border-primary/20"
+                                }`}
+                              >
+                                {isSelected && (
+                                  <IconCheck className="text-primary-content h-3 w-3" />
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <div className="text-base-content/60 py-8 text-center text-sm">
+                          {searchQuery
+                            ? "No posts found matching your search"
+                            : "No posts available"}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Dialog Actions */}
+                    <div className="mt-2 flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={handleConfirmSelection}
+                        className="btn btn-primary"
+                        disabled={!hasChanges}
+                      >
+                        Confirm Selection
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancelSelection}
+                        className="btn btn-ghost"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Backdrop */}
+                  <form method="dialog" className="modal-backdrop">
+                    <button type="button" onClick={handleCancelSelection}>
+                      Close
+                    </button>
+                  </form>
+                </dialog>
               </div>
             );
           }}
         />
-        <PostsManagement form={form} disabled={disabled} />
       </div>
       <div className="flex flex-col gap-4">
         <form.Subscribe
