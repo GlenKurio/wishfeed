@@ -1,6 +1,8 @@
 - Profile:
-  - Wishlists:
-    -- TODO: on wishlist update remove old cover from storage;
+  -- Add bio nad birthday to profile header;
+
+  -- TODO: on wishlist update remove old cover from storage;
+  -- On avatar update remove old avatar from storage;
 
   -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
 
