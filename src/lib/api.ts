@@ -6,6 +6,7 @@ import {
   getUserWishlists,
 } from "./firebase/db";
 import type { UserProfile } from "./types";
+import { USER_POSTS_PAGE_SIZE } from "./constsnts";
 
 export const profileQueryOptions = (userProfileId: string) =>
   queryOptions<UserProfile | null>({
@@ -18,7 +19,7 @@ export const profileQueryOptions = (userProfileId: string) =>
 export const userPostsQueryOptions = ({
   userId,
   published = true,
-  pageSize = 15,
+  pageSize = USER_POSTS_PAGE_SIZE,
   wishlist = "all",
 }: {
   userId: string;
@@ -27,7 +28,7 @@ export const userPostsQueryOptions = ({
   wishlist?: string;
 }) =>
   infiniteQueryOptions({
-    queryKey: ["posts", "user", userId, pageSize, wishlist] as const,
+    queryKey: ["posts", "user", userId, wishlist] as const,
     queryFn: ({
       pageParam,
     }: {

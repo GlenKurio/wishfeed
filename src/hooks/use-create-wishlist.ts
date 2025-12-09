@@ -13,6 +13,7 @@ export function useCreateWishlist() {
   const createWishlist = async (
     wishlistData: CreateWishlist,
     wishlistId?: string,
+    previousPostIds?: string[],
   ) => {
     // 1. Handle image upload if needed
     let imageUrl = wishlistData.cover_image;
@@ -36,7 +37,11 @@ export function useCreateWishlist() {
     };
 
     // 4. Save the post to Firestore
-    const result = await saveWishlistToDb(wishlistDataWithImage, wishlistId);
+    const result = await saveWishlistToDb(
+      wishlistDataWithImage,
+      wishlistId,
+      previousPostIds,
+    );
     return { result };
   };
 
@@ -44,20 +49,21 @@ export function useCreateWishlist() {
     mutationFn: ({
       wishlistData,
       wishlistId,
+      previousPostIds,
     }: {
       wishlistData: CreateWishlist;
       wishlistId?: string;
-    }) => createWishlist(wishlistData, wishlistId),
+      previousPostIds?: string[];
+    }) => createWishlist(wishlistData, wishlistId, previousPostIds),
 
     onSuccess: ({ result }) => {
-      if (result.message === "updated") {
-        toast.success("Wishlist updated!");
-      } else {
-        toast.success("Wishlist created!");
-      }
+      toast.success("Wishlist successfully saved!");
 
       queryClient.invalidateQueries({
         queryKey: ["wishlists", "user", user.uid],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["posts", "user", user.uid, result.id],
       });
 
       navigate({

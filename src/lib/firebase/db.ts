@@ -1,4 +1,6 @@
 import {
+  arrayRemove,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -340,53 +342,129 @@ export async function validateHandle(
   }
 }
 
+// export async function saveWishlistToDb(
+//   wishlistData: CreateWishlist,
+//   wishlistId?: string,
+// ) {
+//   const user = auth.currentUser;
+
+//   if (!user) {
+//     throw new Error("Must be logged in to create or update a wishlist.");
+//   }
+
+//   // Validate the incoming data
+//   const validatedData = createWishlistSchema.parse(wishlistData);
+
+//   if (wishlistId) {
+//     // If a wishlistId is provided, update the existing wishlist
+//     const wishlistRef = doc(db, "wishlists", wishlistId);
+
+//     // Prepare the data for update, ensuring we don't try to update the 'id' or 'owner'
+//     const { ...dataToUpdate } = validatedData;
+//     const wishlistToUpdate: Partial<
+//       Omit<DbWishlist, "id" | "owner" | "createdAt">
+//     > = {
+//       ...dataToUpdate,
+//       updatedAt: serverTimestamp(),
+//     };
+
+//     await updateDoc(wishlistRef, wishlistToUpdate);
+//     return { message: "updated" };
+//   } else {
+//     // If no wishlistId is provided, create a new wishlist
+
+//     // 1. Create a reference for a new document to get its auto-generated ID
+//     const newWishlistRef = doc(collection(db, "wishlists"));
+
+//     // 2. Include the new document's ID in the object you're creating
+//     const newWishlist: DbWishlist = {
+//       id: newWishlistRef.id, // Assign the generated ID here
+//       ...validatedData,
+//       owner: user.uid,
+//       createdAt: serverTimestamp(),
+//       updatedAt: serverTimestamp(),
+//     };
+
+//     // 3. Use setDoc to save the complete object to the new document reference
+//     await setDoc(newWishlistRef, newWishlist);
+//     return { message: "created" };
+//   }
+// }
+
 export async function saveWishlistToDb(
   wishlistData: CreateWishlist,
   wishlistId?: string,
-) {
+  previousPostIds?: string[], // This is the key optimization
+): Promise<Wishlist> {
   const user = auth.currentUser;
-
   if (!user) {
     throw new Error("Must be logged in to create or update a wishlist.");
   }
 
-  // Validate the incoming data
   const validatedData = createWishlistSchema.parse(wishlistData);
+  const newPostIds = validatedData.posts;
 
-  if (wishlistId) {
-    // If a wishlistId is provided, update the existing wishlist
+  // 1. Create a single batch for all database operations.
+  const batch = writeBatch(db);
+  let finalWishlistId: string;
+
+  if (wishlistId && previousPostIds !== undefined) {
+    // --- ATOMIC UPDATE PATH ---
+    finalWishlistId = wishlistId;
     const wishlistRef = doc(db, "wishlists", wishlistId);
 
-    // Prepare the data for update, ensuring we don't try to update the 'id' or 'owner'
-    const { ...dataToUpdate } = validatedData;
-    const wishlistToUpdate: Partial<
-      Omit<DbWishlist, "id" | "owner" | "createdAt">
-    > = {
-      ...dataToUpdate,
-      updatedAt: serverTimestamp(),
-    };
+    // Calculate changes using the passed-in array (no extra read!)
+    const postsToAdd = newPostIds.filter((id) => !previousPostIds.includes(id));
+    const postsToRemove = previousPostIds.filter(
+      (id) => !newPostIds.includes(id),
+    );
 
-    await updateDoc(wishlistRef, wishlistToUpdate);
-    return { message: "updated" };
+    // Add the wishlist update to the batch
+    const wishlistToUpdate = { ...validatedData, updatedAt: serverTimestamp() };
+    batch.update(wishlistRef, wishlistToUpdate);
+
+    // Add the "add" post updates to the batch
+    postsToAdd.forEach((postId) => {
+      const postRef = doc(db, "posts", postId);
+      batch.update(postRef, { wishlists: arrayUnion(wishlistId) });
+    });
+
+    // Add the "remove" post updates to the batch
+    postsToRemove.forEach((postId) => {
+      const postRef = doc(db, "posts", postId);
+      batch.update(postRef, { wishlists: arrayRemove(wishlistId) });
+    });
   } else {
-    // If no wishlistId is provided, create a new wishlist
-
-    // 1. Create a reference for a new document to get its auto-generated ID
+    // --- ATOMIC CREATE PATH ---
     const newWishlistRef = doc(collection(db, "wishlists"));
+    finalWishlistId = newWishlistRef.id;
 
-    // 2. Include the new document's ID in the object you're creating
     const newWishlist: DbWishlist = {
-      id: newWishlistRef.id, // Assign the generated ID here
+      id: finalWishlistId,
       ...validatedData,
       owner: user.uid,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
 
-    // 3. Use setDoc to save the complete object to the new document reference
-    await setDoc(newWishlistRef, newWishlist);
-    return { message: "created" };
+    // Add the wishlist creation to the batch
+    batch.set(newWishlistRef, newWishlist);
+
+    // Add all post updates to the batch
+    newPostIds.forEach((postId) => {
+      const postRef = doc(db, "posts", postId);
+      batch.update(postRef, { wishlists: arrayUnion(finalWishlistId) });
+    });
   }
+
+  // 2. Commit all operations at once.
+  // If any part fails, the entire batch is rolled back.
+  await batch.commit();
+
+  // 3. Fetch and return the final data for the UI
+  const finalWishlistRef = doc(db, "wishlists", finalWishlistId);
+  const finalDocSnap = await getDoc(finalWishlistRef);
+  return finalDocSnap.data() as Wishlist;
 }
 
 export async function getUserWishlists({

@@ -45,12 +45,12 @@ function RouteComponent() {
     userWishlistsQueryOptions({ userId: user.uid }),
   );
   const currentWishlist = wishlists.find((w) => w.id === params.listId);
-
+  // TODO: implement fetch more to fetch next page
   const { data: allPostsData } = useSuspenseInfiniteQuery(
     userPostsQueryOptions({
       userId: user.uid,
       published: true,
-      pageSize: 20,
+      pageSize: 100,
     }),
   );
 
@@ -80,7 +80,11 @@ function RouteComponent() {
     },
 
     onSubmit: async ({ value }) => {
-      createWishlist({ wishlistData: value, wishlistId: currentWishlist?.id });
+      createWishlist({
+        wishlistData: value,
+        wishlistId: currentWishlist?.id,
+        previousPostIds: currentWishlistPostIds,
+      });
     },
   });
 

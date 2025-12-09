@@ -48,12 +48,12 @@ export default function Wishlists({
           <Link
             key={w.id}
             to="/profile/$userId/$wishlist"
-            params={{ userId, wishlist: w.title }}
+            params={{ userId, wishlist: w.id }}
             className="relative shrink-0"
           >
             <div
               className={`bg-base-300 relative flex size-18 items-center overflow-hidden rounded-3xl transition-all ${
-                wishlist === w.title
+                wishlist === w.id
                   ? "ring-primary scale-105 shadow-lg ring-2"
                   : "hover:scale-105"
               }`}
