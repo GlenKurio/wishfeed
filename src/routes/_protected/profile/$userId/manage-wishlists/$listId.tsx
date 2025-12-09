@@ -168,7 +168,7 @@ function RouteComponent() {
                 <div className="mt-2 flex w-full flex-col items-start gap-4 sm:flex-row sm:items-center">
                   {/* Cover Preview */}
                   <div className="avatar shrink-0">
-                    <div className="border-primary size-50 rounded-3xl border-2 border-dashed lg:size-80">
+                    <div className="border-base-content/50 size-50 rounded-3xl border-2 border-dashed lg:size-80">
                       {hasImage ? (
                         <img
                           src={value}

@@ -192,7 +192,7 @@ function RouteComponent() {
                 <div className="mt-2 flex w-full flex-col items-start gap-4 sm:flex-row sm:items-center">
                   {/* Cover Preview */}
                   <div className="avatar shrink-0">
-                    <div className="border-primary size-50 rounded-3xl border-2 border-dashed lg:size-80">
+                    <div className="border-base-content/50 size-50 rounded-3xl border-2 border-dashed lg:size-80">
                       {hasImage ? (
                         <img
                           src={value}
@@ -269,12 +269,12 @@ function RouteComponent() {
                   <span className="label-text font-medium">URL</span>
                 </label>
                 <label
-                  className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                  className={`input input-bordered border-base-content/50 flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
                 >
                   <IconLink
                     width="20"
                     height="20"
-                    className={hasError ? "text-error" : ""}
+                    className={hasError ? "text-error" : "text-base-content/50"}
                   />
                   <input
                     id={field.name}
@@ -317,12 +317,12 @@ function RouteComponent() {
                   </span>
                 </label>
                 <label
-                  className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                  className={`input input-bordered border-base-content/50 flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
                 >
                   <IconTag
                     width="20"
                     height="20"
-                    className={hasError ? "text-error" : ""}
+                    className={hasError ? "text-error" : "text-base-content/50"}
                   />
                   <input
                     id={field.name}
@@ -365,12 +365,12 @@ function RouteComponent() {
                   </span>
                 </label>
                 <label
-                  className={`textarea textarea-bordered border-base-content flex w-full gap-2 p-3 ${hasError ? "textarea-error border-error" : ""}`}
+                  className={`textarea textarea-bordered border-base-content/50 flex w-full gap-2 p-3 ${hasError ? "textarea-error border-error" : ""}`}
                 >
                   <IconFileText
                     width="20"
                     height="20"
-                    className={`shrink-0 ${hasError ? "text-error" : ""}`}
+                    className={`shrink-0 ${hasError ? "text-error" : "text-base-content/50"}`}
                   />
                   <textarea
                     id={field.name}
@@ -411,12 +411,14 @@ function RouteComponent() {
                     <span className="label-text font-medium">Brand</span>
                   </label>
                   <label
-                    className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                    className={`input input-bordered border-base-content/50 flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
                   >
                     <IconBuildingStore
                       width="20"
                       height="20"
-                      className={hasError ? "text-error" : ""}
+                      className={
+                        hasError ? "text-error" : "text-base-content/50"
+                      }
                     />
                     <input
                       id={field.name}
@@ -455,12 +457,14 @@ function RouteComponent() {
                     <span className="label-text font-medium">Price</span>
                   </label>
                   <label
-                    className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                    className={`input input-bordered border-base-content/50 flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
                   >
                     <IconCurrencyDollar
                       width="20"
                       height="20"
-                      className={hasError ? "text-error" : ""}
+                      className={
+                        hasError ? "text-error" : "text-base-content/50"
+                      }
                     />
                     <input
                       id={field.name}

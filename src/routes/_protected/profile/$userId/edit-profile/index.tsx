@@ -260,12 +260,14 @@ function RouteComponent() {
                     </span>
                   </label>
                   <label
-                    className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                    className={`input input-bordered border-base-content/50 flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
                   >
                     <IconUser
                       width="20"
                       height="20"
-                      className={hasError ? "text-error" : ""}
+                      className={
+                        hasError ? "text-error" : "text-base-content/50"
+                      }
                     />
                     <input
                       id={field.name}
@@ -353,12 +355,14 @@ function RouteComponent() {
                     )}
                   </label>
                   <label
-                    className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                    className={`input input-bordered border-base-content/50 flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
                   >
                     <IconAt
                       width="20"
                       height="20"
-                      className={hasError ? "text-error" : ""}
+                      className={
+                        hasError ? "text-error" : "text-base-content/50"
+                      }
                     />
                     <input
                       id={field.name}
@@ -405,12 +409,12 @@ function RouteComponent() {
                     </span>
                   </label>
                   <label
-                    className={`textarea textarea-bordered border-base-content flex w-full items-start gap-2 ${hasError ? "textarea-error border-error" : ""}`}
+                    className={`textarea textarea-bordered border-base-content/50 flex w-full items-start gap-2 ${hasError ? "textarea-error border-error" : ""}`}
                   >
                     <IconMessage
                       width="20"
                       height="20"
-                      className={`mt-1 ${hasError ? "text-error" : ""}`}
+                      className={`mt-1 ${hasError ? "text-error" : "text-base-content/50"}`}
                     />
                     <textarea
                       id={field.name}
@@ -451,12 +455,14 @@ function RouteComponent() {
                     </span>
                   </label>
                   <label
-                    className={`input input-bordered border-base-content flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
+                    className={`input input-bordered border-base-content/50 flex w-full items-center gap-2 ${hasError ? "input-error border-error" : ""}`}
                   >
                     <IconCake
                       width="20"
                       height="20"
-                      className={hasError ? "text-error" : ""}
+                      className={
+                        hasError ? "text-error" : "text-base-content/50"
+                      }
                     />
 
                     <input
@@ -493,9 +499,13 @@ function RouteComponent() {
                       Profile visibility
                     </span>
                   </label>
-                  <div className="border-base-content flex w-full items-center justify-between rounded-full border-2 px-3 py-1">
+                  <div className="border-base-content/50 flex w-full items-center justify-between rounded-full border-2 px-3 py-1">
                     <div className="flex items-center gap-3">
-                      <IconWorld width="20" height="20" />
+                      <IconWorld
+                        width="20"
+                        height="20"
+                        className="text-base-content/50"
+                      />
                       <div>
                         {field.state.value === true ? (
                           <>
@@ -561,8 +571,8 @@ function RouteComponent() {
             }}
           />
           <Link
-            to="/profile/$userId"
-            params={{ userId: user.uid }}
+            to="/profile/$userId/$wishlist"
+            params={{ userId: user.uid, wishlist: "all" }}
             className="btn"
             disabled={disabled}
             onClick={() => {
