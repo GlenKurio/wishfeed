@@ -44,10 +44,9 @@ function RouteComponent() {
               }}
               className="group/list bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-4xl"
             >
-              {/* TODO: make cover to use 'frame image with font-family-cursive text in the center with list title!' */}
               {/* Image (base layer) */}
               <img
-                src={list.cover_image || "/placeholder-whishlist.png"}
+                src={list.cover_image || "/placeholder-wishlist.png"}
                 alt={`Post ${list.id}`}
                 className="h-full w-full object-cover object-center transition-transform duration-300 group-hover/list:scale-105"
               />
@@ -56,7 +55,7 @@ function RouteComponent() {
               <div className="from-primary/40 via-primary/10 pointer-events-none absolute inset-0 z-10 bg-linear-to-b to-transparent opacity-0 transition-opacity duration-300 group-hover/list:opacity-100" />
 
               {/* Title (smooth fade + slide up) */}
-              <p className="text-base-100 pointer-events-none absolute top-3 left-3 z-20 translate-y-1 font-bold opacity-0 transition-all duration-300 group-hover/list:translate-y-0 group-hover/list:opacity-100">
+              <p className="text-base-100 pointer-events-none absolute top-3 left-3 z-20 translate-y-1 text-xl font-bold opacity-0 transition-all duration-300 group-hover/list:translate-y-0 group-hover/list:opacity-100">
                 {list.title}
               </p>
             </Link>

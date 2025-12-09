@@ -26,21 +26,21 @@ export default function Wishlists({
           className="shrink-0"
         >
           <div
-            className={`relative size-16 overflow-hidden rounded-3xl transition-all ${
+            className={`bg-base-300 relative flex size-18 items-center justify-center overflow-hidden rounded-3xl transition-all ${
               wishlist === "all" || !wishlist
                 ? "ring-primary scale-105 shadow-lg ring-2"
                 : "hover:scale-105"
             }`}
           >
-            <div className="from-base-300 to-primary/10 absolute inset-0 flex items-center justify-center bg-linear-to-br">
-              <img
-                src="/ampersand.png"
-                alt="All wishes list"
-                className="size-12"
-              />
-            </div>
+            <img
+              src="/ampersand.png"
+              alt="All wishes list"
+              className="size-12"
+            />
           </div>
-          <p className="mt-2 text-center text-xs font-medium">All Wishes</p>
+          <p className="mt-2 line-clamp-1 max-w-18 truncate text-center text-[11px] font-medium lg:text-xs">
+            All Wishes
+          </p>
         </Link>
 
         {/* Wishlist Cards */}
@@ -52,21 +52,27 @@ export default function Wishlists({
             className="relative shrink-0"
           >
             <div
-              className={`relative size-16 overflow-hidden rounded-3xl transition-all ${
+              className={`bg-base-300 relative flex size-18 items-center overflow-hidden rounded-3xl transition-all ${
                 wishlist === w.title
                   ? "ring-primary scale-105 shadow-lg ring-2"
                   : "hover:scale-105"
               }`}
             >
-              {/* TODO: make mini placeholder look good too. */}
-              <img
-                src={w.cover_image || "/public/placeholder-whishlist.png"}
-                alt={w.title}
-                className="h-full w-full object-cover"
-              />
-              <div className="from-primary/10 absolute inset-0 bg-linear-to-t to-transparent" />
+              {w.cover_image ? (
+                <img
+                  src={w.cover_image || "/cover-wishlist-mini.png"}
+                  alt={w.title}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <p className="font-family-cursive mt-1 line-clamp-1 w-full truncate ps-1 text-center text-sm leading-5 tracking-wider">
+                  {w.title} asdasd asd as da
+                </p>
+              )}
             </div>
-            <p className="mt-2 text-center text-xs font-medium">{w.title}</p>
+            <p className="mt-2 line-clamp-1 max-w-18 truncate text-center text-[11px] font-medium lg:text-xs">
+              {w.title}
+            </p>
           </Link>
         ))}
 
@@ -78,31 +84,31 @@ export default function Wishlists({
               className="shrink-0"
             >
               <div
-                className={`relative size-16 overflow-hidden rounded-3xl transition-all ${
+                className={`bg-base-300 relative flex size-18 items-center justify-center overflow-hidden rounded-3xl transition-all ${
                   wishlist === "drafts" || !wishlist
                     ? "ring-primary scale-105 shadow-lg ring-2"
                     : "hover:scale-105"
                 }`}
               >
-                <div className="from-base-300 to-primary/10 absolute inset-0 flex items-center justify-center bg-linear-to-br">
-                  <img
-                    src="/drafts.png"
-                    alt="All wishes list"
-                    className="size-12"
-                  />
-                </div>
+                <img
+                  src="/drafts.png"
+                  alt="All wishes list"
+                  className="size-12"
+                />
               </div>
-              <p className="mt-2 text-center text-xs font-medium">Drafts</p>
+              <p className="mt-2 line-clamp-1 max-w-18 truncate text-center text-[11px] font-medium lg:text-xs">
+                Drafts
+              </p>
             </Link>
             <Link
               to="/profile/$userId/manage-wishlists"
               params={{ userId: userId }}
               className="shrink-0"
             >
-              <div className="group hover:border-primary hover:bg-base-200 flex size-16 items-center justify-center rounded-3xl border-2 border-dashed border-gray-300 transition-colors">
+              <div className="group hover:border-primary hover:bg-base-200 flex size-18 items-center justify-center rounded-3xl border-2 border-dashed border-gray-300 transition-colors">
                 <IconListDetails className="group-hover:text-primary size-8 text-gray-400 transition-colors" />
               </div>
-              <p className="mt-2 text-center text-xs font-medium text-gray-600">
+              <p className="mt-2 line-clamp-1 max-w-18 truncate text-center text-[11px] font-medium text-gray-600 lg:text-xs">
                 Manage
               </p>
             </Link>
