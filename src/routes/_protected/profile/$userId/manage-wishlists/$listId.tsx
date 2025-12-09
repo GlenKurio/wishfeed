@@ -7,7 +7,9 @@ import { userWishlistsQueryOptions } from "@/lib/api";
 import { createWishlistSchema } from "@/lib/types";
 import {
   IconFileText,
+  IconHeartPlus,
   IconPhoto,
+  IconPlus,
   IconTag,
   IconTrash,
   IconUpload,
@@ -19,7 +21,7 @@ import {
   useNavigate,
   useParams,
 } from "@tanstack/react-router";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import PostsManagement from "../../-components/posts-management";
 
 export const Route = createFileRoute(
@@ -27,6 +29,33 @@ export const Route = createFileRoute(
 )({
   component: RouteComponent,
 });
+
+const availablePosts = [
+  {
+    id: "post1",
+    title: "Amazing Product 1",
+    image: "https://placehold.co/100",
+  },
+  { id: "post2", title: "Cool Item 2", image: "https://placehold.co/100" },
+  { id: "post3", title: "Must Have 3", image: "https://placehold.co/100" },
+  { id: "post4", title: "Great Find 4", image: "https://placehold.co/100" },
+  {
+    id: "post1",
+    title: "Amazing Product 1",
+    image: "https://placehold.co/100",
+  },
+  { id: "post2", title: "Cool Item 2", image: "https://placehold.co/100" },
+  { id: "post3", title: "Must Have 3", image: "https://placehold.co/100" },
+  { id: "post4", title: "Great Find 4", image: "https://placehold.co/100" },
+  {
+    id: "post1",
+    title: "Amazing Product 1",
+    image: "https://placehold.co/100",
+  },
+  { id: "post2", title: "Cool Item 2", image: "https://placehold.co/100" },
+  { id: "post3", title: "Must Have 3", image: "https://placehold.co/100" },
+  { id: "post4", title: "Great Find 4", image: "https://placehold.co/100" },
+];
 
 function RouteComponent() {
   const user = useAuth();
@@ -38,6 +67,13 @@ function RouteComponent() {
   const { data: wishlists } = useSuspenseQuery(
     userWishlistsQueryOptions({ userId: user.uid }),
   );
+
+  // Drag scroll state
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
   const currentWishlist = wishlists.find((w) => w.id === params.listId);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,7 +84,7 @@ function RouteComponent() {
       cover_image: currentWishlist?.cover_image || "",
       title: currentWishlist?.title || "",
       description: currentWishlist?.description || "",
-      posts: currentWishlist?.posts || ([] as string[]),
+      posts: availablePosts || ([] as string[]),
     },
 
     validators: {
@@ -320,6 +356,88 @@ function RouteComponent() {
                     {message}
                   </div>
                 )}
+              </div>
+            );
+          }}
+        />
+        <form.Field
+          name="posts"
+          children={(field) => {
+            const selectedPostIds = field.state.value || [];
+            const isAddingPost = false;
+
+            const handleMouseDown = (e: React.MouseEvent) => {
+              if (!scrollRef.current) return;
+              setIsDragging(true);
+              setStartX(e.pageX - scrollRef.current.offsetLeft);
+              setScrollLeft(scrollRef.current.scrollLeft);
+              scrollRef.current.style.cursor = "grabbing";
+            };
+
+            const handleMouseLeave = () => {
+              setIsDragging(false);
+              if (scrollRef.current) {
+                scrollRef.current.style.cursor = "grab";
+              }
+            };
+
+            const handleMouseUp = () => {
+              setIsDragging(false);
+              if (scrollRef.current) {
+                scrollRef.current.style.cursor = "grab";
+              }
+            };
+
+            const handleMouseMove = (e: React.MouseEvent) => {
+              if (!isDragging || !scrollRef.current) return;
+              e.preventDefault();
+              const x = e.pageX - scrollRef.current.offsetLeft;
+              const walk = (x - startX) * 1; // Multiply for faster scroll
+              scrollRef.current.scrollLeft = scrollLeft - walk;
+            };
+            // TODO: on add wish show modal with list of wishes.
+            // allow to select/deselect many
+            // confirm selection/deselection with one button in dialog
+            // click on wish mini removes it
+            // Add a post title under the mini image
+            return (
+              <div className="w-full">
+                <div className="mb-2 flex items-center justify-between">
+                  <label className="label ml-1">
+                    <span className="label-text font-medium">
+                      Wishes ({selectedPostIds.length})
+                    </span>
+                  </label>
+                  {!isAddingPost && (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-ghost gap-2"
+                      disabled={disabled}
+                    >
+                      <IconHeartPlus className="h-4 w-4" />
+                      Add Wish
+                    </button>
+                  )}
+                </div>
+                <div
+                  ref={scrollRef}
+                  className="w-full cursor-grab overflow-x-auto select-none active:cursor-grabbing"
+                  onMouseDown={handleMouseDown}
+                  onMouseLeave={handleMouseLeave}
+                  onMouseUp={handleMouseUp}
+                  onMouseMove={handleMouseMove}
+                >
+                  <div className="flex gap-4 p-2">
+                    {selectedPostIds.map((wish) => (
+                      <div
+                        key={wish.id}
+                        className="bg-base-300 pointer-events-none relative flex size-18 shrink-0 items-center overflow-hidden rounded-3xl transition-all hover:scale-105"
+                      >
+                        {wish.title}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             );
           }}
