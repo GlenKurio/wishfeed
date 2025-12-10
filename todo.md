@@ -1,39 +1,41 @@
 - Profile:
-  -- Add bio nad birthday to profile header;
 
   -- TODO: on wishlist update remove old cover from storage;
   -- On avatar update remove old avatar from storage;
 
-  -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
+  -- Add breadcrumbs and "Go back" buttons to pages(header?)
 
-  -- Add breadcrumbs and "Go back" actions to pages(header?)
-
-  -- Display different actions on the proile page if visitor is not the profile owner; -- In post actions for owner allow to select wishlists to add post to;
-
-  -- On hover of the post in proifle show actions (same actions that in full feed post card).
   -- Show info and allow actions based on user profile privacy settings;
-
-  -- Create post actions: one for author, one for other users;
-
+  -- Display different actions on the proile page if visitor is not the profile owner; -- In post actions for owner allow to select wishlists to add post to;
   -- Add ui to get followers, following; Implement functionality to follow/unfollow;
 
   -- Allow to open the page with followers and following with search;
 
-  -- Get Feed posts for user from people user follows:
-  -- Get user feed posts in loader/preload and also get user profiles for posts? Profile later can be reused from cache in profile page layout loader? SHould I load all the profiles from feed or better to keep some data in post in db and just update it using firebase function when user updates the profile?
+- Post:
+  -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
+  -- On hover of the post in proifle show actions (same actions that in full feed post card).
+  - Finish post design:
+    -- Like posts (add ratelimit to it)
+    -- Save post
+    -- Finish all the todos in the component;
+    -- Add actions to post (report, delete, edit, hide?)
 
-- Finish post design:
-  -- Like posts (add ratelimit to it)
-  -- Save post
-  -- Finish all the todos in the component;
-  -- Add actions to post (report, delete, edit, hide?)
+  -- Get Feed posts for user from people user follows;
+
+- Gifting:
+  -- How 'gifting' will work?
+
+- Notifications:
+  -- Notifications feature
+
+- Search:
+  -- Search feature
 
 - Auth:
 
-  -- Create a function to update posts when user updates the profile doc in firestore; (Name, handle, or avatar)
   -- Improve magic link email design;
 
-- Create wish:
+- Create wish (polish):
 
   -- Add create wish ui and functionality to frontend;
   -- Allow to paste the link by pressing cmd+v on create wish page;
@@ -48,8 +50,6 @@
   -- Allow to create post by simply pasting the link to the product page;
   -- Allow to share the product to the app from the product page website - Bookmarklet for desktop browser, Web Share Target API (PWA feature);
   -- Create first wisher in Firestore and fetch them into feed
-
-- How 'gifting' will work?
 
 # Finishing
 
