@@ -1,7 +1,5 @@
 - Profile:
 
-  -- On avatar update remove old avatar from storage;
-
   -- Add breadcrumbs and "Go back" buttons to pages(header?)
 
   -- Show info and allow actions based on user profile privacy settings;
