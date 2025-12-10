@@ -84,6 +84,7 @@ function RouteComponent() {
         wishlistData: value,
         wishlistId: currentWishlist?.id,
         previousPostIds: currentWishlistPostIds,
+        previousCoverImageUrl: currentWishlist?.cover_image,
       });
     },
   });

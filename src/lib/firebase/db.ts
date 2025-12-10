@@ -66,7 +66,7 @@ export async function createUserProfile(user: User) {
     updatedAt: serverTimestamp(),
     followers: [],
     following: [],
-    posts: 0,
+    postsCount: 0,
     createdAt: serverTimestamp(),
   };
 
@@ -391,10 +391,87 @@ export async function validateHandle(
 //   }
 // }
 
+// export async function saveWishlistToDb(
+//   wishlistData: CreateWishlist,
+//   wishlistId?: string,
+//   previousPostIds?: string[], // This is the key optimization
+// ): Promise<Wishlist> {
+//   const user = auth.currentUser;
+//   if (!user) {
+//     throw new Error("Must be logged in to create or update a wishlist.");
+//   }
+
+//   const validatedData = createWishlistSchema.parse(wishlistData);
+//   const newPostIds = validatedData.posts;
+
+//   // 1. Create a single batch for all database operations.
+//   const batch = writeBatch(db);
+//   let finalWishlistId: string;
+
+//   if (wishlistId && previousPostIds !== undefined) {
+//     // --- ATOMIC UPDATE PATH ---
+//     finalWishlistId = wishlistId;
+//     const wishlistRef = doc(db, "wishlists", wishlistId);
+
+//     // Calculate changes using the passed-in array (no extra read!)
+//     const postsToAdd = newPostIds.filter((id) => !previousPostIds.includes(id));
+//     const postsToRemove = previousPostIds.filter(
+//       (id) => !newPostIds.includes(id),
+//     );
+
+//     // Add the wishlist update to the batch
+//     const wishlistToUpdate = { ...validatedData, updatedAt: serverTimestamp() };
+//     batch.update(wishlistRef, wishlistToUpdate);
+
+//     // Add the "add" post updates to the batch
+//     postsToAdd.forEach((postId) => {
+//       const postRef = doc(db, "posts", postId);
+//       batch.update(postRef, { wishlists: arrayUnion(wishlistId) });
+//     });
+
+//     // Add the "remove" post updates to the batch
+//     postsToRemove.forEach((postId) => {
+//       const postRef = doc(db, "posts", postId);
+//       batch.update(postRef, { wishlists: arrayRemove(wishlistId) });
+//     });
+//   } else {
+//     // --- ATOMIC CREATE PATH ---
+//     const newWishlistRef = doc(collection(db, "wishlists"));
+//     finalWishlistId = newWishlistRef.id;
+
+//     const newWishlist: DbWishlist = {
+//       id: finalWishlistId,
+//       ...validatedData,
+//       owner: user.uid,
+//       createdAt: serverTimestamp(),
+//       updatedAt: serverTimestamp(),
+//     };
+
+//     // Add the wishlist creation to the batch
+//     batch.set(newWishlistRef, newWishlist);
+
+//     // Add all post updates to the batch
+//     newPostIds.forEach((postId) => {
+//       const postRef = doc(db, "posts", postId);
+//       batch.update(postRef, { wishlists: arrayUnion(finalWishlistId) });
+//     });
+//   }
+
+//   // 2. Commit all operations at once.
+//   // If any part fails, the entire batch is rolled back.
+//   await batch.commit();
+
+//   // 3. Fetch and return the final data for the UI
+//   const finalWishlistRef = doc(db, "wishlists", finalWishlistId);
+//   const finalDocSnap = await getDoc(finalWishlistRef);
+//   return finalDocSnap.data() as Wishlist;
+// }
+
 export async function saveWishlistToDb(
   wishlistData: CreateWishlist,
   wishlistId?: string,
-  previousPostIds?: string[], // This is the key optimization
+  previousPostIds?: string[],
+  previousCoverImageUrl?: string, // <-- 1. Add new parameter
 ): Promise<Wishlist> {
   const user = auth.currentUser;
   if (!user) {
@@ -403,39 +480,52 @@ export async function saveWishlistToDb(
 
   const validatedData = createWishlistSchema.parse(wishlistData);
   const newPostIds = validatedData.posts;
+  const newCoverImageUrl = validatedData.cover_image;
 
-  // 1. Create a single batch for all database operations.
   const batch = writeBatch(db);
   let finalWishlistId: string;
+  let deleteImagePromise: Promise<void> | null = null;
 
   if (wishlistId && previousPostIds !== undefined) {
     // --- ATOMIC UPDATE PATH ---
     finalWishlistId = wishlistId;
     const wishlistRef = doc(db, "wishlists", wishlistId);
 
-    // Calculate changes using the passed-in array (no extra read!)
+    // 2. Check if the cover image has changed and needs to be deleted
+    if (previousCoverImageUrl && previousCoverImageUrl !== newCoverImageUrl) {
+      try {
+        const oldImageRef = ref(storage, previousCoverImageUrl);
+        deleteImagePromise = deleteObject(oldImageRef);
+      } catch (error) {
+        // This can happen if the URL is malformed. Log it but don't block the update.
+        console.error(
+          "Failed to create reference to old image for deletion:",
+          error,
+        );
+      }
+    }
+
+    // (The rest of your existing update logic remains the same)
     const postsToAdd = newPostIds.filter((id) => !previousPostIds.includes(id));
     const postsToRemove = previousPostIds.filter(
       (id) => !newPostIds.includes(id),
     );
 
-    // Add the wishlist update to the batch
     const wishlistToUpdate = { ...validatedData, updatedAt: serverTimestamp() };
     batch.update(wishlistRef, wishlistToUpdate);
 
-    // Add the "add" post updates to the batch
     postsToAdd.forEach((postId) => {
       const postRef = doc(db, "posts", postId);
       batch.update(postRef, { wishlists: arrayUnion(wishlistId) });
     });
 
-    // Add the "remove" post updates to the batch
     postsToRemove.forEach((postId) => {
       const postRef = doc(db, "posts", postId);
       batch.update(postRef, { wishlists: arrayRemove(wishlistId) });
     });
   } else {
     // --- ATOMIC CREATE PATH ---
+    // (This path remains unchanged)
     const newWishlistRef = doc(collection(db, "wishlists"));
     finalWishlistId = newWishlistRef.id;
 
@@ -446,10 +536,7 @@ export async function saveWishlistToDb(
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-
-    // Add the wishlist creation to the batch
     batch.set(newWishlistRef, newWishlist);
-
     // Add all post updates to the batch
     newPostIds.forEach((postId) => {
       const postRef = doc(db, "posts", postId);
@@ -457,11 +544,21 @@ export async function saveWishlistToDb(
     });
   }
 
-  // 2. Commit all operations at once.
-  // If any part fails, the entire batch is rolled back.
-  await batch.commit();
+  // 3. Concurrently execute the Firestore batch and the image deletion
+  const allPromises: Promise<any>[] = [batch.commit()];
+  if (deleteImagePromise) {
+    // We add a catch here so a failed image deletion (e.g., file not found)
+    // doesn't cause the entire operation to throw an error for the user.
+    allPromises.push(
+      deleteImagePromise.catch((err) =>
+        console.warn("Old image deletion failed but wishlist was saved:", err),
+      ),
+    );
+  }
 
-  // 3. Fetch and return the final data for the UI
+  await Promise.all(allPromises);
+
+  // Fetch and return the final data for the UI
   const finalWishlistRef = doc(db, "wishlists", finalWishlistId);
   const finalDocSnap = await getDoc(finalWishlistRef);
   return finalDocSnap.data() as Wishlist;

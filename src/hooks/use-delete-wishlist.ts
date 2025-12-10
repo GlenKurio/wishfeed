@@ -10,7 +10,6 @@ export function useDeleteWishlist() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const deleteWishlistFromDb = async ({ wishlist }: { wishlist: Wishlist }) => {
-    // TODO: delete cover from storage!
     await deleteWishlist({ wishlist });
 
     return { wishlist };

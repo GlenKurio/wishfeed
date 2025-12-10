@@ -14,6 +14,7 @@ export function useCreateWishlist() {
     wishlistData: CreateWishlist,
     wishlistId?: string,
     previousPostIds?: string[],
+    previousCoverImageUrl?: string,
   ) => {
     // 1. Handle image upload if needed
     let imageUrl = wishlistData.cover_image;
@@ -41,6 +42,7 @@ export function useCreateWishlist() {
       wishlistDataWithImage,
       wishlistId,
       previousPostIds,
+      previousCoverImageUrl,
     );
     return { result };
   };
@@ -50,11 +52,19 @@ export function useCreateWishlist() {
       wishlistData,
       wishlistId,
       previousPostIds,
+      previousCoverImageUrl,
     }: {
       wishlistData: CreateWishlist;
       wishlistId?: string;
       previousPostIds?: string[];
-    }) => createWishlist(wishlistData, wishlistId, previousPostIds),
+      previousCoverImageUrl?: string;
+    }) =>
+      createWishlist(
+        wishlistData,
+        wishlistId,
+        previousPostIds,
+        previousCoverImageUrl,
+      ),
 
     onSuccess: ({ result }) => {
       toast.success("Wishlist successfully saved!");
