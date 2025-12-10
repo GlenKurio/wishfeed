@@ -276,26 +276,88 @@ export async function getUserProfileById({
   return userProfile;
 }
 
+// export async function editUserProfile({
+//   updatedUserProfile,
+// }: {
+//   updatedUserProfile: UserProfile;
+// }) {
+//   const user = auth.currentUser;
+
+//   if (!user || user.uid !== updatedUserProfile.uid) {
+//     throw new Error("Must be logged in to update a profile.");
+//   }
+
+//   // 1. Update Firebase Authentication profile
+//   await updateProfile(user, {
+//     displayName: updatedUserProfile.displayName,
+//     photoURL: updatedUserProfile.photoURL,
+//   });
+
+//   // 2. Update the userProfile document in Firestore
+//   const userProfileDocRef = doc(db, "users", updatedUserProfile.uid);
+//   await updateDoc(userProfileDocRef, updatedUserProfile);
+// }
+
 export async function editUserProfile({
   updatedUserProfile,
+  oldPhotoURL,
 }: {
   updatedUserProfile: UserProfile;
+  oldPhotoURL?: string | null;
 }) {
   const user = auth.currentUser;
 
   if (!user || user.uid !== updatedUserProfile.uid) {
-    throw new Error("Must be logged in to update a profile.");
+    throw new Error("You are not authorized to perform this action.");
   }
 
-  // 1. Update Firebase Authentication profile
-  await updateProfile(user, {
-    displayName: updatedUserProfile.displayName,
-    photoURL: updatedUserProfile.photoURL,
-  });
+  let deleteImagePromise: Promise<void> | null = null;
 
-  // 2. Update the userProfile document in Firestore
-  const userProfileDocRef = doc(db, "users", updatedUserProfile.uid);
-  await updateDoc(userProfileDocRef, updatedUserProfile);
+  //  Use the passed-in oldPhotoURL to check if deletion is needed
+  if (oldPhotoURL && oldPhotoURL !== updatedUserProfile.photoURL) {
+    // Safety check: only delete images from our own storage
+    if (oldPhotoURL.includes("firebasestorage.googleapis.com")) {
+      try {
+        const oldImageRef = ref(storage, oldPhotoURL);
+        deleteImagePromise = deleteObject(oldImageRef);
+      } catch (error) {
+        console.error("Could not create reference to old avatar:", error);
+      }
+    }
+  }
+
+  // 4. Concurrently run all update and delete operations
+  try {
+    const authUpdatePromise = updateProfile(user, {
+      displayName: updatedUserProfile.displayName,
+      photoURL: updatedUserProfile.photoURL,
+    });
+
+    const userProfileDocRef = doc(db, "users", updatedUserProfile.uid);
+    const firestoreUpdatePromise = updateDoc(userProfileDocRef, {
+      ...updatedUserProfile, // Pass the whole object to update all fields
+    });
+
+    const allPromises: Promise<void>[] = [
+      authUpdatePromise,
+      firestoreUpdatePromise,
+    ];
+    if (deleteImagePromise) {
+      allPromises.push(
+        deleteImagePromise.catch((err) => {
+          console.warn(
+            "Old avatar deletion failed, but profile update succeeded:",
+            err,
+          );
+        }),
+      );
+    }
+
+    await Promise.all(allPromises);
+  } catch (error) {
+    console.error("Failed to update user profile:", error);
+    throw new Error("An error occurred while updating the profile.");
+  }
 }
 
 /**
@@ -545,7 +607,7 @@ export async function saveWishlistToDb(
   }
 
   // 3. Concurrently execute the Firestore batch and the image deletion
-  const allPromises: Promise<any>[] = [batch.commit()];
+  const allPromises: Promise<void | null>[] = [batch.commit()];
   if (deleteImagePromise) {
     // We add a catch here so a failed image deletion (e.g., file not found)
     // doesn't cause the entire operation to throw an error for the user.

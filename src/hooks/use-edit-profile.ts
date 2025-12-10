@@ -46,6 +46,7 @@ export function useEditProfile() {
 
     await editUserProfile({
       updatedUserProfile: updatedProfile,
+      oldPhotoURL: userProfile.data.photoURL,
     });
 
     return { updatedUserProfileDb: updatedProfile };
