@@ -1,12 +1,12 @@
 import EmptyFrame from "@/components/empty-frame";
+import { useAuth } from "@/hooks/use-auth";
+import { useFollowUser } from "@/hooks/use-follow-user";
+import { useGetUserProfile } from "@/hooks/use-get-user-profile";
+import { profileQueryOptions } from "@/lib/api";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import PostsGrid from "../../-components/posts-grid";
 import ProfileHeader from "../../-components/profile-header";
 import Wishlists from "../../-components/wishlists";
-import { profileQueryOptions } from "@/lib/api";
-import { useAuth } from "@/hooks/use-auth";
-import { useFollowUser } from "@/hooks/use-follow-user";
-import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_protected/profile/$userId/$wishlist/")({
   beforeLoad: async ({ context, params }) => {
@@ -27,7 +27,10 @@ function RouteComponent() {
   const authUser = useAuth();
   const navigate = useNavigate();
   const { userId } = Route.useParams();
-  const { data: userProfile } = useSuspenseQuery(profileQueryOptions(userId));
+  const { data: userProfile } = useGetUserProfile({
+    userProfileId: userId,
+    realtime: authUser?.uid === userId, // Only for own profile
+  });
   const { isFollowing } = useFollowUser({
     userId: userProfile?.uid,
   });
