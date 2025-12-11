@@ -6,6 +6,7 @@ import { useDeleteWishlist } from "@/hooks/use-delete-wishlist";
 import { userPostsQueryOptions, userWishlistsQueryOptions } from "@/lib/api";
 import { createWishlistSchema } from "@/lib/types";
 import {
+  IconArrowLeft,
   IconCheck,
   IconFileText,
   IconHeartPlus,
@@ -23,6 +24,7 @@ import {
 } from "@tanstack/react-query";
 import {
   createFileRoute,
+  Link,
   useNavigate,
   useParams,
 } from "@tanstack/react-router";
@@ -111,7 +113,18 @@ function RouteComponent() {
 
   return (
     <div className="mx-auto flex h-full w-full max-w-3xl flex-col gap-6">
-      <PageHeading title={pageTitle} />
+      <div className="flex items-center gap-2">
+        <Link
+          to={"/profile/$userId/manage-wishlists"}
+          params={{
+            userId: user.uid,
+          }}
+          className="btn btn-circle btn-ghost btn-sm"
+        >
+          <IconArrowLeft className="size-4" />
+        </Link>
+        <PageHeading title={pageTitle} />
+      </div>
 
       <div className="flex w-full flex-col items-start gap-4">
         {/* Image File Field with Preview */}

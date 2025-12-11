@@ -6,6 +6,7 @@ import { validateHandle } from "@/lib/firebase/db";
 import { updateUserProfileSchema, type UpdatedUserProfile } from "@/lib/types";
 import { isoToDateInput } from "@/lib/utils";
 import {
+  IconArrowLeft,
   IconAt,
   IconCake,
   IconCheck,
@@ -97,7 +98,19 @@ function RouteComponent() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-      <PageHeading title="Edit Your Profile" />
+      <div className="flex items-center gap-2">
+        <Link
+          to={"/profile/$userId/$wishlist"}
+          params={{
+            userId: user.uid,
+            wishlist: "all",
+          }}
+          className="btn btn-circle btn-ghost btn-sm"
+        >
+          <IconArrowLeft className="size-4" />
+        </Link>
+        <PageHeading title="Edit Your Profile" />
+      </div>
 
       <div className="flex flex-col gap-6">
         <div className="flex w-full flex-col items-start gap-4 lg:gap-6">

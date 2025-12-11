@@ -2,9 +2,8 @@ import EmptyFrame from "@/components/empty-frame";
 import { Icons } from "@/components/icons";
 import PageHeading from "@/components/page-heading";
 import { useAuth } from "@/hooks/use-auth";
-import { userWishlistsQueryOptions } from "@/lib/api";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { IconArrowLeft } from "@tabler/icons-react";
+import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/manage-wishlists/",
@@ -14,14 +13,26 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const user = useAuth();
+  const { wishlists } = useRouteContext({
+    from: "/_protected/profile/$userId",
+  });
 
-  const { data: wishlists } = useSuspenseQuery(
-    userWishlistsQueryOptions({ userId: user.uid }),
-  );
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
-        <PageHeading title="Manage Your Wihslists" />
+        <div className="flex items-center gap-2">
+          <Link
+            to={"/profile/$userId/$wishlist"}
+            params={{
+              userId: user.uid,
+              wishlist: "all",
+            }}
+            className="btn btn-circle btn-ghost btn-sm"
+          >
+            <IconArrowLeft className="size-4" />
+          </Link>
+          <PageHeading title="Manage Your Wihslists" />
+        </div>
         <h2 className="text-base-content text-3xl font-bold"></h2>
         <Link
           to="/profile/$userId/manage-wishlists/$listId"

@@ -1,19 +1,14 @@
-import { userWishlistsQueryOptions } from "@/lib/api";
 import { IconListDetails } from "@tabler/icons-react";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, useParams, useRouteContext } from "@tanstack/react-router";
 
 export default function Wishlists() {
-  const { isOwner } = useRouteContext({
+  const { isOwner, wishlists } = useRouteContext({
     from: "/_protected/profile/$userId",
   });
   const { userId, wishlist } = useParams({
     from: "/_protected/profile/$userId/$wishlist",
   });
 
-  const { data: wishlists } = useSuspenseQuery(
-    userWishlistsQueryOptions({ userId }),
-  );
   const wishListsToDisplay = wishlists.filter((w) => w.posts.length >= 0);
   return (
     <div className="w-full overflow-x-auto">
