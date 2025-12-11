@@ -7,8 +7,8 @@ import {
 import { Link, useParams } from "@tanstack/react-router";
 import { GridHeader } from "./grid-header";
 
-export default function PostsGrid({ userId }: { userId: string }) {
-  const { wishlist } = useParams({
+export default function PostsGrid() {
+  const { wishlist, userId } = useParams({
     from: "/_protected/profile/$userId/$wishlist",
   });
 

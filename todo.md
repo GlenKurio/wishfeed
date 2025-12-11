@@ -1,9 +1,5 @@
 - Profile:
 
-  -- Add breadcrumbs and "Go back" buttons to pages(header?)
-
-  -- Show info and allow actions based on user profile privacy settings;
-  -- Display different actions on the proile page if visitor is not the profile owner; -- In post actions for owner allow to select wishlists to add post to;
   -- Add ui to get followers, following; Implement functionality to follow/unfollow;
 
   -- Allow to open the page with followers and following with search;
@@ -16,6 +12,7 @@
     -- Save post
     -- Finish all the todos in the component;
     -- Add actions to post (report, delete, edit, hide?)
+    In post actions for owner allow to select wishlists to add post to;
 
   -- Get Feed posts for user from people user follows;
 
