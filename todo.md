@@ -1,6 +1,6 @@
 - Profile:
 
-  -- Add ui to get followers, following; Implement functionality to follow/unfollow;
+  -- If profile is private send target user a request and wait for target user to approve it before allowing current user access to target user profile;
 
   -- Allow to open the page with followers and following with search;
 
