@@ -3,15 +3,10 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_protected/profile/$userId")({
   beforeLoad: async ({ context, params }) => {
-    const [userProfile, authedUserProfile, wishlists] = await Promise.all([
+    const [userProfile, authedUserProfile] = await Promise.all([
       context.queryClient.ensureQueryData(profileQueryOptions(params.userId)),
       context.queryClient.ensureQueryData(
         profileQueryOptions(context.user.uid),
-      ),
-      context.queryClient.ensureQueryData(
-        userWishlistsQueryOptions({
-          userId: params.userId,
-        }),
       ),
     ]);
 
@@ -42,10 +37,16 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
       hasFullAccess,
       userProfile,
       authedUserProfile,
-      wishlists,
     };
   },
 
+  loader: async ({ context, params }) => {
+    await context.queryClient.ensureQueryData(
+      userWishlistsQueryOptions({
+        userId: params.userId,
+      }),
+    );
+  },
   errorComponent: ({ error }) => {
     return (
       <div className="container mx-auto px-4 py-6">

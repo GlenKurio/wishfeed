@@ -2,8 +2,10 @@ import EmptyFrame from "@/components/empty-frame";
 import { Icons } from "@/components/icons";
 import PageHeading from "@/components/page-heading";
 import { useAuth } from "@/hooks/use-auth";
+import { userWishlistsQueryOptions } from "@/lib/api";
 import { IconArrowLeft } from "@tabler/icons-react";
-import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute(
   "/_protected/profile/$userId/manage-wishlists/",
@@ -13,10 +15,10 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const user = useAuth();
-  const { wishlists } = useRouteContext({
-    from: "/_protected/profile/$userId",
-  });
 
+  const { data: wishlists } = useSuspenseQuery(
+    userWishlistsQueryOptions({ userId: user.uid }),
+  );
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
