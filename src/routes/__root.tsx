@@ -7,7 +7,7 @@ import { useAuthListener } from "../hooks/use-auth-listener";
 
 export interface MyRouterContext {
   queryClient: QueryClient;
-  user: User;
+  user?: User;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({

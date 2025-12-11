@@ -53,7 +53,7 @@ export default function PostFooter(post: PostType) {
             </span>
           </Link>
         )}
-        {user?.uid !== post?.userUid ? (
+        {user?.uid !== post?.createdBy ? (
           <button className="btn btn-primary btn-xs lg:btn-sm flex items-center gap-1.5 transition-colors">
             <IconGift className="size-4" /> <span>Gift</span>
           </button>

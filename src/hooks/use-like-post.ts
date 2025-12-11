@@ -1,10 +1,7 @@
-import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 
-import { db } from "../lib/firebase/db";
-
-import { useAuth } from "./use-auth";
 import type { PostType } from "../lib/types";
+import { useAuth } from "./use-auth";
 
 export function useLikePost(post: PostType) {
   const user = useAuth();
@@ -17,6 +14,7 @@ export function useLikePost(post: PostType) {
     if (isLiked) {
       setLikes(likes - 1);
     } else {
+      setIsUpdating(false);
       setLikes(likes + 1);
     }
     //     if (isUpdating) return;

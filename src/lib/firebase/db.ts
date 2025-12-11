@@ -176,11 +176,11 @@ export async function getFeedPosts() {
   );
 
   // Sort by createdAt descending (in case chunks were out of order)
-  allPosts.sort((a, b) => {
-    const aTime = a.createdAt?.toMillis?.() || 0;
-    const bTime = b.createdAt?.toMillis?.() || 0;
-    return bTime - aTime;
-  });
+  // allPosts.sort((a, b) => {
+  //   const aTime = a.createdAt?.toMillis?.() || 0;
+  //   const bTime = b.createdAt?.toMillis?.() || 0;
+  //   return bTime - aTime;
+  // });
 
   return allPosts;
 }

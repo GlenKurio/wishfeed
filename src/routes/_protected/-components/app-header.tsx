@@ -1,7 +1,7 @@
 import { IconBellRinging2 } from "@tabler/icons-react";
-import { Link, useMatches } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 export default function AppHeader() {
-  const { pathname } = useMatches().at(-1)!;
+  // const { pathname } = useMatches().at(-1)!;
 
   const renderHeader = () => {
     return (
