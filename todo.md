@@ -1,6 +1,6 @@
 - Profile:
 
-  -- If profile is private send target user a request and wait for target user to approve it before allowing current user access to target user profile;
+  -- Implement follow requests for private accounts;
 
   -- Allow to open the page with followers and following with search;
 

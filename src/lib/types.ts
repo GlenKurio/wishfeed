@@ -117,6 +117,8 @@ export type UserProfile = {
   isPublic: boolean;
   followers: string[];
   following: string[];
+  followRequestsSent: string[];
+  followRequestsReceived: string[];
   postsCount: number;
   updatedAt: Timestamp;
   createdAt: Timestamp;
