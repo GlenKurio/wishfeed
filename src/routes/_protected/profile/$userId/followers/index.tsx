@@ -40,6 +40,10 @@ export const Route = createFileRoute("/_protected/profile/$userId/followers/")({
     };
   },
 
+  loader: async ({ context }) => {
+    const userFollowers;
+  },
+
   component: RouteComponent,
 });
 

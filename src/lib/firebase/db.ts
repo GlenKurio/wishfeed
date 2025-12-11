@@ -769,3 +769,47 @@ export async function unfollowUser(
     });
   });
 }
+
+/**
+ * Fetches the full user profiles for a given list of follower IDs.
+ * @param followersIds An array of user UIDs.
+ * @returns A promise that resolves to an array of UserProfile objects.
+ */
+export async function getUserFollowers({
+  followersIds,
+}: {
+  followersIds: string[];
+}): Promise<UserProfile[]> {
+  // 1. Validate input
+  if (!followersIds || followersIds.length === 0) {
+    return []; // Return an empty array if there are no IDs to fetch
+  }
+
+  // Note: Firestore's 'in' operator is limited to 30 items per query.
+  // If a user can have more than 30 followers, you will need to
+  // batch these requests. For simplicity, this example assumes < 30.
+  if (followersIds.length > 30) {
+    console.warn(
+      "Cannot fetch more than 30 followers at once. Truncating list.",
+    );
+    followersIds = followersIds.slice(0, 30);
+  }
+
+  // 2. Get a reference to the 'users' collection
+  const usersRef = collection(db, "users");
+
+  // 3. Create the query to get all users whose 'uid' is in the followersIds array
+  const q = query(usersRef, where("uid", "in", followersIds));
+
+  // 4. Execute the query
+  const querySnapshot = await getDocs(q);
+
+  // 5. Map the results to the UserProfile type
+  const users = querySnapshot.docs.map((doc) => ({
+    id: doc.id, // The document ID
+    ...doc.data(),
+  })) as unknown as UserProfile[];
+
+  return users;
+}
+export async function getUserFollowing() {}
