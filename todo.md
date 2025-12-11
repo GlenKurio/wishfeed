@@ -50,6 +50,6 @@
 - Make sure images are optimized, do not cause layout shifts, accessible or hidden from screen readers;
 
 - Connect domain to Firbase and make initial deployment to Fiebase;
-
+  --- Connect github repo to firebase to deploy automatically on git push
 - On user register create user handle automatically? what if user handle is taken?
 - When user reposts(adds the product from the feed to their account) how its done? is it just copiend and can be edited? Or product info is copied (image, link, title, price) and create wish opens with that info filled so user only adds the description and selects the wishlist?

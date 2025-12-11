@@ -1,12 +1,19 @@
 import EmptyFrame from "@/components/empty-frame";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import PostsGrid from "../../-components/posts-grid";
 import ProfileHeader from "../../-components/profile-header";
 import Wishlists from "../../-components/wishlists";
+import { profileQueryOptions } from "@/lib/api";
+import { useAuth } from "@/hooks/use-auth";
+import { useFollowUser } from "@/hooks/use-follow-user";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_protected/profile/$userId/$wishlist/")({
-  beforeLoad: ({ context }) => {
-    if (!context.userProfile) {
+  beforeLoad: async ({ context, params }) => {
+    const userProfile = await context.queryClient.ensureQueryData(
+      profileQueryOptions(params.userId),
+    );
+    if (!userProfile) {
       throw redirect({
         to: "/profile/$userId/$wishlist",
         params: { userId: context.user.uid, wishlist: "all" },
@@ -17,14 +24,36 @@ export const Route = createFileRoute("/_protected/profile/$userId/$wishlist/")({
 });
 
 function RouteComponent() {
-  const { hasFullAccess } = Route.useRouteContext();
+  const authUser = useAuth();
+  const navigate = useNavigate();
+  const { userId } = Route.useParams();
+  const { data: userProfile } = useSuspenseQuery(profileQueryOptions(userId));
+  const { isFollowing } = useFollowUser({
+    userId: userProfile?.uid,
+  });
+  if (!userProfile) {
+    return navigate({
+      to: "/profile/$userId/$wishlist",
+      params: { userId: authUser.uid, wishlist: "all" },
+    });
+  }
+
+  const isOwner = authUser?.uid === userId;
+  const isPublic = userProfile.isPublic;
+
+  // Centralized access control logic
+  const hasFullAccess = isOwner || isPublic || isFollowing;
 
   return (
     <div className="flex flex-col gap-6">
-      <ProfileHeader />
+      <ProfileHeader
+        hasFullAccess={hasFullAccess}
+        isOwner={isOwner}
+        userProfile={userProfile}
+      />
       {hasFullAccess ? (
         <>
-          <Wishlists />
+          <Wishlists isOwner={isOwner} />
 
           <PostsGrid />
         </>

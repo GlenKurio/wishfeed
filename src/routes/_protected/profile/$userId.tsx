@@ -1,43 +1,18 @@
 import { profileQueryOptions, userWishlistsQueryOptions } from "@/lib/api";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { Suspense } from "react";
 
 export const Route = createFileRoute("/_protected/profile/$userId")({
   beforeLoad: async ({ context, params }) => {
-    const [userProfile, authedUserProfile] = await Promise.all([
-      context.queryClient.ensureQueryData(profileQueryOptions(params.userId)),
-      context.queryClient.ensureQueryData(
-        profileQueryOptions(context.user.uid),
-      ),
-    ]);
+    const userProfile = await context.queryClient.ensureQueryData(
+      profileQueryOptions(params.userId),
+    );
 
-    if (!authedUserProfile) {
+    if (!userProfile)
       throw redirect({
-        to: "/auth",
+        to: "/profile/$userId",
+        params: { userId: context.user.uid },
       });
-    }
-
-    if (!userProfile) {
-      throw redirect({
-        to: "/profile/$userId/$wishlist",
-        params: { userId: context.user.uid, wishlist: "all" },
-      });
-    }
-    const isFollowing =
-      authedUserProfile?.following.includes(params.userId || "") ?? false;
-    const isOwner = context.user?.uid === params.userId;
-    const isPublic = userProfile.isPublic;
-
-    // Determine access level
-    const hasFullAccess = isOwner || isPublic || isFollowing;
-
-    return {
-      isFollowing,
-      isOwner,
-      isPublic,
-      hasFullAccess,
-      userProfile,
-      authedUserProfile,
-    };
   },
 
   loader: async ({ context, params }) => {
@@ -63,7 +38,9 @@ export const Route = createFileRoute("/_protected/profile/$userId")({
 function RouteComponent() {
   return (
     <div className="container mx-auto px-4 py-6 lg:py-10">
-      <Outlet />
+      <Suspense fallback={<div>Loading profile…</div>}>
+        <Outlet />
+      </Suspense>
     </div>
   );
 }

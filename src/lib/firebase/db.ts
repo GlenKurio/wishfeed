@@ -13,6 +13,7 @@ import {
   query,
   QueryConstraint,
   QueryDocumentSnapshot,
+  runTransaction,
   serverTimestamp,
   setDoc,
   startAfter,
@@ -697,3 +698,74 @@ export async function deleteWishlist({ wishlist }: { wishlist: Wishlist }) {
 }
 export async function addWishToList() {}
 export async function removeWishFromList() {}
+
+export async function followUser(
+  currentUserId: string,
+  targetUserId: string,
+): Promise<void> {
+  if (!currentUserId || !targetUserId) {
+    throw new Error("User IDs are required");
+  }
+
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("Must be logged in tofollow user.");
+  }
+
+  if (currentUserId === targetUserId) {
+    throw new Error("Cannot follow yourself");
+  }
+
+  // Use transaction to ensure data consistency
+  await runTransaction(db, async (transaction) => {
+    const currentUserRef = doc(db, "users", currentUserId);
+    const targetUserRef = doc(db, "users", targetUserId);
+
+    // Check if target user exists
+    const targetUserDoc = await transaction.get(targetUserRef);
+    if (!targetUserDoc.exists()) {
+      throw new Error("Target user does not exist");
+    }
+
+    // Update current user's following list
+    transaction.update(currentUserRef, {
+      following: arrayUnion(targetUserId),
+    });
+
+    // Update target user's followers list
+    transaction.update(targetUserRef, {
+      followers: arrayUnion(currentUserId),
+    });
+  });
+}
+
+export async function unfollowUser(
+  currentUserId: string,
+  targetUserId: string,
+): Promise<void> {
+  if (!currentUserId || !targetUserId) {
+    throw new Error("User IDs are required");
+  }
+
+  const user = auth.currentUser;
+
+  if (!user) {
+    throw new Error("Must be logged in to unfollow user.");
+  }
+
+  await runTransaction(db, async (transaction) => {
+    const currentUserRef = doc(db, "users", currentUserId);
+    const targetUserRef = doc(db, "users", targetUserId);
+
+    // Update current user's following list
+    transaction.update(currentUserRef, {
+      following: arrayRemove(targetUserId),
+    });
+
+    // Update target user's followers list
+    transaction.update(targetUserRef, {
+      followers: arrayRemove(currentUserId),
+    });
+  });
+}

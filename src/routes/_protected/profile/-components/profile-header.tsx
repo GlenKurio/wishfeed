@@ -1,14 +1,21 @@
 import Avatar from "@/components/avatar";
 import { useFollowUser } from "@/hooks/use-follow-user";
+import type { UserProfile } from "@/lib/types";
 import { IconCake, IconEdit, IconLock } from "@tabler/icons-react";
-import { Link, useRouteContext } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { format, parseISO } from "date-fns";
 
-export default function ProfileHeader() {
-  const { hasFullAccess, isPublic, isOwner, userProfile } = useRouteContext({
-    from: "/_protected/profile/$userId",
-  });
-  const { isFollowing, followUser, unfollowUser, isLoading } = useFollowUser({
+export default function ProfileHeader({
+  hasFullAccess,
+  isOwner,
+  userProfile,
+}: {
+  hasFullAccess: boolean;
+  isOwner: boolean;
+  userProfile: UserProfile;
+}) {
+  const isPublic = userProfile?.isPublic;
+  const { isFollowing, followUser, unfollowUser, isPending } = useFollowUser({
     userId: userProfile?.uid,
   });
 
@@ -25,9 +32,9 @@ export default function ProfileHeader() {
         <button
           className="btn btn-xs btn-primary btn-soft w-full sm:w-auto"
           onClick={unfollowUser}
-          disabled={isLoading}
+          disabled={isPending}
         >
-          {isLoading ? "Loading..." : "Unfollow"}
+          {isPending ? "Loading..." : "Unfollow"}
         </button>
       );
     }
@@ -36,9 +43,9 @@ export default function ProfileHeader() {
       <button
         className="btn btn-xs btn-primary w-full sm:w-auto"
         onClick={followUser}
-        disabled={isLoading}
+        disabled={isPending}
       >
-        {isLoading ? "Loading..." : isPublic ? "Follow" : "Request to Follow"}
+        {isPending ? "Loading..." : isPublic ? "Follow" : "Request to Follow"}
       </button>
     );
   };

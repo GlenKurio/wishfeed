@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { UserProfile } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -54,4 +55,28 @@ export function dateInputToISO(dateString: string | undefined): string {
     console.error("Invalid date input:", dateString, error);
     return "";
   }
+}
+
+export function checkProfileAccess({
+  currentUserId,
+  targetProfile,
+  currentUserProfile,
+}: {
+  currentUserId: string;
+  targetProfile: UserProfile;
+  currentUserProfile: UserProfile | null;
+}) {
+  const isOwner = currentUserId === targetProfile.uid;
+  const isPublic = targetProfile.isPublic;
+  const isFollowing =
+    currentUserProfile?.following.includes(targetProfile.uid) ?? false;
+
+  const hasFullAccess = isOwner || isPublic || isFollowing;
+
+  return {
+    isOwner,
+    isPublic,
+    isFollowing,
+    hasFullAccess,
+  };
 }
