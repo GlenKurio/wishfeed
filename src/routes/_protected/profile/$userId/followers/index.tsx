@@ -75,12 +75,10 @@ function RouteComponent() {
   } = useInfiniteQuery(
     userFollowersSearchQueryOptions({
       userId: userProfile.uid,
-      searchTerm: searchInput || undefined,
-      pageSize: 30,
     }),
   );
-  console.log("ERROR: ", error);
-
+  // TODO: display all followers if search input is empty, if not empty - show search results
+  // Set search term into search params!
   const allFollowers = data?.pages.flatMap((page) => page.followers) ?? [];
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
