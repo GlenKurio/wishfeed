@@ -19,12 +19,13 @@ export const Route = createFileRoute("/_protected/profile/$userId/followers/")({
       currentUserId: context.user.uid,
       targetProfile: userProfile,
     });
-
+    console.log("ACCESS: ", access);
+    console.log("FOLLOWERS COUNT: ", userProfile.followersCount);
     // Redirect if no access and no followers to show
-    if (!access.hasFullAccess || userProfile.followersCount > 0) {
+    if (!access.hasFullAccess || userProfile.followersCount <= 0) {
       throw redirect({
-        to: "/profile/$userId",
-        params: { userId: params.userId },
+        to: "/profile/$userId/$wishlist",
+        params: { userId: params.userId, wishlist: "all" },
       });
     }
 
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/_protected/profile/$userId/followers/")({
     };
   },
 
-  loader: async ({ context }) => {},
+  // loader: async ({ context }) => {},
 
   component: RouteComponent,
 });

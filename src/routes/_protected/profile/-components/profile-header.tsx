@@ -121,7 +121,7 @@ export default function ProfileHeader({
           {/* Stats */}
           <div className="flex w-full items-center gap-2 md:gap-6">
             <StatLink
-              to="/profile/$userId/followers"
+              to="/profile/$userId/followers/"
               params={{ userId: userProfile?.uid }}
               disabled={!canViewFollowers}
               count={userProfile?.followersCount || 0}
