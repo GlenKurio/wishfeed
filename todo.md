@@ -1,7 +1,7 @@
 - Profile:
   -- Following and followers:
-  --- implement search query to query paginated results with search term in Firestore;
-  --- implement client side query and ui
+  --- Get paginated all followers if search input is empty and get followers using search params and debounced call to firebase functions on search;
+  --- Do the same with following;
   --- implement firebase function to keep data in sync by updateing subcollections on user profile update;
 
   --- Do same thing with post author? Keep authors as subcollections? Or just keep needed info with post and update on profile update?
