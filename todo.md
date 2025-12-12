@@ -1,10 +1,10 @@
 - Profile:
-  -- Allow to open the page with followers and following with search;
-  -- get user followers in batches of 30
-  -- get user following in batches of 30
-  -- Finish followers and following pages ui;
+  -- Following and followers:
+  --- implement search query to query paginated results with search term in Firestore;
+  --- implement client side query and ui
+  --- implement firebase function to keep data in sync by updateing subcollections on user profile update;
 
-  -- Implement follow requests for private accounts;
+  --- Do same thing with post author? Keep authors as subcollections? Or just keep needed info with post and update on profile update?
 
 - Post:
   -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;

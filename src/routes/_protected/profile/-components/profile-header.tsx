@@ -1,14 +1,7 @@
 import Avatar from "@/components/avatar";
 import { useFollowUser } from "@/hooks/use-follow-user";
 import type { UserProfile } from "@/lib/types";
-import {
-  IconCake,
-  IconEdit,
-  IconLock,
-  IconCheck,
-  IconX,
-  IconLoader,
-} from "@tabler/icons-react";
+import { IconCake, IconCheck, IconEdit, IconX } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import { format, parseISO } from "date-fns";
 
