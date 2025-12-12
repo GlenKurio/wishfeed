@@ -31,9 +31,10 @@ function RouteComponent() {
     userProfileId: userId,
     realtime: authUser?.uid === userId, // Only for own profile
   });
-  const { isFollowing } = useFollowUser({
-    userId: userProfile?.uid,
+  const { isFollowing, isRequested } = useFollowUser({
+    userId,
   });
+
   if (!userProfile) {
     return navigate({
       to: "/profile/$userId/$wishlist",
@@ -60,8 +61,10 @@ function RouteComponent() {
 
           <PostsGrid />
         </>
+      ) : isRequested ? (
+        <EmptyFrame text="Follow request pending. You'll see their content once they accept." />
       ) : (
-        <EmptyFrame text="This profile is private. You need to follow this user to see their profile." />
+        <EmptyFrame text="This account is private. Send a follow request to see their content." />
       )}
     </div>
   );

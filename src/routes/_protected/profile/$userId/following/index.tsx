@@ -15,19 +15,13 @@ export const Route = createFileRoute("/_protected/profile/$userId/following/")({
       });
     }
 
-    // Get current user's profile (will be cached from previous loads)
-    const currentUserProfile = await context.queryClient.ensureQueryData(
-      profileQueryOptions(context.user.uid),
-    );
-
-    const access = checkProfileAccess({
+    const access = await checkProfileAccess({
       currentUserId: context.user.uid,
       targetProfile: userProfile,
-      currentUserProfile,
     });
 
     // Redirect if no access and no followers to show
-    if (!access.hasFullAccess || userProfile.followers.length === 0) {
+    if (!access.hasFullAccess || userProfile.followingCount > 0) {
       throw redirect({
         to: "/profile/$userId",
         params: { userId: params.userId },

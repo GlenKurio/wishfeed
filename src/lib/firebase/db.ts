@@ -1,4 +1,5 @@
 import {
+  addDoc,
   arrayRemove,
   arrayUnion,
   collection,
@@ -65,8 +66,10 @@ export async function createUserProfile(user: User) {
     isPublic: true,
     handle: user.email?.split("@")[0],
     updatedAt: serverTimestamp(),
-    followers: [],
-    following: [],
+    followersCount: 0,
+    followingCount: 0,
+    followRequestsSentCount: 0,
+    followRequestsReceivedCount: 0,
     postsCount: 0,
     createdAt: serverTimestamp(),
   };
@@ -699,6 +702,48 @@ export async function deleteWishlist({ wishlist }: { wishlist: Wishlist }) {
 export async function addWishToList() {}
 export async function removeWishFromList() {}
 
+//*******************************
+// Follow/Unfollow functionality
+// ******************************
+
+// Helper to get user info for subcollection storage
+export async function getUserInfoForSubcollection(userId: string) {
+  const userDoc = await getDoc(doc(db, "users", userId));
+  if (!userDoc.exists()) {
+    throw new Error("User not found");
+  }
+  const data = userDoc.data();
+  return {
+    uid: userId,
+    displayName: data.displayName,
+    handle: data.handle,
+    photoURL: data.photoURL || null,
+  };
+}
+
+// Check if user is following another user
+export async function isFollowing(
+  currentUserId: string,
+  targetUserId: string,
+): Promise<boolean> {
+  const followingDoc = await getDoc(
+    doc(db, "users", currentUserId, "following", targetUserId),
+  );
+  return followingDoc.exists();
+}
+
+// Check if follow request exists
+export async function hasFollowRequest(
+  currentUserId: string,
+  targetUserId: string,
+): Promise<boolean> {
+  const requestDoc = await getDoc(
+    doc(db, "users", currentUserId, "followRequestsSent", targetUserId),
+  );
+  return requestDoc.exists();
+}
+
+// Follow user (for public accounts)
 export async function followUser(
   currentUserId: string,
   targetUserId: string,
@@ -707,39 +752,85 @@ export async function followUser(
     throw new Error("User IDs are required");
   }
 
-  const user = auth.currentUser;
-
-  if (!user) {
-    throw new Error("Must be logged in tofollow user.");
-  }
-
   if (currentUserId === targetUserId) {
     throw new Error("Cannot follow yourself");
   }
 
-  // Use transaction to ensure data consistency
-  await runTransaction(db, async (transaction) => {
-    const currentUserRef = doc(db, "users", currentUserId);
-    const targetUserRef = doc(db, "users", targetUserId);
+  // Get user info first
+  const [currentUserInfo, targetUserInfo] = await Promise.all([
+    getUserInfoForSubcollection(currentUserId),
+    getUserInfoForSubcollection(targetUserId),
+  ]);
 
-    // Check if target user exists
+  await runTransaction(db, async (transaction) => {
+    const targetUserRef = doc(db, "users", targetUserId);
     const targetUserDoc = await transaction.get(targetUserRef);
+
     if (!targetUserDoc.exists()) {
       throw new Error("Target user does not exist");
     }
 
-    // Update current user's following list
-    transaction.update(currentUserRef, {
-      following: arrayUnion(targetUserId),
+    const targetUserData = targetUserDoc.data();
+
+    if (!targetUserData.isPublic) {
+      throw new Error("Cannot follow private account directly");
+    }
+
+    // Add to current user's following subcollection
+    const followingRef = doc(
+      db,
+      "users",
+      currentUserId,
+      "following",
+      targetUserId,
+    );
+    transaction.set(followingRef, {
+      ...targetUserInfo,
+      followedAt: serverTimestamp(),
     });
 
-    // Update target user's followers list
+    // Add to target user's followers subcollection
+    const followerRef = doc(
+      db,
+      "users",
+      targetUserId,
+      "followers",
+      currentUserId,
+    );
+    transaction.set(followerRef, {
+      ...currentUserInfo,
+      followedAt: serverTimestamp(),
+    });
+
+    // Update counters
+    const currentUserRef = doc(db, "users", currentUserId);
+    transaction.update(currentUserRef, {
+      followingCount: increment(1),
+    });
+
     transaction.update(targetUserRef, {
-      followers: arrayUnion(currentUserId),
+      followersCount: increment(1),
     });
   });
+
+  // Create notification
+  try {
+    await addDoc(collection(db, "notifications"), {
+      userId: targetUserId,
+      type: "follow",
+      actorId: currentUserId,
+      actorName: currentUserInfo.displayName,
+      actorPhotoURL: currentUserInfo.photoURL,
+      message: `${currentUserInfo.displayName} started following you`,
+      isRead: false,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error creating notification:", error);
+  }
 }
 
+// Unfollow user
 export async function unfollowUser(
   currentUserId: string,
   targetUserId: string,
@@ -748,68 +839,422 @@ export async function unfollowUser(
     throw new Error("User IDs are required");
   }
 
-  const user = auth.currentUser;
-
-  if (!user) {
-    throw new Error("Must be logged in to unfollow user.");
-  }
-
   await runTransaction(db, async (transaction) => {
+    // Remove from subcollections
+    const followingRef = doc(
+      db,
+      "users",
+      currentUserId,
+      "following",
+      targetUserId,
+    );
+    const followerRef = doc(
+      db,
+      "users",
+      targetUserId,
+      "followers",
+      currentUserId,
+    );
+
+    transaction.delete(followingRef);
+    transaction.delete(followerRef);
+
+    // Update counters
     const currentUserRef = doc(db, "users", currentUserId);
     const targetUserRef = doc(db, "users", targetUserId);
 
-    // Update current user's following list
     transaction.update(currentUserRef, {
-      following: arrayRemove(targetUserId),
+      followingCount: increment(-1),
     });
 
-    // Update target user's followers list
     transaction.update(targetUserRef, {
-      followers: arrayRemove(currentUserId),
+      followersCount: increment(-1),
     });
   });
 }
 
-/**
- * Fetches the full user profiles for a given list of follower IDs.
- * @param followersIds An array of user UIDs.
- * @returns A promise that resolves to an array of UserProfile objects.
- */
-export async function getUserFollowers({
-  followersIds,
-}: {
-  followersIds: string[];
-}): Promise<UserProfile[]> {
-  // 1. Validate input
-  if (!followersIds || followersIds.length === 0) {
-    return []; // Return an empty array if there are no IDs to fetch
+// Send follow request to private account
+export async function sendFollowRequest(
+  currentUserId: string,
+  targetUserId: string,
+): Promise<void> {
+  if (!currentUserId || !targetUserId) {
+    throw new Error("User IDs are required");
   }
 
-  // Note: Firestore's 'in' operator is limited to 30 items per query.
-  // If a user can have more than 30 followers, you will need to
-  // batch these requests. For simplicity, this example assumes < 30.
-  if (followersIds.length > 30) {
-    console.warn(
-      "Cannot fetch more than 30 followers at once. Truncating list.",
+  if (currentUserId === targetUserId) {
+    throw new Error("Cannot follow yourself");
+  }
+
+  const [currentUserInfo, targetUserInfo] = await Promise.all([
+    getUserInfoForSubcollection(currentUserId),
+    getUserInfoForSubcollection(targetUserId),
+  ]);
+
+  await runTransaction(db, async (transaction) => {
+    const targetUserRef = doc(db, "users", targetUserId);
+    const targetUserDoc = await transaction.get(targetUserRef);
+
+    if (!targetUserDoc.exists()) {
+      throw new Error("Target user does not exist");
+    }
+
+    const targetUserData = targetUserDoc.data();
+
+    if (targetUserData.isPublic) {
+      throw new Error("Use followUser for public accounts");
+    }
+
+    // Add to current user's followRequestsSent subcollection
+    const requestSentRef = doc(
+      db,
+      "users",
+      currentUserId,
+      "followRequestsSent",
+      targetUserId,
     );
-    followersIds = followersIds.slice(0, 30);
+    transaction.set(requestSentRef, {
+      ...targetUserInfo,
+      requestedAt: serverTimestamp(),
+    });
+
+    // Add to target user's followRequestsReceived subcollection
+    const requestReceivedRef = doc(
+      db,
+      "users",
+      targetUserId,
+      "followRequestsReceived",
+      currentUserId,
+    );
+    transaction.set(requestReceivedRef, {
+      ...currentUserInfo,
+      requestedAt: serverTimestamp(),
+    });
+
+    // Update counters
+    const currentUserRef = doc(db, "users", currentUserId);
+    transaction.update(currentUserRef, {
+      followRequestsSentCount: increment(1),
+    });
+
+    transaction.update(targetUserRef, {
+      followRequestsReceivedCount: increment(1),
+    });
+  });
+
+  // Create notification
+  try {
+    await addDoc(collection(db, "notifications"), {
+      userId: targetUserId,
+      type: "follow_request",
+      actorId: currentUserId,
+      actorName: currentUserInfo.displayName,
+      actorPhotoURL: currentUserInfo.photoURL,
+      message: `${currentUserInfo.displayName} requested to follow you`,
+      isRead: false,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error creating notification:", error);
+  }
+}
+
+// Cancel follow request
+export async function cancelFollowRequest(
+  currentUserId: string,
+  targetUserId: string,
+): Promise<void> {
+  if (!currentUserId || !targetUserId) {
+    throw new Error("User IDs are required");
   }
 
-  // 2. Get a reference to the 'users' collection
-  const usersRef = collection(db, "users");
+  await runTransaction(db, async (transaction) => {
+    // Remove from subcollections
+    const requestSentRef = doc(
+      db,
+      "users",
+      currentUserId,
+      "followRequestsSent",
+      targetUserId,
+    );
+    const requestReceivedRef = doc(
+      db,
+      "users",
+      targetUserId,
+      "followRequestsReceived",
+      currentUserId,
+    );
 
-  // 3. Create the query to get all users whose 'uid' is in the followersIds array
-  const q = query(usersRef, where("uid", "in", followersIds));
+    transaction.delete(requestSentRef);
+    transaction.delete(requestReceivedRef);
 
-  // 4. Execute the query
-  const querySnapshot = await getDocs(q);
+    // Update counters
+    const currentUserRef = doc(db, "users", currentUserId);
+    const targetUserRef = doc(db, "users", targetUserId);
 
-  // 5. Map the results to the UserProfile type
-  const users = querySnapshot.docs.map((doc) => ({
-    id: doc.id, // The document ID
-    ...doc.data(),
-  })) as unknown as UserProfile[];
+    transaction.update(currentUserRef, {
+      followRequestsSentCount: increment(-1),
+    });
 
-  return users;
+    transaction.update(targetUserRef, {
+      followRequestsReceivedCount: increment(-1),
+    });
+  });
+
+  // Delete notification
+  try {
+    const notificationsRef = collection(db, "notifications");
+    const q = query(
+      notificationsRef,
+      where("userId", "==", targetUserId),
+      where("actorId", "==", currentUserId),
+      where("type", "==", "follow_request"),
+    );
+
+    const snapshot = await getDocs(q);
+    const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+  }
 }
-export async function getUserFollowing() {}
+
+// Accept follow request
+export async function acceptFollowRequest(
+  currentUserId: string,
+  requesterId: string,
+): Promise<void> {
+  if (!currentUserId || !requesterId) {
+    throw new Error("User IDs are required");
+  }
+
+  const [currentUserInfo, requesterInfo] = await Promise.all([
+    getUserInfoForSubcollection(currentUserId),
+    getUserInfoForSubcollection(requesterId),
+  ]);
+
+  await runTransaction(db, async (transaction) => {
+    const requesterRef = doc(db, "users", requesterId);
+    const requesterDoc = await transaction.get(requesterRef);
+
+    if (!requesterDoc.exists()) {
+      throw new Error("Requester does not exist");
+    }
+
+    // Remove from follow requests subcollections
+    const requestSentRef = doc(
+      db,
+      "users",
+      requesterId,
+      "followRequestsSent",
+      currentUserId,
+    );
+    const requestReceivedRef = doc(
+      db,
+      "users",
+      currentUserId,
+      "followRequestsReceived",
+      requesterId,
+    );
+
+    transaction.delete(requestSentRef);
+    transaction.delete(requestReceivedRef);
+
+    // Add to following/followers subcollections
+    const followingRef = doc(
+      db,
+      "users",
+      requesterId,
+      "following",
+      currentUserId,
+    );
+    transaction.set(followingRef, {
+      ...currentUserInfo,
+      followedAt: serverTimestamp(),
+    });
+
+    const followerRef = doc(
+      db,
+      "users",
+      currentUserId,
+      "followers",
+      requesterId,
+    );
+    transaction.set(followerRef, {
+      ...requesterInfo,
+      followedAt: serverTimestamp(),
+    });
+
+    // Update counters
+    const currentUserRef = doc(db, "users", currentUserId);
+
+    transaction.update(currentUserRef, {
+      followRequestsReceivedCount: increment(-1),
+      followersCount: increment(1),
+    });
+
+    transaction.update(requesterRef, {
+      followRequestsSentCount: increment(-1),
+      followingCount: increment(1),
+    });
+  });
+
+  // Handle notifications
+  try {
+    // Delete the request notification
+    const notificationsRef = collection(db, "notifications");
+    const q = query(
+      notificationsRef,
+      where("userId", "==", currentUserId),
+      where("actorId", "==", requesterId),
+      where("type", "==", "follow_request"),
+    );
+
+    const snapshot = await getDocs(q);
+    const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+
+    // Send acceptance notification
+    await addDoc(collection(db, "notifications"), {
+      userId: requesterId,
+      type: "follow_request_accepted",
+      actorId: currentUserId,
+      actorName: currentUserInfo.displayName,
+      actorPhotoURL: currentUserInfo.photoURL,
+      message: `${currentUserInfo.displayName} accepted your follow request`,
+      isRead: false,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error handling notifications:", error);
+  }
+}
+// Reject follow request
+export async function rejectFollowRequest(
+  currentUserId: string,
+  requesterId: string,
+): Promise<void> {
+  if (!currentUserId || !requesterId) {
+    throw new Error("User IDs are required");
+  }
+
+  await runTransaction(db, async (transaction) => {
+    // Remove from subcollections
+    const requestSentRef = doc(
+      db,
+      "users",
+      requesterId,
+      "followRequestsSent",
+      currentUserId,
+    );
+    const requestReceivedRef = doc(
+      db,
+      "users",
+      currentUserId,
+      "followRequestsReceived",
+      requesterId,
+    );
+
+    transaction.delete(requestSentRef);
+    transaction.delete(requestReceivedRef);
+
+    // Update counters
+    const currentUserRef = doc(db, "users", currentUserId);
+    const requesterRef = doc(db, "users", requesterId);
+
+    transaction.update(currentUserRef, {
+      followRequestsReceivedCount: increment(-1),
+    });
+
+    transaction.update(requesterRef, {
+      followRequestsSentCount: increment(-1),
+    });
+  });
+
+  // Delete notification
+  try {
+    const notificationsRef = collection(db, "notifications");
+    const q = query(
+      notificationsRef,
+      where("userId", "==", currentUserId),
+      where("actorId", "==", requesterId),
+      where("type", "==", "follow_request"),
+    );
+
+    const snapshot = await getDocs(q);
+    const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+  } catch (error) {
+    console.error("Error deleting notification:", error);
+  }
+}
+// export async function followUser(
+//   currentUserId: string,
+//   targetUserId: string,
+// ): Promise<void> {
+//   if (!currentUserId || !targetUserId) {
+//     throw new Error("User IDs are required");
+//   }
+
+//   const user = auth.currentUser;
+
+//   if (!user) {
+//     throw new Error("Must be logged in tofollow user.");
+//   }
+
+//   if (currentUserId === targetUserId) {
+//     throw new Error("Cannot follow yourself");
+//   }
+
+//   // Use transaction to ensure data consistency
+//   await runTransaction(db, async (transaction) => {
+//     const currentUserRef = doc(db, "users", currentUserId);
+//     const targetUserRef = doc(db, "users", targetUserId);
+
+//     // Check if target user exists
+//     const targetUserDoc = await transaction.get(targetUserRef);
+//     if (!targetUserDoc.exists()) {
+//       throw new Error("Target user does not exist");
+//     }
+
+//     // Update current user's following list
+//     transaction.update(currentUserRef, {
+//       following: arrayUnion(targetUserId),
+//     });
+
+//     // Update target user's followers list
+//     transaction.update(targetUserRef, {
+//       followers: arrayUnion(currentUserId),
+//     });
+//   });
+// }
+
+// export async function unfollowUser(
+//   currentUserId: string,
+//   targetUserId: string,
+// ): Promise<void> {
+//   if (!currentUserId || !targetUserId) {
+//     throw new Error("User IDs are required");
+//   }
+
+//   const user = auth.currentUser;
+
+//   if (!user) {
+//     throw new Error("Must be logged in to unfollow user.");
+//   }
+
+//   await runTransaction(db, async (transaction) => {
+//     const currentUserRef = doc(db, "users", currentUserId);
+//     const targetUserRef = doc(db, "users", targetUserId);
+
+//     // Update current user's following list
+//     transaction.update(currentUserRef, {
+//       following: arrayRemove(targetUserId),
+//     });
+
+//     // Update target user's followers list
+//     transaction.update(targetUserRef, {
+//       followers: arrayRemove(currentUserId),
+//     });
+//   });
+// }

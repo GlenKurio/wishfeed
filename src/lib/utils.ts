@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { UserProfile } from "./types";
+import { isFollowing } from "./firebase/db";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -57,26 +58,27 @@ export function dateInputToISO(dateString: string | undefined): string {
   }
 }
 
-export function checkProfileAccess({
+export async function checkProfileAccess({
   currentUserId,
   targetProfile,
-  currentUserProfile,
 }: {
   currentUserId: string;
   targetProfile: UserProfile;
-  currentUserProfile: UserProfile | null;
 }) {
   const isOwner = currentUserId === targetProfile.uid;
   const isPublic = targetProfile.isPublic;
-  const isFollowing =
-    currentUserProfile?.following.includes(targetProfile.uid) ?? false;
 
-  const hasFullAccess = isOwner || isPublic || isFollowing;
+  // Check following status from subcollection
+  const isFollowingUser = isOwner
+    ? false
+    : await isFollowing(currentUserId, targetProfile.uid);
+
+  const hasFullAccess = isOwner || isPublic || isFollowingUser;
 
   return {
     isOwner,
     isPublic,
-    isFollowing,
+    isFollowing: isFollowingUser,
     hasFullAccess,
   };
 }

@@ -115,18 +115,56 @@ export type UserProfile = {
   bio?: string;
   birthday?: string | null; // ISO date "YYYY-MM-DD"
   isPublic: boolean;
-  followers: string[];
-  following: string[];
-  followRequestsSent: string[];
-  followRequestsReceived: string[];
+  followersCount: number;
+  followingCount: number;
+  followRequestsSentCount: number;
+  followRequestsReceivedCount: number;
   postsCount: number;
   updatedAt: Timestamp;
   createdAt: Timestamp;
 };
 
+export type FollowerInfo = {
+  uid: string;
+  displayName: string;
+  handle: string;
+  photoURL?: string;
+  followedAt: Timestamp;
+};
+
+export type FollowingInfo = FollowerInfo;
+
+export type FollowRequestInfo = {
+  uid: string;
+  displayName: string;
+  handle: string;
+  photoURL?: string;
+  requestedAt: Timestamp;
+};
+
 export type DbUserProfile = Omit<UserProfile, "createdAt" | "updatedAt"> & {
   createdAt: FieldValue;
   updatedAt: FieldValue;
+};
+
+export type Notification = {
+  id: string;
+  userId: string;
+  type:
+    | "follow"
+    | "follow_request"
+    | "follow_request_accepted"
+    | "like"
+    | "comment"
+    | "mention";
+  actorId: string;
+  actorName: string;
+  actorPhotoURL?: string;
+  message: string;
+  isRead: boolean;
+  createdAt: Timestamp;
+  postId?: string;
+  commentId?: string;
 };
 
 export const updateUserProfileSchema = z.object({

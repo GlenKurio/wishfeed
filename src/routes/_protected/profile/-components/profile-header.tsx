@@ -1,7 +1,14 @@
 import Avatar from "@/components/avatar";
 import { useFollowUser } from "@/hooks/use-follow-user";
 import type { UserProfile } from "@/lib/types";
-import { IconCake, IconEdit, IconLock } from "@tabler/icons-react";
+import {
+  IconCake,
+  IconEdit,
+  IconLock,
+  IconCheck,
+  IconX,
+  IconLoader,
+} from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import { format, parseISO } from "date-fns";
 
@@ -14,38 +21,71 @@ export default function ProfileHeader({
   isOwner: boolean;
   userProfile: UserProfile;
 }) {
-  const isPublic = userProfile?.isPublic;
-  const { isFollowing, followUser, unfollowUser, isPending } = useFollowUser({
-    userId: userProfile?.uid,
-  });
+  const { isFollowing, isRequested, isPrivateAccount, followUser, isPending } =
+    useFollowUser({
+      userId: userProfile?.uid,
+    });
 
   const canViewPosts = hasFullAccess && userProfile.postsCount > 0;
-  const canViewFollowing = hasFullAccess && userProfile.following.length > 0;
-  const canViewFollowers = hasFullAccess && userProfile.followers.length > 0;
+  const canViewFollowing = hasFullAccess && userProfile.followingCount > 0;
+  const canViewFollowers = hasFullAccess && userProfile.followersCount > 0;
 
-  // Determine follow button state
+  // Determine follow button state and appearance
   const getFollowButton = () => {
     if (isOwner) return null;
 
+    // Following state - show unfollow option
     if (isFollowing) {
       return (
         <button
-          className="btn btn-xs btn-primary btn-soft w-full sm:w-auto"
-          onClick={unfollowUser}
+          className="btn btn-xs btn-success w-full sm:w-auto"
+          onClick={followUser}
           disabled={isPending}
         >
-          {isPending ? "Loading..." : "Unfollow"}
+          {isPending ? (
+            "Loading..."
+          ) : (
+            <>
+              <IconCheck className="size-3" />
+              Following
+            </>
+          )}
         </button>
       );
     }
 
+    // Requested state - show pending/cancel option
+    if (isRequested) {
+      return (
+        <button
+          className="btn btn-xs btn-neutral btn-soft w-full sm:w-auto"
+          onClick={followUser} // This will cancel the request
+          disabled={isPending}
+        >
+          {isPending ? (
+            "Loading..."
+          ) : (
+            <>
+              <IconX className="size-3" />
+              Requested
+            </>
+          )}
+        </button>
+      );
+    }
+
+    // Default state - show follow/request button
     return (
       <button
         className="btn btn-xs btn-primary w-full sm:w-auto"
         onClick={followUser}
         disabled={isPending}
       >
-        {isPending ? "Loading..." : isPublic ? "Follow" : "Request to Follow"}
+        {isPending
+          ? "Loading..."
+          : isPrivateAccount
+            ? "Request Follow"
+            : "Follow"}
       </button>
     );
   };
@@ -79,15 +119,11 @@ export default function ProfileHeader({
             </div>
           </div>
 
-          {/* Handle */}
-          <div className="flex items-center gap-1">
-            <p className="text-muted-foreground mb-1 text-xs md:text-sm">
-              @{userProfile?.handle}
-            </p>
-            {!isPublic && !isOwner && (
-              <IconLock className="text-muted-foreground size-3" />
-            )}
-          </div>
+          {/* Handle and privacy indicator */}
+
+          <p className="text-muted-foreground mb-1 text-xs md:text-sm">
+            @{userProfile?.handle}
+          </p>
 
           {/* Stats */}
           <div className="flex w-full items-center gap-2 md:gap-6">
@@ -95,7 +131,7 @@ export default function ProfileHeader({
               to="/profile/$userId/followers"
               params={{ userId: userProfile?.uid }}
               disabled={!canViewFollowers}
-              count={userProfile?.followers.length || 0}
+              count={userProfile?.followersCount || 0}
               label="Followers"
             />
 
@@ -105,7 +141,7 @@ export default function ProfileHeader({
               to="/profile/$userId/following"
               params={{ userId: userProfile?.uid }}
               disabled={!canViewFollowing}
-              count={userProfile?.following.length || 0}
+              count={userProfile?.followingCount || 0}
               label="Following"
             />
 
@@ -124,19 +160,13 @@ export default function ProfileHeader({
           {hasFullAccess && <ProfileBirthday birthday={userProfile.birthday} />}
 
           {/* Bio - always visible */}
-          {userProfile.bio && (
+          {hasFullAccess && userProfile.bio && (
             <p className="text-base-content/60 mt-2 max-w-md text-xs md:text-sm">
               {userProfile.bio}
             </p>
           )}
         </div>
       </div>
-      <Link
-        to="/profile/$userId/$wishlist"
-        params={{ userId: "vJDEKsrRAvYYxNOShVtYCPvIvBA2", wishlist: "all" }}
-      >
-        Go to another user
-      </Link>
     </div>
   );
 }
@@ -164,7 +194,11 @@ function StatLink({
   );
 
   if (disabled) {
-    return <div className="flex items-center gap-1 md:gap-2">{content}</div>;
+    return (
+      <div className="flex items-center gap-1 opacity-50 md:gap-2">
+        {content}
+      </div>
+    );
   }
 
   return (

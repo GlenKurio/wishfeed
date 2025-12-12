@@ -1,8 +1,10 @@
 - Profile:
+  -- Allow to open the page with followers and following with search;
+  -- get user followers in batches of 30
+  -- get user following in batches of 30
+  -- Finish followers and following pages ui;
 
   -- Implement follow requests for private accounts;
-
-  -- Allow to open the page with followers and following with search;
 
 - Post:
   -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
