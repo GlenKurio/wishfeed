@@ -6,6 +6,7 @@ import {
 } from "firebase/functions";
 import { firebaseApp } from ".";
 import type {
+  FollowerFollowingInfo,
   ScrapeWishInput,
   ScrapedWishData,
   ScrapedWishDataWithOriginalUrl,
@@ -38,4 +39,41 @@ export async function scrapeWishUrl({
 
 export async function swapUrl(url: string) {
   return url;
+}
+
+export type SearchUsersInput = {
+  searchTerm: string;
+  collection: "followers" | "following";
+};
+
+export type SearchUsersResult = {
+  users: FollowerFollowingInfo[];
+};
+
+export async function searchUsers({
+  searchTerm,
+  collection,
+}: SearchUsersInput): Promise<SearchUsersResult> {
+  const searchUsersFunction = httpsCallable<
+    SearchUsersInput,
+    SearchUsersResult
+  >(functions, "searchUsers");
+
+  const result: HttpsCallableResult<SearchUsersResult> =
+    await searchUsersFunction({ searchTerm, collection });
+
+  return result.data;
+}
+
+// Convenience functions if you want to keep simpler APIs
+export async function searchFollowers(
+  searchTerm: string,
+): Promise<SearchUsersResult> {
+  return searchUsers({ searchTerm, collection: "followers" });
+}
+
+export async function searchFollowing(
+  searchTerm: string,
+): Promise<SearchUsersResult> {
+  return searchUsers({ searchTerm, collection: "following" });
 }

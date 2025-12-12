@@ -4,6 +4,7 @@ import {
   getUserPostsPaginated,
   getUserProfileById,
   getUserWishlists,
+  searchUserFollowers,
 } from "./firebase/db";
 import type { UserProfile } from "./types";
 import { USER_POSTS_PAGE_SIZE } from "./constsnts";
@@ -56,4 +57,40 @@ export const userWishlistsQueryOptions = ({ userId }: { userId: string }) =>
     queryFn: () => getUserWishlists({ userId }),
     enabled: !!userId,
     staleTime: 60 * 1000,
+  });
+
+export const userFollowersSearchQueryOptions = ({
+  userId,
+  searchTerm,
+  pageSize = 50,
+}: {
+  userId: string;
+  searchTerm?: string;
+  pageSize?: number;
+}) =>
+  infiniteQueryOptions({
+    // IMPORTANT: The search term is now part of the query key!
+    // This ensures TanStack Query refetches when the search term changes.
+    queryKey: ["users", userId, "followers", { search: searchTerm }],
+
+    queryFn: (
+      {
+        pageParam,
+      }: {
+        pageParam: QueryDocumentSnapshot<DocumentData> | undefined;
+      }, // pageParam is the lastDoc from Firestore
+    ) =>
+      searchUserFollowers({
+        userId,
+        searchTerm,
+        pageSize,
+        lastDoc: pageParam,
+      }),
+
+    initialPageParam: undefined,
+
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.lastDoc : undefined,
+
+    enabled: !!userId, // Only run if we have a userId
   });

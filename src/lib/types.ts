@@ -124,15 +124,13 @@ export type UserProfile = {
   createdAt: Timestamp;
 };
 
-export type FollowerInfo = {
+export type FollowerFollowingInfo = {
   uid: string;
   displayName: string;
   handle: string;
   photoURL?: string;
   followedAt: Timestamp;
 };
-
-export type FollowingInfo = FollowerInfo;
 
 export type FollowRequestInfo = {
   uid: string;

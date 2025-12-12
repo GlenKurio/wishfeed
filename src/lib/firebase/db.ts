@@ -31,6 +31,7 @@ import {
   type DbPostType,
   type DbUserProfile,
   type DbWishlist,
+  type FollowerInfo,
   type NewWishType,
   type PostType,
   type UserProfile,
@@ -1188,73 +1189,59 @@ export async function rejectFollowRequest(
     console.error("Error deleting notification:", error);
   }
 }
-// export async function followUser(
-//   currentUserId: string,
-//   targetUserId: string,
-// ): Promise<void> {
-//   if (!currentUserId || !targetUserId) {
-//     throw new Error("User IDs are required");
-//   }
 
-//   const user = auth.currentUser;
+export interface PaginatedFollowersResult {
+  followers: FollowerInfo[];
+  lastDoc?: QueryDocumentSnapshot<DocumentData> | null;
+  hasMore: boolean;
+}
 
-//   if (!user) {
-//     throw new Error("Must be logged in tofollow user.");
-//   }
+/**
+ * Searches and paginates through a user's followers subcollection.
+ */
+export async function searchUserFollowers({
+  userId,
+  searchTerm = "",
+  pageSize = 15,
+  lastDoc,
+}: {
+  userId: string;
+  searchTerm?: string;
+  pageSize?: number;
+  lastDoc?: QueryDocumentSnapshot<DocumentData>;
+}): Promise<PaginatedFollowersResult> {
+  // Get a reference to the followers subcollection
+  const followersRef = collection(db, "users", userId, "followers");
 
-//   if (currentUserId === targetUserId) {
-//     throw new Error("Cannot follow yourself");
-//   }
+  const queryConstraints: QueryConstraint[] = [
+    orderBy("displayName"), // You MUST order by the field you are filtering
+    limit(pageSize + 1), // Fetch one extra to check if there are more pages
+  ];
+  console.log("SEARCH TERM: ", searchTerm);
+  // If a search term is provided, add the where clauses
+  if (searchTerm) {
+    // This creates a "starts with" search query
+    queryConstraints.push(where("displayName", ">=", searchTerm));
+    queryConstraints.push(where("displayName", "<=", searchTerm + "\uf8ff"));
+  }
 
-//   // Use transaction to ensure data consistency
-//   await runTransaction(db, async (transaction) => {
-//     const currentUserRef = doc(db, "users", currentUserId);
-//     const targetUserRef = doc(db, "users", targetUserId);
+  // If this is not the first page, start after the last document
+  if (lastDoc) {
+    queryConstraints.push(startAfter(lastDoc));
+  }
 
-//     // Check if target user exists
-//     const targetUserDoc = await transaction.get(targetUserRef);
-//     if (!targetUserDoc.exists()) {
-//       throw new Error("Target user does not exist");
-//     }
+  const q = query(followersRef, ...queryConstraints);
+  const querySnapshot = await getDocs(q);
+  const docs = querySnapshot.docs;
 
-//     // Update current user's following list
-//     transaction.update(currentUserRef, {
-//       following: arrayUnion(targetUserId),
-//     });
+  const hasMore = docs.length > pageSize;
+  const followers = docs
+    .slice(0, pageSize)
+    .map((doc) => doc.data() as FollowerInfo);
 
-//     // Update target user's followers list
-//     transaction.update(targetUserRef, {
-//       followers: arrayUnion(currentUserId),
-//     });
-//   });
-// }
-
-// export async function unfollowUser(
-//   currentUserId: string,
-//   targetUserId: string,
-// ): Promise<void> {
-//   if (!currentUserId || !targetUserId) {
-//     throw new Error("User IDs are required");
-//   }
-
-//   const user = auth.currentUser;
-
-//   if (!user) {
-//     throw new Error("Must be logged in to unfollow user.");
-//   }
-
-//   await runTransaction(db, async (transaction) => {
-//     const currentUserRef = doc(db, "users", currentUserId);
-//     const targetUserRef = doc(db, "users", targetUserId);
-
-//     // Update current user's following list
-//     transaction.update(currentUserRef, {
-//       following: arrayRemove(targetUserId),
-//     });
-
-//     // Update target user's followers list
-//     transaction.update(targetUserRef, {
-//       followers: arrayRemove(currentUserId),
-//     });
-//   });
-// }
+  return {
+    followers,
+    lastDoc: hasMore ? docs[pageSize - 1] : null,
+    hasMore,
+  };
+}
