@@ -2,13 +2,14 @@ import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import {
   getUserFollowers,
+  getUserFollowing,
   getUserPostsPaginated,
   getUserProfileById,
   getUserWishlists,
 } from "./firebase/db";
 import type { UserProfile } from "./types";
 import { USER_POSTS_PAGE_SIZE } from "./constsnts";
-import { searchFollowers } from "./firebase/functions";
+import { searchFollowers, searchFollowing } from "./firebase/functions";
 
 export const profileQueryOptions = (userProfileId: string) =>
   queryOptions<UserProfile | null>({
@@ -92,6 +93,38 @@ export const userFollowersQueryOptions = ({
 
     enabled: !!userId, // Only run if we have a userId
   });
+export const userFollowingQueryOptions = ({
+  userId,
+
+  pageSize = 50,
+}: {
+  userId: string;
+
+  pageSize?: number;
+}) =>
+  infiniteQueryOptions({
+    queryKey: ["users", userId, "following"],
+
+    queryFn: (
+      {
+        pageParam,
+      }: {
+        pageParam: QueryDocumentSnapshot<DocumentData> | undefined;
+      }, // pageParam is the lastDoc from Firestore
+    ) =>
+      getUserFollowing({
+        userId,
+        pageSize,
+        lastDoc: pageParam,
+      }),
+
+    initialPageParam: undefined,
+
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.lastDoc : undefined,
+
+    enabled: !!userId, // Only run if we have a userId
+  });
 
 export const searchFollowersQueryOptions = ({
   searchTerm,
@@ -103,5 +136,18 @@ export const searchFollowersQueryOptions = ({
   queryOptions({
     queryKey: ["users", userId, "followers", { search: searchTerm }],
     queryFn: () => searchFollowers(searchTerm),
+    enabled: !!userId && !!searchTerm && searchTerm !== "",
+  });
+
+export const searchFollowingQueryOptions = ({
+  searchTerm,
+  userId,
+}: {
+  searchTerm: string;
+  userId: string;
+}) =>
+  queryOptions({
+    queryKey: ["users", userId, "followers", { search: searchTerm }],
+    queryFn: () => searchFollowing(searchTerm),
     enabled: !!userId && !!searchTerm && searchTerm !== "",
   });

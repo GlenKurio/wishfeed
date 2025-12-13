@@ -1201,7 +1201,7 @@ export interface PaginatedFollowersResult {
  */
 export async function getUserFollowers({
   userId,
-  pageSize = 15,
+  pageSize = 30,
   lastDoc,
 }: {
   userId: string;
@@ -1233,6 +1233,54 @@ export async function getUserFollowers({
 
   return {
     followers,
+    lastDoc: hasMore ? docs[pageSize - 1] : null,
+    hasMore,
+  };
+}
+
+export interface PaginatedFollowingResult {
+  following: FollowerFollowingInfo[];
+  lastDoc?: QueryDocumentSnapshot<DocumentData> | null;
+  hasMore: boolean;
+}
+
+/**
+ * Searches and paginates through a user's following subcollection.
+ */
+export async function getUserFollowing({
+  userId,
+  pageSize = 30,
+  lastDoc,
+}: {
+  userId: string;
+
+  pageSize?: number;
+  lastDoc?: QueryDocumentSnapshot<DocumentData>;
+}): Promise<PaginatedFollowingResult> {
+  // Get a reference to the followers subcollection
+  const followingRef = collection(db, "users", userId, "following");
+
+  const queryConstraints: QueryConstraint[] = [
+    orderBy("displayName"), // You MUST order by the field you are filtering
+    limit(pageSize + 1), // Fetch one extra to check if there are more pages
+  ];
+
+  // If this is not the first page, start after the last document
+  if (lastDoc) {
+    queryConstraints.push(startAfter(lastDoc));
+  }
+
+  const q = query(followingRef, ...queryConstraints);
+  const querySnapshot = await getDocs(q);
+  const docs = querySnapshot.docs;
+
+  const hasMore = docs.length > pageSize;
+  const following = docs
+    .slice(0, pageSize)
+    .map((doc) => doc.data() as FollowerFollowingInfo);
+
+  return {
+    following,
     lastDoc: hasMore ? docs[pageSize - 1] : null,
     hasMore,
   };
