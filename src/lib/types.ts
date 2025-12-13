@@ -60,7 +60,12 @@ export type PostType = {
   wishlists: string[];
   gifted: boolean;
 
-  createdBy: string;
+  author: {
+    id: string;
+    photoUrl?: string;
+    displayName: string;
+    handle: string;
+  };
 
   isPublished: boolean;
 

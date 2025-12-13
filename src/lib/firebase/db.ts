@@ -97,11 +97,22 @@ export async function saveWishPostToDb(
 
   // 3. Create a reference to the user's profile document
   const userProfileRef = doc(db, "users", user.uid);
+  const userProfileSnap = await getDoc(userProfileRef);
+  if (!userProfileSnap.exists()) throw new Error("cannot find user profile");
+
+  const userData = userProfileSnap.data();
 
   // Construct the final post object, now including the author's UID
   const fullPost: DbPostType = {
     id: newPostRef.id, // Store the auto-generated ID right in the document
-    createdBy: user.uid, // Crucial for querying posts by user
+
+    author: {
+      id: userData.uid,
+      displayName: userData.displayName,
+      photoUrl: userData.photoURL,
+      handle: userData.handle,
+    },
+
     image: validatedData.wish_image as string,
     title: validatedData.wish_title,
     description: validatedData.wish_description,
