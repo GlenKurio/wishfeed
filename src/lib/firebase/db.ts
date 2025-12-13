@@ -123,7 +123,7 @@ export async function saveWishPostToDb(
     likes: [],
     saves: [],
     wishlists: [],
-    gifted: false,
+
     isPublished: validatedData.isPublished,
     ...(validatedData.isPublished
       ? { publishedAt: serverTimestamp() }
@@ -230,7 +230,7 @@ export async function getUserPostsPaginated({
   const postsRef = collection(db, "posts");
 
   const queryConstraints: QueryConstraint[] = [
-    where("createdBy", "==", userId),
+    where("author.id", "==", userId),
     where("isPublished", "==", published),
     orderBy("createdAt", "desc"),
     limit(pageSize + 1),

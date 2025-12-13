@@ -58,7 +58,6 @@ export type PostType = {
   likes: string[];
   saves: string[];
   wishlists: string[];
-  gifted: boolean;
 
   author: {
     id: string;
@@ -66,6 +65,14 @@ export type PostType = {
     displayName: string;
     handle: string;
   };
+
+  // gift: {
+  //   isGifted: boolean;
+  //   giftedBy: string;
+  //   bookedBy: string;
+  //   bookedAt: string;
+  //   bookedUntil: string;
+  // };
 
   isPublished: boolean;
 
