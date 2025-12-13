@@ -755,7 +755,6 @@ export async function hasFollowRequest(
   return requestDoc.exists();
 }
 
-// Follow user (for public accounts)
 export async function followUser(
   currentUserId: string,
   targetUserId: string,
@@ -784,8 +783,24 @@ export async function followUser(
 
     const targetUserData = targetUserDoc.data();
 
-    if (!targetUserData.isPublic) {
-      throw new Error("Cannot follow private account directly");
+    // Check if target user follows current user (allows bypass of privacy)
+    const targetFollowsCurrentUserRef = doc(
+      db,
+      "users",
+      targetUserId,
+      "following",
+      currentUserId,
+    );
+    const targetFollowsCurrentUserDoc = await transaction.get(
+      targetFollowsCurrentUserRef,
+    );
+    const targetFollowsCurrentUser = targetFollowsCurrentUserDoc.exists();
+
+    // Only allow following private accounts if they already follow you
+    if (!targetUserData.isPublic && !targetFollowsCurrentUser) {
+      throw new Error(
+        "Cannot follow private account directly. They must follow you first or accept your request.",
+      );
     }
 
     // Add to current user's following subcollection
@@ -824,6 +839,22 @@ export async function followUser(
       followersCount: increment(1),
     });
   });
+
+  // Create notification
+  try {
+    await addDoc(collection(db, "notifications"), {
+      userId: targetUserId,
+      type: "follow",
+      actorId: currentUserId,
+      actorName: currentUserInfo.displayName,
+      actorPhotoURL: currentUserInfo.photoURL,
+      message: `${currentUserInfo.displayName} started following you`,
+      isRead: false,
+      createdAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error("Error creating notification:", error);
+  }
 
   // Create notification
   try {
@@ -1199,6 +1230,17 @@ export async function rejectFollowRequest(
   } catch (error) {
     console.error("Error deleting notification:", error);
   }
+}
+
+// Check if a user has sent you a follow request
+export async function hasIncomingFollowRequest(
+  currentUserId: string,
+  requesterId: string,
+): Promise<boolean> {
+  const requestDoc = await getDoc(
+    doc(db, "users", currentUserId, "followRequestsReceived", requesterId),
+  );
+  return requestDoc.exists();
 }
 
 export interface PaginatedFollowersResult {

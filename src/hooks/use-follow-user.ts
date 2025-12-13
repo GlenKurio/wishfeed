@@ -6,8 +6,11 @@ import {
   unfollowUser as unfollowUserApi,
   sendFollowRequest as sendFollowRequestApi,
   cancelFollowRequest as cancelFollowRequestApi,
+  acceptFollowRequest as acceptFollowRequestApi,
+  rejectFollowRequest as rejectFollowRequestApi,
   isFollowing,
   hasFollowRequest,
+  hasIncomingFollowRequest,
 } from "@/lib/firebase/db";
 import { useQuery } from "@tanstack/react-query";
 
@@ -18,7 +21,17 @@ export function useFollowUser({ userId }: { userId: string }) {
     userProfileId: userId,
   });
 
-  // Check if following (from subcollection)
+  // Check if target user is following current user
+  const { data: targetFollowsMe = false } = useQuery({
+    queryKey: ["is-following", userId, authUser?.uid],
+    queryFn: async () => {
+      if (!authUser?.uid || !userId) return false;
+      return await isFollowing(userId, authUser.uid);
+    },
+    enabled: !!authUser?.uid && !!userId,
+  });
+
+  // Check if current user is following target user
   const { data: isFollowingUser = false } = useQuery({
     queryKey: ["is-following", authUser?.uid, userId],
     queryFn: async () => {
@@ -28,7 +41,7 @@ export function useFollowUser({ userId }: { userId: string }) {
     enabled: !!authUser?.uid && !!userId,
   });
 
-  // Check if request sent (from subcollection)
+  // Check if current user sent request to target user
   const { data: isRequested = false } = useQuery({
     queryKey: ["has-follow-request", authUser?.uid, userId],
     queryFn: async () => {
@@ -38,11 +51,24 @@ export function useFollowUser({ userId }: { userId: string }) {
     enabled: !!authUser?.uid && !!userId,
   });
 
+  // Check if target user sent request to current user
+  const { data: hasIncomingRequest = false } = useQuery({
+    queryKey: ["has-incoming-request", authUser?.uid, userId],
+    queryFn: async () => {
+      if (!authUser?.uid || !userId) return false;
+      return await hasIncomingFollowRequest(authUser.uid, userId);
+    },
+    enabled: !!authUser?.uid && !!userId,
+  });
+
   const isPrivateAccount = targetUserProfile
     ? !targetUserProfile.isPublic
     : false;
 
-  // Follow mutation with optimistic updates
+  // Should show "Follow Back" - they follow you, but you don't follow them
+  const shouldShowFollowBack = targetFollowsMe && !isFollowingUser;
+
+  // Follow mutation (bypasses privacy if they follow you)
   const followMutation = useMutation({
     mutationFn: async ({
       currentUserId,
@@ -54,7 +80,6 @@ export function useFollowUser({ userId }: { userId: string }) {
       await followUserApi(currentUserId, targetUserId);
     },
     onMutate: async (variables) => {
-      // Cancel outgoing refetches
       await queryClient.cancelQueries({
         queryKey: [
           "is-following",
@@ -66,7 +91,6 @@ export function useFollowUser({ userId }: { userId: string }) {
         queryKey: ["user-profile", variables.targetUserId],
       });
 
-      // Snapshot previous values
       const previousIsFollowing = queryClient.getQueryData<boolean>([
         "is-following",
         variables.currentUserId,
@@ -77,13 +101,11 @@ export function useFollowUser({ userId }: { userId: string }) {
         variables.targetUserId,
       ]);
 
-      // Optimistically update to following state
       queryClient.setQueryData(
         ["is-following", variables.currentUserId, variables.targetUserId],
         true,
       );
 
-      // Optimistically increment follower count
       if (previousTargetProfile) {
         queryClient.setQueryData(["user-profile", variables.targetUserId], {
           ...previousTargetProfile,
@@ -93,8 +115,7 @@ export function useFollowUser({ userId }: { userId: string }) {
 
       return { previousIsFollowing, previousTargetProfile };
     },
-    onError: (_, variables, context) => {
-      // Rollback on error
+    onError: (err, variables, context) => {
       if (context?.previousIsFollowing !== undefined) {
         queryClient.setQueryData(
           ["is-following", variables.currentUserId, variables.targetUserId],
@@ -108,8 +129,7 @@ export function useFollowUser({ userId }: { userId: string }) {
         );
       }
     },
-    onSettled: (_, __, variables) => {
-      // Refetch to ensure consistency
+    onSettled: (data, error, variables) => {
       queryClient.invalidateQueries({
         queryKey: [
           "is-following",
@@ -126,7 +146,7 @@ export function useFollowUser({ userId }: { userId: string }) {
     },
   });
 
-  // Request mutation with optimistic updates
+  // Request mutation
   const requestMutation = useMutation({
     mutationFn: async ({
       currentUserId,
@@ -159,13 +179,11 @@ export function useFollowUser({ userId }: { userId: string }) {
         variables.targetUserId,
       ]);
 
-      // Optimistically update to requested state
       queryClient.setQueryData(
         ["has-follow-request", variables.currentUserId, variables.targetUserId],
         true,
       );
 
-      // Optimistically increment request count
       if (previousTargetProfile) {
         queryClient.setQueryData(["user-profile", variables.targetUserId], {
           ...previousTargetProfile,
@@ -176,7 +194,7 @@ export function useFollowUser({ userId }: { userId: string }) {
 
       return { previousIsRequested, previousTargetProfile };
     },
-    onError: (_, variables, context) => {
+    onError: (err, variables, context) => {
       if (context?.previousIsRequested !== undefined) {
         queryClient.setQueryData(
           [
@@ -194,7 +212,7 @@ export function useFollowUser({ userId }: { userId: string }) {
         );
       }
     },
-    onSettled: (_, __, variables) => {
+    onSettled: (data, error, variables) => {
       queryClient.invalidateQueries({
         queryKey: [
           "has-follow-request",
@@ -211,7 +229,7 @@ export function useFollowUser({ userId }: { userId: string }) {
     },
   });
 
-  // Cancel request mutation with optimistic updates
+  // Cancel request mutation
   const cancelRequestMutation = useMutation({
     mutationFn: async ({
       currentUserId,
@@ -244,13 +262,11 @@ export function useFollowUser({ userId }: { userId: string }) {
         variables.targetUserId,
       ]);
 
-      // Optimistically update to not-requested state
       queryClient.setQueryData(
         ["has-follow-request", variables.currentUserId, variables.targetUserId],
         false,
       );
 
-      // Optimistically decrement request count
       if (previousTargetProfile) {
         queryClient.setQueryData(["user-profile", variables.targetUserId], {
           ...previousTargetProfile,
@@ -263,7 +279,7 @@ export function useFollowUser({ userId }: { userId: string }) {
 
       return { previousIsRequested, previousTargetProfile };
     },
-    onError: (_, variables, context) => {
+    onError: (err, variables, context) => {
       if (context?.previousIsRequested !== undefined) {
         queryClient.setQueryData(
           [
@@ -281,7 +297,7 @@ export function useFollowUser({ userId }: { userId: string }) {
         );
       }
     },
-    onSettled: (_, __, variables) => {
+    onSettled: (data, error, variables) => {
       queryClient.invalidateQueries({
         queryKey: [
           "has-follow-request",
@@ -298,7 +314,204 @@ export function useFollowUser({ userId }: { userId: string }) {
     },
   });
 
-  // Unfollow mutation with optimistic updates
+  // Accept follow request mutation
+  const acceptRequestMutation = useMutation({
+    mutationFn: async ({
+      currentUserId,
+      requesterId,
+    }: {
+      currentUserId: string;
+      requesterId: string;
+    }) => {
+      await acceptFollowRequestApi(currentUserId, requesterId);
+    },
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({
+        queryKey: [
+          "has-incoming-request",
+          variables.currentUserId,
+          variables.requesterId,
+        ],
+      });
+      await queryClient.cancelQueries({
+        queryKey: [
+          "is-following",
+          variables.requesterId,
+          variables.currentUserId,
+        ],
+      });
+      await queryClient.cancelQueries({
+        queryKey: ["user-profile", variables.currentUserId],
+      });
+
+      const previousHasIncoming = queryClient.getQueryData<boolean>([
+        "has-incoming-request",
+        variables.currentUserId,
+        variables.requesterId,
+      ]);
+      const previousProfile = queryClient.getQueryData([
+        "user-profile",
+        variables.currentUserId,
+      ]);
+
+      queryClient.setQueryData(
+        [
+          "has-incoming-request",
+          variables.currentUserId,
+          variables.requesterId,
+        ],
+        false,
+      );
+      queryClient.setQueryData(
+        ["is-following", variables.requesterId, variables.currentUserId],
+        true,
+      );
+
+      if (previousProfile) {
+        queryClient.setQueryData(["user-profile", variables.currentUserId], {
+          ...previousProfile,
+          followRequestsReceivedCount: Math.max(
+            0,
+            (previousProfile as any).followRequestsReceivedCount - 1,
+          ),
+          followersCount: (previousProfile as any).followersCount + 1,
+        });
+      }
+
+      return { previousHasIncoming, previousProfile };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousHasIncoming !== undefined) {
+        queryClient.setQueryData(
+          [
+            "has-incoming-request",
+            variables.currentUserId,
+            variables.requesterId,
+          ],
+          context.previousHasIncoming,
+        );
+      }
+      if (context?.previousProfile) {
+        queryClient.setQueryData(
+          ["user-profile", variables.currentUserId],
+          context.previousProfile,
+        );
+      }
+    },
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "has-incoming-request",
+          variables.currentUserId,
+          variables.requesterId,
+        ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "is-following",
+          variables.requesterId,
+          variables.currentUserId,
+        ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["user-profile", variables.currentUserId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["user-profile", variables.requesterId],
+      });
+    },
+  });
+
+  // Reject follow request mutation
+  const rejectRequestMutation = useMutation({
+    mutationFn: async ({
+      currentUserId,
+      requesterId,
+    }: {
+      currentUserId: string;
+      requesterId: string;
+    }) => {
+      await rejectFollowRequestApi(currentUserId, requesterId);
+    },
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({
+        queryKey: [
+          "has-incoming-request",
+          variables.currentUserId,
+          variables.requesterId,
+        ],
+      });
+      await queryClient.cancelQueries({
+        queryKey: ["user-profile", variables.currentUserId],
+      });
+
+      const previousHasIncoming = queryClient.getQueryData<boolean>([
+        "has-incoming-request",
+        variables.currentUserId,
+        variables.requesterId,
+      ]);
+      const previousProfile = queryClient.getQueryData([
+        "user-profile",
+        variables.currentUserId,
+      ]);
+
+      queryClient.setQueryData(
+        [
+          "has-incoming-request",
+          variables.currentUserId,
+          variables.requesterId,
+        ],
+        false,
+      );
+
+      if (previousProfile) {
+        queryClient.setQueryData(["user-profile", variables.currentUserId], {
+          ...previousProfile,
+          followRequestsReceivedCount: Math.max(
+            0,
+            (previousProfile as any).followRequestsReceivedCount - 1,
+          ),
+        });
+      }
+
+      return { previousHasIncoming, previousProfile };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousHasIncoming !== undefined) {
+        queryClient.setQueryData(
+          [
+            "has-incoming-request",
+            variables.currentUserId,
+            variables.requesterId,
+          ],
+          context.previousHasIncoming,
+        );
+      }
+      if (context?.previousProfile) {
+        queryClient.setQueryData(
+          ["user-profile", variables.currentUserId],
+          context.previousProfile,
+        );
+      }
+    },
+    onSettled: (data, error, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: [
+          "has-incoming-request",
+          variables.currentUserId,
+          variables.requesterId,
+        ],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["user-profile", variables.currentUserId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["user-profile", variables.requesterId],
+      });
+    },
+  });
+
+  // Unfollow mutation
   const unfollowMutation = useMutation({
     mutationFn: async ({
       currentUserId,
@@ -331,13 +544,11 @@ export function useFollowUser({ userId }: { userId: string }) {
         variables.targetUserId,
       ]);
 
-      // Optimistically update to not-following state
       queryClient.setQueryData(
         ["is-following", variables.currentUserId, variables.targetUserId],
         false,
       );
 
-      // Optimistically decrement follower count
       if (previousTargetProfile) {
         queryClient.setQueryData(["user-profile", variables.targetUserId], {
           ...previousTargetProfile,
@@ -350,7 +561,7 @@ export function useFollowUser({ userId }: { userId: string }) {
 
       return { previousIsFollowing, previousTargetProfile };
     },
-    onError: (_, variables, context) => {
+    onError: (err, variables, context) => {
       if (context?.previousIsFollowing !== undefined) {
         queryClient.setQueryData(
           ["is-following", variables.currentUserId, variables.targetUserId],
@@ -364,7 +575,7 @@ export function useFollowUser({ userId }: { userId: string }) {
         );
       }
     },
-    onSettled: (_, __, variables) => {
+    onSettled: (data, error, variables) => {
       queryClient.invalidateQueries({
         queryKey: [
           "is-following",
@@ -381,20 +592,33 @@ export function useFollowUser({ userId }: { userId: string }) {
     },
   });
 
+  // Main action handler
   const handleFollowAction = () => {
     if (!authUser?.uid || !userId) return;
 
+    // Already following - unfollow
     if (isFollowingUser) {
       unfollowMutation.mutate({
         currentUserId: authUser.uid,
         targetUserId: userId,
       });
-    } else if (isRequested) {
+    }
+    // Request already sent - cancel it
+    else if (isRequested) {
       cancelRequestMutation.mutate({
         currentUserId: authUser.uid,
         targetUserId: userId,
       });
-    } else {
+    }
+    // They follow you - follow back (bypasses privacy check)
+    else if (shouldShowFollowBack) {
+      followMutation.mutate({
+        currentUserId: authUser.uid,
+        targetUserId: userId,
+      });
+    }
+    // Default - follow or request based on privacy
+    else {
       if (isPrivateAccount) {
         requestMutation.mutate({
           currentUserId: authUser.uid,
@@ -409,28 +633,55 @@ export function useFollowUser({ userId }: { userId: string }) {
     }
   };
 
+  const handleAcceptRequest = () => {
+    if (!authUser?.uid || !userId) return;
+    acceptRequestMutation.mutate({
+      currentUserId: authUser.uid,
+      requesterId: userId,
+    });
+  };
+
+  const handleRejectRequest = () => {
+    if (!authUser?.uid || !userId) return;
+    rejectRequestMutation.mutate({
+      currentUserId: authUser.uid,
+      requesterId: userId,
+    });
+  };
+
   const isPending =
     followMutation.isPending ||
     unfollowMutation.isPending ||
     requestMutation.isPending ||
-    cancelRequestMutation.isPending;
+    cancelRequestMutation.isPending ||
+    acceptRequestMutation.isPending ||
+    rejectRequestMutation.isPending;
 
   return {
     isFollowing: isFollowingUser,
     isRequested,
+    hasIncomingRequest,
+    shouldShowFollowBack,
+    targetFollowsMe,
     isPrivateAccount,
     followUser: handleFollowAction,
     unfollowUser: handleFollowAction,
+    acceptRequest: handleAcceptRequest,
+    rejectRequest: handleRejectRequest,
     isPending,
     isError:
       followMutation.isError ||
       unfollowMutation.isError ||
       requestMutation.isError ||
-      cancelRequestMutation.isError,
+      cancelRequestMutation.isError ||
+      acceptRequestMutation.isError ||
+      rejectRequestMutation.isError,
     error:
       followMutation.error ||
       unfollowMutation.error ||
       requestMutation.error ||
-      cancelRequestMutation.error,
+      cancelRequestMutation.error ||
+      acceptRequestMutation.error ||
+      rejectRequestMutation.error,
   };
 }

@@ -1,7 +1,14 @@
 import Avatar from "@/components/avatar";
 import { useFollowUser } from "@/hooks/use-follow-user";
 import type { UserProfile } from "@/lib/types";
-import { IconCake, IconCheck, IconEdit, IconX } from "@tabler/icons-react";
+import {
+  IconCake,
+  IconEdit,
+  IconLock,
+  IconCheck,
+  IconX,
+  IconUserPlus,
+} from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import { format, parseISO } from "date-fns";
 
@@ -14,24 +21,76 @@ export default function ProfileHeader({
   isOwner: boolean;
   userProfile: UserProfile;
 }) {
-  const { isFollowing, isRequested, isPrivateAccount, followUser, isPending } =
-    useFollowUser({
-      userId: userProfile?.uid,
-    });
+  const {
+    isFollowing,
+    isRequested,
+    hasIncomingRequest,
+    shouldShowFollowBack,
+    targetFollowsMe,
+    isPrivateAccount,
+    followUser,
+    acceptRequest,
+    rejectRequest,
+    isPending,
+  } = useFollowUser({
+    userId: userProfile?.uid,
+  });
 
   const canViewPosts = hasFullAccess && userProfile.postsCount > 0;
   const canViewFollowing = hasFullAccess && userProfile.followingCount > 0;
   const canViewFollowers = hasFullAccess && userProfile.followersCount > 0;
 
   // Determine follow button state and appearance
-  const getFollowButton = () => {
+  const getFollowButtons = () => {
     if (isOwner) return null;
 
-    // Following state - show unfollow option
+    // Priority 1 - Has incoming request: show Accept/Reject buttons
+    if (hasIncomingRequest) {
+      return (
+        <div className="flex gap-2">
+          <button
+            className="btn btn-xs btn-primary w-full sm:w-auto"
+            onClick={acceptRequest}
+            disabled={isPending}
+          >
+            {isPending ? "Loading..." : "Accept"}
+          </button>
+          <button
+            className="btn btn-xs btn-neutral btn-soft w-full sm:w-auto"
+            onClick={rejectRequest}
+            disabled={isPending}
+          >
+            Decline
+          </button>
+        </div>
+      );
+    }
+
+    // Priority 2 - They follow you, show "Follow Back"
+    if (shouldShowFollowBack) {
+      return (
+        <button
+          className="btn btn-xs btn-primary w-full sm:w-auto"
+          onClick={followUser}
+          disabled={isPending}
+        >
+          {isPending ? (
+            "Loading..."
+          ) : (
+            <>
+              <IconUserPlus className="size-3" />
+              Follow Back
+            </>
+          )}
+        </button>
+      );
+    }
+
+    // Priority 3 - Following state
     if (isFollowing) {
       return (
         <button
-          className="btn btn-xs btn-success w-full sm:w-auto"
+          className="btn btn-xs btn-primary btn-soft w-full sm:w-auto"
           onClick={followUser}
           disabled={isPending}
         >
@@ -47,12 +106,12 @@ export default function ProfileHeader({
       );
     }
 
-    // Requested state - show pending/cancel option
+    // Priority 4 - Requested state
     if (isRequested) {
       return (
         <button
           className="btn btn-xs btn-neutral btn-soft w-full sm:w-auto"
-          onClick={followUser} // This will cancel the request
+          onClick={followUser}
           disabled={isPending}
         >
           {isPending ? (
@@ -67,21 +126,47 @@ export default function ProfileHeader({
       );
     }
 
-    // Default state - show follow/request button
+    // Priority 5 - Default state
     return (
       <button
         className="btn btn-xs btn-primary w-full sm:w-auto"
         onClick={followUser}
         disabled={isPending}
       >
-        {isPending
-          ? "Loading..."
-          : isPrivateAccount
-            ? "Request Follow"
-            : "Follow"}
+        {isPending ? "Loading..." : isPrivateAccount ? "Request" : "Follow"}
       </button>
     );
   };
+
+  // Helper message for context
+  const getContextMessage = () => {
+    if (hasIncomingRequest) {
+      return {
+        type: "info" as const,
+        message: `${userProfile.displayName} wants to follow you.`,
+      };
+    }
+
+    if (targetFollowsMe && !isFollowing) {
+      return {
+        type: "info" as const,
+        message: `${userProfile.displayName} follows you.${isPrivateAccount ? " Click 'Follow Back' to follow them (no request needed)." : ""}`,
+      };
+    }
+
+    if (isPrivateAccount && !hasFullAccess && !isOwner) {
+      return {
+        type: "default" as const,
+        message: isRequested
+          ? "Follow request pending. You'll see their content once they accept."
+          : "This account is private. Send a follow request to see their content.",
+      };
+    }
+
+    return null;
+  };
+
+  const contextMessage = getContextMessage();
 
   return (
     <div className="w-full">
@@ -107,21 +192,46 @@ export default function ProfileHeader({
                   Edit Profile <IconEdit className="size-3" />
                 </Link>
               ) : (
-                getFollowButton()
+                getFollowButtons()
               )}
             </div>
           </div>
 
           {/* Handle and privacy indicator */}
+          <div className="flex items-center gap-1">
+            <p className="text-muted-foreground mb-1 text-xs md:text-sm">
+              @{userProfile?.handle}
+            </p>
+            {isPrivateAccount && !isOwner && (
+              <IconLock className="text-muted-foreground size-3" />
+            )}
+          </div>
 
-          <p className="text-muted-foreground mb-1 text-xs md:text-sm">
-            @{userProfile?.handle}
-          </p>
+          {/* Context message */}
+          {contextMessage && (
+            <div
+              className={`mt-2 rounded-lg px-3 py-2 ${
+                contextMessage.type === "info"
+                  ? "border border-blue-200 bg-blue-50"
+                  : "bg-muted/50"
+              }`}
+            >
+              <p
+                className={`text-xs ${
+                  contextMessage.type === "info"
+                    ? "text-blue-700"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {contextMessage.message}
+              </p>
+            </div>
+          )}
 
           {/* Stats */}
           <div className="flex w-full items-center gap-2 md:gap-6">
             <StatLink
-              to="/profile/$userId/followers/"
+              to="/profile/$userId/followers"
               params={{ userId: userProfile?.uid }}
               disabled={!canViewFollowers}
               count={userProfile?.followersCount || 0}
@@ -153,7 +263,7 @@ export default function ProfileHeader({
           {hasFullAccess && <ProfileBirthday birthday={userProfile.birthday} />}
 
           {/* Bio - always visible */}
-          {hasFullAccess && userProfile.bio && (
+          {userProfile.bio && (
             <p className="text-base-content/60 mt-2 max-w-md text-xs md:text-sm">
               {userProfile.bio}
             </p>
