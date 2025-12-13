@@ -1,9 +1,5 @@
 - Profile:
 
-  --- implement firebase function to keep data in sync by updateing subcollections on user profile update;
-
-  --- Do same thing with post author? Keep authors as subcollections? Or just keep needed info with post and update on profile update?
-
   -- If current follower has a private account and reguests to follow from target user (with private acc), and target account approves the request, show 'follow back' btn which immideatly approves the request and shows the private follower account;
 
 - Post:

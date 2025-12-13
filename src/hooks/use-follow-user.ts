@@ -93,7 +93,7 @@ export function useFollowUser({ userId }: { userId: string }) {
 
       return { previousIsFollowing, previousTargetProfile };
     },
-    onError: (err, variables, context) => {
+    onError: (_, variables, context) => {
       // Rollback on error
       if (context?.previousIsFollowing !== undefined) {
         queryClient.setQueryData(
@@ -108,7 +108,7 @@ export function useFollowUser({ userId }: { userId: string }) {
         );
       }
     },
-    onSettled: (data, error, variables) => {
+    onSettled: (_, __, variables) => {
       // Refetch to ensure consistency
       queryClient.invalidateQueries({
         queryKey: [
@@ -176,7 +176,7 @@ export function useFollowUser({ userId }: { userId: string }) {
 
       return { previousIsRequested, previousTargetProfile };
     },
-    onError: (err, variables, context) => {
+    onError: (_, variables, context) => {
       if (context?.previousIsRequested !== undefined) {
         queryClient.setQueryData(
           [
@@ -194,7 +194,7 @@ export function useFollowUser({ userId }: { userId: string }) {
         );
       }
     },
-    onSettled: (data, error, variables) => {
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({
         queryKey: [
           "has-follow-request",
@@ -263,7 +263,7 @@ export function useFollowUser({ userId }: { userId: string }) {
 
       return { previousIsRequested, previousTargetProfile };
     },
-    onError: (err, variables, context) => {
+    onError: (_, variables, context) => {
       if (context?.previousIsRequested !== undefined) {
         queryClient.setQueryData(
           [
@@ -281,7 +281,7 @@ export function useFollowUser({ userId }: { userId: string }) {
         );
       }
     },
-    onSettled: (data, error, variables) => {
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({
         queryKey: [
           "has-follow-request",
@@ -350,7 +350,7 @@ export function useFollowUser({ userId }: { userId: string }) {
 
       return { previousIsFollowing, previousTargetProfile };
     },
-    onError: (err, variables, context) => {
+    onError: (_, variables, context) => {
       if (context?.previousIsFollowing !== undefined) {
         queryClient.setQueryData(
           ["is-following", variables.currentUserId, variables.targetUserId],
@@ -364,7 +364,7 @@ export function useFollowUser({ userId }: { userId: string }) {
         );
       }
     },
-    onSettled: (data, error, variables) => {
+    onSettled: (_, __, variables) => {
       queryClient.invalidateQueries({
         queryKey: [
           "is-following",

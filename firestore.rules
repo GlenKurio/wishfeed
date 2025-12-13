@@ -2,14 +2,7 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-// Helper functions
-    function isSignedIn() {
-      return request.auth != null;
-    }
-    
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
+
     // This rule allows anyone with your Firestore database reference to view, edit,
     // and delete all data in your Firestore database. It is useful for getting
     // started, but it is configured to expire after 30 days because it
@@ -19,22 +12,7 @@ service cloud.firestore {
     // Make sure to write security rules for your app before that time, or else
     // all client requests to your Firestore database will be denied until you Update
     // your rules
- 
-
-    match /users/{userId} {
-  // Allow reading any user profile document (even if it doesn't exist)
-  allow read: if true;
-  
-  // Only the user can update their own profile
-  allow update: if isOwner(userId);
-  
-  // Only the user can delete their own profile
-  allow delete: if isOwner(userId);
-  
-  // Only authenticated users can create profiles, and only their own
-  allow create: if isSignedIn() && request.auth.uid == userId;
-  }
-   match /{document=**} {
+    match /{document=**} {
       allow read, write: if request.time < timestamp.date(2025, 12, 28);
     }
   }
