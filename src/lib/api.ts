@@ -1,13 +1,14 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import {
+  getUserFollowers,
   getUserPostsPaginated,
   getUserProfileById,
   getUserWishlists,
-  searchUserFollowers,
 } from "./firebase/db";
 import type { UserProfile } from "./types";
 import { USER_POSTS_PAGE_SIZE } from "./constsnts";
+import { searchFollowers } from "./firebase/functions";
 
 export const profileQueryOptions = (userProfileId: string) =>
   queryOptions<UserProfile | null>({
@@ -59,19 +60,17 @@ export const userWishlistsQueryOptions = ({ userId }: { userId: string }) =>
     staleTime: 60 * 1000,
   });
 
-export const userFollowersSearchQueryOptions = ({
+export const userFollowersQueryOptions = ({
   userId,
-  searchTerm,
+
   pageSize = 50,
 }: {
   userId: string;
-  searchTerm?: string;
+
   pageSize?: number;
 }) =>
   infiniteQueryOptions({
-    // IMPORTANT: The search term is now part of the query key!
-    // This ensures TanStack Query refetches when the search term changes.
-    queryKey: ["users", userId, "followers", { search: searchTerm }],
+    queryKey: ["users", userId, "followers"],
 
     queryFn: (
       {
@@ -80,9 +79,8 @@ export const userFollowersSearchQueryOptions = ({
         pageParam: QueryDocumentSnapshot<DocumentData> | undefined;
       }, // pageParam is the lastDoc from Firestore
     ) =>
-      searchUserFollowers({
+      getUserFollowers({
         userId,
-        searchTerm,
         pageSize,
         lastDoc: pageParam,
       }),
@@ -93,4 +91,17 @@ export const userFollowersSearchQueryOptions = ({
       lastPage.hasMore ? lastPage.lastDoc : undefined,
 
     enabled: !!userId, // Only run if we have a userId
+  });
+
+export const searchFollowersQueryOptions = ({
+  searchTerm,
+  userId,
+}: {
+  searchTerm: string;
+  userId: string;
+}) =>
+  queryOptions({
+    queryKey: ["users", userId, "followers", { search: searchTerm }],
+    queryFn: () => searchFollowers(searchTerm),
+    enabled: !!userId && !!searchTerm && searchTerm !== "",
   });

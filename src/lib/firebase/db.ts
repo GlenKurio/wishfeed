@@ -31,7 +31,7 @@ import {
   type DbPostType,
   type DbUserProfile,
   type DbWishlist,
-  type FollowerInfo,
+  type FollowerFollowingInfo,
   type NewWishType,
   type PostType,
   type UserProfile,
@@ -39,8 +39,8 @@ import {
 } from "../types";
 
 import { updateProfile, type User } from "firebase/auth";
-import { auth } from "./auth";
 import { deleteObject, ref } from "firebase/storage";
+import { auth } from "./auth";
 import { storage } from "./storage";
 
 export const db = getFirestore(firebaseApp);
@@ -1191,7 +1191,7 @@ export async function rejectFollowRequest(
 }
 
 export interface PaginatedFollowersResult {
-  followers: FollowerInfo[];
+  followers: FollowerFollowingInfo[];
   lastDoc?: QueryDocumentSnapshot<DocumentData> | null;
   hasMore: boolean;
 }
@@ -1199,14 +1199,13 @@ export interface PaginatedFollowersResult {
 /**
  * Searches and paginates through a user's followers subcollection.
  */
-export async function searchUserFollowers({
+export async function getUserFollowers({
   userId,
-  searchTerm = "",
   pageSize = 15,
   lastDoc,
 }: {
   userId: string;
-  searchTerm?: string;
+
   pageSize?: number;
   lastDoc?: QueryDocumentSnapshot<DocumentData>;
 }): Promise<PaginatedFollowersResult> {
@@ -1217,13 +1216,6 @@ export async function searchUserFollowers({
     orderBy("displayName"), // You MUST order by the field you are filtering
     limit(pageSize + 1), // Fetch one extra to check if there are more pages
   ];
-  console.log("SEARCH TERM: ", searchTerm);
-  // If a search term is provided, add the where clauses
-  if (searchTerm) {
-    // This creates a "starts with" search query
-    queryConstraints.push(where("displayName", ">=", searchTerm));
-    queryConstraints.push(where("displayName", "<=", searchTerm + "\uf8ff"));
-  }
 
   // If this is not the first page, start after the last document
   if (lastDoc) {
@@ -1237,7 +1229,7 @@ export async function searchUserFollowers({
   const hasMore = docs.length > pageSize;
   const followers = docs
     .slice(0, pageSize)
-    .map((doc) => doc.data() as FollowerInfo);
+    .map((doc) => doc.data() as FollowerFollowingInfo);
 
   return {
     followers,
