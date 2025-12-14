@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { Link, useParams } from "@tanstack/react-router";
 import { GridHeader } from "./grid-header";
+import PostCard from "./post-card";
 
 export default function PostsGrid() {
   const { wishlist, userId } = useParams({
@@ -41,19 +42,7 @@ export default function PostsGrid() {
       {allPosts.length !== 0 ? (
         <div className="grid w-full grid-cols-2 gap-2 md:grid-cols-3 md:gap-4">
           {allPosts.map((post) => (
-            <Link
-              key={post.id}
-              to="/profile/$userId/$wishlist/feed"
-              params={{ userId, wishlist }}
-              search={{ postId: post.id }}
-              className="group bg-muted relative aspect-square cursor-pointer overflow-hidden rounded-3xl transition-all hover:opacity-90"
-            >
-              <img
-                src={post.image || "/placeholder.svg"}
-                alt={`Post ${post.id}`}
-                className="h-full w-full object-cover object-center transition-transform group-hover:scale-105"
-              />
-            </Link>
+            <PostCard post={post} userId={userId} wishlist={wishlist} />
           ))}
         </div>
       ) : (

@@ -60,7 +60,7 @@ function RouteComponent() {
               {/* Image (base layer) */}
               <img
                 src={list.cover_image || "/placeholder-wishlist.png"}
-                alt={`Post ${list.id}`}
+                alt={`List ${list.id}`}
                 className="h-full w-full object-cover object-center transition-transform duration-300 group-hover/list:scale-105"
               />
 

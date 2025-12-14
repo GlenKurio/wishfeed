@@ -62,7 +62,7 @@ export default function Wishlists({ isOwner }: { isOwner: boolean }) {
                 />
               ) : (
                 <p className="font-family-cursive mt-1 line-clamp-1 w-full truncate ps-1 text-center text-sm leading-5 tracking-wider">
-                  {w.title} asdasd asd as da
+                  {w.title}
                 </p>
               )}
             </div>
