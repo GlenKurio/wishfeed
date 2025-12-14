@@ -44,6 +44,9 @@
 
 # Finishing
 
+- Finish all todo; especially ones with keeping db data in sync;
+- Remove notifications from db after some time; make usre notifications are not being abused by clicking like button or follow/unfollow;
+
 - Make sure images are optimized, do not cause layout shifts, accessible or hidden from screen readers;
 
 - Connect domain to Firbase and make initial deployment to Fiebase;
