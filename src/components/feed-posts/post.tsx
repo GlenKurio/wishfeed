@@ -27,13 +27,13 @@ export function Post({ post }: PostProps) {
       {/* Product Image */}
       <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-3xl bg-linear-to-br from-gray-50 to-gray-100">
         <img
-          src={post.image || "/product-placeholder.webp"}
+          src={post.image || "/placeholder-wish.png"}
           alt={post.title}
           className="h-full w-full object-cover object-center"
         />
 
         {post.brand && (
-          <div className="text-foreground absolute top-2 left-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium tracking-wide uppercase shadow-sm backdrop-blur-sm">
+          <div className="text-foreground absolute top-2 left-2 rounded-full bg-white/90 p-2 text-[7px] leading-0 font-bold tracking-wide uppercase shadow-sm backdrop-blur-sm lg:p-3 lg:text-xs">
             {post.brand}
           </div>
         )}

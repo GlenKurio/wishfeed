@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { MoreHorizontal } from "lucide-react";
 import type { PostType } from "../../lib/types";
+import PostActions from "./post-actions";
 
 export default function PostHeader(post: PostType) {
   // TODO: get post author profile info by createdBy post property;
@@ -31,9 +31,7 @@ export default function PostHeader(post: PostType) {
           </div>
         </div>
       </Link>
-      <button className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-gray-100">
-        <MoreHorizontal className="h-4 w-4 text-gray-600" />
-      </button>
+      <PostActions />
     </div>
   );
 }

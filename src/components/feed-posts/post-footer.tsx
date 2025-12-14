@@ -26,16 +26,16 @@ export default function PostFooter(post: PostType) {
           className="btn btn-xs lg:btn-sm flex items-center gap-1.5 transition-colors"
         >
           {isLiked ? (
-            <IconHeartFilled className="text-primary size-4" />
+            <IconHeartFilled className="text-primary size-3 lg:size-4" />
           ) : (
-            <IconHeart className="size-4" />
+            <IconHeart className="size-3 lg:size-4" />
           )}
 
           <span className="text-[11px] font-medium">{likes}</span>
         </button>
 
         <button className="btn btn-xs lg:btn-sm flex items-center gap-1.5 transition-colors">
-          <IconBookmarkPlus className="size-4" />
+          <IconBookmarkPlus className="size-3 lg:size-4" />
           <span className="text-[11px] font-medium">{post.repostsCount}</span>
         </button>
       </div>
@@ -45,22 +45,22 @@ export default function PostFooter(post: PostType) {
             to={post.wishUrlAffiliate}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-xs btn-dash lg:btn-sm text-info hover:bg-info/10 hover:border-info/50 flex items-center gap-1.5 border transition-colors"
+            className="btn btn-xs btn-soft lg:btn-sm btn-info hover:bg-info/10 hover:border-info/50 flex items-center gap-1.5 border transition-colors"
           >
-            <IconExternalLink className="size-4" />
+            <IconExternalLink className="size-3 lg:size-4" />
             <span className="text-[11px] leading-0 font-medium">
-              {post.price}
+              ${post.price}
             </span>
           </Link>
         )}
         {user?.uid !== post?.author.uid ? (
           <button className="btn btn-primary btn-xs lg:btn-sm flex items-center gap-1.5 transition-colors">
-            <IconGift className="size-4" /> <span>Gift</span>
+            <IconGift className="size-3 lg:size-4" /> <span>Gift</span>
           </button>
         ) : (
           // TODO: if gifted change color to green and remove text; Improve cta;
           <button className="btn btn-xs lg:btn-sm flex items-center gap-1 transition-colors">
-            <IconCheck className="size-4" /> <span>Mark as Gifted</span>
+            <IconCheck className="size-3 lg:size-4" /> <span> Gifted</span>
           </button>
         )}
       </div>

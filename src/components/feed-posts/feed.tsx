@@ -126,7 +126,7 @@ export default function Feed({
 
   const postsToMap = posts;
   return (
-    <div className="flex max-w-3xl flex-col items-center gap-12 md:grid md:gap-16">
+    <div className="flex w-full flex-col items-center gap-12 md:grid md:gap-16">
       {postsToMap.map((wish, index) => (
         <div key={wish.id} ref={(el) => setPostRef(wish.id!, el)}>
           <Post key={index} post={wish} />
