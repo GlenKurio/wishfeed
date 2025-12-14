@@ -21,7 +21,7 @@ export default function PostCard({
       <img
         src={post.image || "/placeholder-wish.png"}
         alt={`Post ${post.id}`}
-        className="h-full w-full object-cover object-center transition-transform group-hover:scale-105"
+        className="h-full w-full object-cover object-center transition-transform duration-300 group-hover/post:scale-105"
       />
       <div className="from-primary/40 via-primary/10 pointer-events-none absolute inset-0 z-10 bg-linear-to-b to-transparent opacity-0 transition-opacity duration-300 group-hover/post:opacity-100" />
 
