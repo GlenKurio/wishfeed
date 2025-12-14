@@ -1,6 +1,3 @@
-- Profile:
-  - improve profile header design;
-
 - Post:
   -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
   -- On hover of the post in proifle show actions (same actions that in full feed post card).
