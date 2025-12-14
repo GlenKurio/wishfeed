@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { PostType } from "../../lib/types";
 import PostActions from "./post-actions";
+import Avatar from "../avatar";
 
 export default function PostHeader(post: PostType) {
   // TODO: get post author profile info by createdBy post property;
@@ -13,13 +14,7 @@ export default function PostHeader(post: PostType) {
       >
         <div className="flex items-center gap-2">
           <div className="avatar">
-            <div className="w-8 rounded-full">
-              {/* TODO: add fallbacks */}
-              <img
-                src={post.author.photoUrl}
-                alt={post.author.displayName || ""}
-              />
-            </div>
+            <Avatar src={post.author.photoUrl} className="w-8 lg:w-10" />
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-0.5">
