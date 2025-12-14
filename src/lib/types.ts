@@ -44,8 +44,7 @@ export type ScrapeWishInput = {
   url: string;
 };
 
-// export const postStatuses = ["draft", "published"] as const;
-// export type PostStatus = (typeof postStatuses)[number];
+// /post/{postId}
 export type PostType = {
   id?: string;
   image: string;
@@ -55,30 +54,39 @@ export type PostType = {
   price: number;
   wishUrlOriginal: string;
   wishUrlAffiliate?: string;
-  likes: string[];
-  saves: string[];
+  likesCount: number;
+  repostsCount: number;
   wishlists: string[];
 
   author: {
-    id: string;
+    uid: string;
     photoUrl?: string;
     displayName: string;
     handle: string;
   };
 
-  // gift: {
-  //   isGifted: boolean;
-  //   giftedBy: string;
-  //   bookedBy: string;
-  //   bookedAt: string;
-  //   bookedUntil: string;
-  // };
+  giftStatus: "available" | "reserved" | "gifted";
+  // TODO: update gifter data on user profile update
+  gifter?: {
+    uid: string;
+    photoUrl?: string;
+    displayName: string;
+    handle: string;
+  };
 
   isPublished: boolean;
 
   publishedAt: Timestamp | null;
   createdAt: Timestamp;
   updatedAt: Timestamp;
+};
+
+export type PostLikeRepostType = {
+  userId: string;
+  displayName: string;
+  handle: string;
+  photoUrl: string;
+  createdAt: Timestamp;
 };
 
 export type DbPostType = Omit<
@@ -88,6 +96,66 @@ export type DbPostType = Omit<
   createdAt: FieldValue;
   updatedAt: FieldValue;
   publishedAt: FieldValue | null;
+};
+
+// /gifts/{giftId}
+export type GiftType = {
+  id?: string;
+
+  // References
+  postId: string; // Reference to the wish/post
+  gifterId: string; // Who's giving the gift
+  recipientId: string; // Who's receiving (post author)
+  // TODO: update wish on post update in db
+  wish: {
+    title: string;
+    image: string;
+    brand: string;
+    price: number;
+  };
+  // TODO: update gifter on userProfile update in db
+  gifter: {
+    uid: string;
+    photoUrl?: string;
+    displayName: string;
+    handle: string;
+  };
+  // TODO: update recipient on userProfile update in db
+  recipient: {
+    uid: string;
+    photoUrl?: string;
+    displayName: string;
+    handle: string;
+  };
+
+  // Status tracking
+  status: "reserved" | "sent" | "confirmed" | "cancelled" | "expired";
+
+  // Timestamps
+  reservedAt: Timestamp;
+  expiresAt: Timestamp; // Auto-calculated: reservedAt + 30 days
+  sentAt?: Timestamp; // When gifter marks as sent
+  confirmedAt?: Timestamp; // When recipient confirms receipt
+  cancelledAt?: Timestamp; // If gifter cancels
+
+  // Notes
+  gifterNotes?: string; // Private notes for gifter (e.g., tracking number)
+  recipientNotes?: string; // Private notes from recipient (e.g., thank you message)
+
+  // Optional: Delivery details
+  deliveryMethod?: "shipped" | "digital" | "in-person" | "other";
+  trackingInfo?: string;
+
+  // Metadata
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+
+  // Reminder tracking
+  reminderSentAt?: Timestamp; // When we reminded gifter to send
+  confirmationReminderSentAt?: Timestamp; // When we reminded recipient to confirm
+
+  // Privacy
+  revealIdentityAfterConfirmation: boolean; // Default true, but could be anonymous gift
 };
 
 export const newWishSchema = z.object({
@@ -118,6 +186,7 @@ export const newWishSchema = z.object({
 
 export type NewWishType = z.infer<typeof newWishSchema>;
 
+// users/{userId}
 export type UserProfile = {
   uid: string;
   email: string;
@@ -136,6 +205,17 @@ export type UserProfile = {
   createdAt: Timestamp;
 };
 
+// TODO: on user profile update update gifter
+// /users/{userId}/gifters/{gifterId}
+export type GifterType = {
+  giftCount: number; // (incremented for each gift)
+  totalAmountSpent: number; // (sum of the price of all gifts)
+  displayName: string;
+  photoUrl: string;
+  handle: string;
+};
+// users/{userId}/followers/{followerId}
+// users/{userId}/following/{followingId}
 export type FollowerFollowingInfo = {
   uid: string;
   displayName: string;
@@ -143,7 +223,7 @@ export type FollowerFollowingInfo = {
   photoURL?: string;
   followedAt: Timestamp;
 };
-
+// users/{userId}/requests/{requerstId}
 export type FollowRequestInfo = {
   uid: string;
   displayName: string;
@@ -157,6 +237,7 @@ export type DbUserProfile = Omit<UserProfile, "createdAt" | "updatedAt"> & {
   updatedAt: FieldValue;
 };
 
+// /notifications/{notificationId}
 export type Notification = {
   id: string;
   userId: string;

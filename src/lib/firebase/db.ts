@@ -107,7 +107,7 @@ export async function saveWishPostToDb(
     id: newPostRef.id, // Store the auto-generated ID right in the document
 
     author: {
-      id: userData.uid,
+      uid: userData.uid,
       displayName: userData.displayName,
       photoUrl: userData.photoURL,
       handle: userData.handle,

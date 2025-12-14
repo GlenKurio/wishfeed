@@ -58,7 +58,7 @@ export function useCreatePost() {
       queryClient.setQueryData([SCRAPED_WISH_KEY], null);
 
       queryClient.invalidateQueries({
-        queryKey: ["posts", "user", savedPost.author.id, 10, "all"],
+        queryKey: ["posts", "user", savedPost.author.uid, 10, "all"],
       });
 
       navigate({
