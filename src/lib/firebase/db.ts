@@ -42,6 +42,7 @@ import { updateProfile, type User } from "firebase/auth";
 import { deleteObject, ref } from "firebase/storage";
 import { auth } from "./auth";
 import { storage } from "./storage";
+import { swapUrl } from "./functions";
 
 export const db = getFirestore(firebaseApp);
 
@@ -80,15 +81,17 @@ export async function createUserProfile(user: User) {
   return;
 }
 
-export async function saveWishPostToDb(
-  wishData: NewWishType,
-  affiliateLink: string,
-) {
+export async function saveWishPostToDb(wishData: NewWishType) {
   const user = auth.currentUser;
   if (!user) {
     throw new Error("Must be logged in to save posts.");
   }
   const validatedData = newWishSchema.parse(wishData);
+
+  // 0. Swap url for affiliate one
+
+  const affiliateLink = await swapUrl(validatedData.wish_url);
+
   // 1. Get a new write batch
   const batch = writeBatch(db);
 
@@ -142,7 +145,7 @@ export async function saveWishPostToDb(
   // We no longer need to fetch the user profile first, which saves a read operation.
   if (validatedData.isPublished) {
     batch.update(userProfileRef, {
-      postCount: increment(1),
+      postsCount: increment(1),
     });
   }
 
@@ -232,7 +235,7 @@ export async function getUserPostsPaginated({
   const postsRef = collection(db, "posts");
 
   const queryConstraints: QueryConstraint[] = [
-    where("author.id", "==", userId),
+    where("author.uid", "==", userId),
     where("isPublished", "==", published),
     orderBy("createdAt", "desc"),
     limit(pageSize + 1),

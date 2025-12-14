@@ -6,8 +6,9 @@ import { useAuth } from "./use-auth";
 export function useLikePost(post: PostType) {
   const user = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
-  const [likes, setLikes] = useState(post.likes.length);
-  const [isLiked, setIsLiked] = useState(post.likes.includes(user?.uid));
+  const [likes, setLikes] = useState(post.likesCount);
+  const [isLiked, setIsLiked] = useState(false);
+  // const [isLiked, setIsLiked] = useState(post.likes.includes(user?.uid));
 
   const handleLikePost = async () => {
     setIsLiked(!isLiked);

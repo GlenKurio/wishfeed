@@ -68,7 +68,7 @@ function RouteComponent() {
 
   return (
     <div className="container mx-auto flex items-center justify-center px-4 pb-6 lg:pb-10">
-      {allPosts.length === 0 ? (
+      {allPosts?.length === 0 ? (
         <>Empty feed</>
       ) : (
         <Feed posts={allPosts} postRefs={postRefs} />

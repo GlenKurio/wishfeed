@@ -80,9 +80,9 @@ export type PostType = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
-
+// TODO: update likes and reposts on user profile update
+// /posts/{postsId}/likes/{userId}
 export type PostLikeRepostType = {
-  userId: string;
   displayName: string;
   handle: string;
   photoUrl: string;

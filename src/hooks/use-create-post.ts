@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { saveWishPostToDb } from "../lib/firebase/db";
-import { swapUrl } from "../lib/firebase/functions";
 import { uploadPostImage } from "../lib/firebase/storage";
 import {
   clearScrapedWish,
@@ -30,17 +29,14 @@ export function useCreatePost() {
       imageUrl = newWishData.wish_image; // URL already
     }
 
-    // 2. Swap the url
-    const affiliateLink = await swapUrl(newWishData.wish_url);
-
-    // 3. Construct wish data with Cover image url, original product url and affiliate link
+    // 2. Construct wish data with Cover image url, original product url and affiliate link
     const wishData: NewWishType = {
       ...newWishData,
       wish_image: imageUrl,
     };
 
-    // 4. Save the post to Firestore
-    const savedPost = await saveWishPostToDb(wishData, affiliateLink);
+    // 3. Save the post to Firestore
+    const savedPost = await saveWishPostToDb(wishData);
     return { savedPost };
   };
 
