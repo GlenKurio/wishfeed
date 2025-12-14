@@ -36,7 +36,7 @@ export default function PostFooter(post: PostType) {
 
         <button className="btn btn-xs lg:btn-sm flex items-center gap-1.5 transition-colors">
           <IconBookmarkPlus className="size-4" />
-          <span className="text-[11px] font-medium">{post.saves.length}</span>
+          <span className="text-[11px] font-medium">{post.repostsCount}</span>
         </button>
       </div>
       <div className="flex items-center gap-2">
@@ -53,7 +53,7 @@ export default function PostFooter(post: PostType) {
             </span>
           </Link>
         )}
-        {user?.uid !== post?.author.id ? (
+        {user?.uid !== post?.author.uid ? (
           <button className="btn btn-primary btn-xs lg:btn-sm flex items-center gap-1.5 transition-colors">
             <IconGift className="size-4" /> <span>Gift</span>
           </button>

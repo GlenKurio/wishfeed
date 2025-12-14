@@ -9,7 +9,7 @@ export default function PostHeader(post: PostType) {
     <div className="flex w-full items-center justify-between px-2">
       <Link
         to="/profile/$userId/$wishlist"
-        params={{ userId: post.author.id || "", wishlist: "all" }}
+        params={{ userId: post.author.uid || "", wishlist: "all" }}
       >
         <div className="flex items-center gap-2">
           <div className="avatar">

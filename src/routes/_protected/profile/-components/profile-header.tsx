@@ -26,7 +26,6 @@ export default function ProfileHeader({
     isRequested,
     hasIncomingRequest,
     shouldShowFollowBack,
-    targetFollowsMe,
     isPrivateAccount,
     followUser,
     acceptRequest,
@@ -49,14 +48,14 @@ export default function ProfileHeader({
       return (
         <div className="flex gap-2">
           <button
-            className="btn btn-xs btn-primary w-full sm:w-auto"
+            className="btn btn-xs btn-primary md:w-full"
             onClick={acceptRequest}
             disabled={isPending}
           >
             {isPending ? "Loading..." : "Accept"}
           </button>
           <button
-            className="btn btn-xs btn-neutral btn-soft w-full sm:w-auto"
+            className="btn btn-xs btn-neutral btn-soft md:w-full"
             onClick={rejectRequest}
             disabled={isPending}
           >
@@ -138,36 +137,6 @@ export default function ProfileHeader({
     );
   };
 
-  // Helper message for context
-  const getContextMessage = () => {
-    if (hasIncomingRequest) {
-      return {
-        type: "info" as const,
-        message: `${userProfile.displayName} wants to follow you.`,
-      };
-    }
-
-    if (targetFollowsMe && !isFollowing) {
-      return {
-        type: "info" as const,
-        message: `${userProfile.displayName} follows you.${isPrivateAccount ? " Click 'Follow Back' to follow them (no request needed)." : ""}`,
-      };
-    }
-
-    if (isPrivateAccount && !hasFullAccess && !isOwner) {
-      return {
-        type: "default" as const,
-        message: isRequested
-          ? "Follow request pending. You'll see their content once they accept."
-          : "This account is private. Send a follow request to see their content.",
-      };
-    }
-
-    return null;
-  };
-
-  const contextMessage = getContextMessage();
-
   return (
     <div className="w-full">
       <div className="flex items-start gap-2 md:gap-6">
@@ -207,27 +176,6 @@ export default function ProfileHeader({
             )}
           </div>
 
-          {/* Context message */}
-          {contextMessage && (
-            <div
-              className={`mt-2 rounded-lg px-3 py-2 ${
-                contextMessage.type === "info"
-                  ? "border border-blue-200 bg-blue-50"
-                  : "bg-muted/50"
-              }`}
-            >
-              <p
-                className={`text-xs ${
-                  contextMessage.type === "info"
-                    ? "text-blue-700"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {contextMessage.message}
-              </p>
-            </div>
-          )}
-
           {/* Stats */}
           <div className="flex w-full items-center gap-2 md:gap-6">
             <StatLink
@@ -264,7 +212,7 @@ export default function ProfileHeader({
 
           {/* Bio - always visible */}
           {userProfile.bio && (
-            <p className="text-base-content/60 mt-2 max-w-md text-xs md:text-sm">
+            <p className="text-base-content/60 mt-1 max-w-md text-xs md:text-sm lg:mt-2">
               {userProfile.bio}
             </p>
           )}

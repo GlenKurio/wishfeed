@@ -120,9 +120,11 @@ export async function saveWishPostToDb(
     brand: validatedData.brand,
     wishUrlOriginal: validatedData.wish_url,
     wishUrlAffiliate: affiliateLink,
-    likes: [],
-    saves: [],
+    likesCount: 0,
+    repostsCount: 0,
     wishlists: [],
+
+    giftStatus: "available",
 
     isPublished: validatedData.isPublished,
     ...(validatedData.isPublished

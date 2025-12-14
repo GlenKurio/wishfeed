@@ -31,7 +31,13 @@ function RouteComponent() {
     userProfileId: userId,
     realtime: authUser?.uid === userId, // Only for own profile
   });
-  const { isFollowing, isRequested } = useFollowUser({
+  const {
+    isFollowing,
+    isRequested,
+    hasIncomingRequest,
+    targetFollowsMe,
+    isPrivateAccount,
+  } = useFollowUser({
     userId,
   });
 
@@ -48,6 +54,36 @@ function RouteComponent() {
   // Centralized access control logic
   const hasFullAccess = isOwner || isPublic || isFollowing;
 
+  // Helper message for context
+  const getContextMessage = () => {
+    if (hasIncomingRequest) {
+      return {
+        type: "info" as const,
+        message: `${userProfile.displayName} wants to follow you.`,
+      };
+    }
+
+    if (targetFollowsMe && !isFollowing) {
+      return {
+        type: "info" as const,
+        message: `${userProfile.displayName} follows you.${isPrivateAccount ? " Click 'Follow Back' to follow them (no request needed)." : ""}`,
+      };
+    }
+
+    if (isPrivateAccount && !hasFullAccess && !isOwner) {
+      return {
+        type: "default" as const,
+        message: isRequested
+          ? "Follow request pending. You'll see their content once they accept."
+          : "This account is private. Send a follow request to see their content.",
+      };
+    }
+
+    return null;
+  };
+
+  const contextMessage = getContextMessage();
+
   return (
     <div className="flex flex-col gap-6">
       <ProfileHeader
@@ -61,10 +97,8 @@ function RouteComponent() {
 
           <PostsGrid />
         </>
-      ) : isRequested ? (
-        <EmptyFrame text="Follow request pending. You'll see their content once they accept." />
       ) : (
-        <EmptyFrame text="This account is private. Send a follow request to see their content." />
+        <EmptyFrame text={contextMessage?.message || ""} />
       )}
     </div>
   );
