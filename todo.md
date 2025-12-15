@@ -1,6 +1,10 @@
 - Post:
 
-  -- Post gift actions: polish and finish; add functinality to 'undo' each action; also add a dialog to confirm each action; Continue with gift page and gifting feature;
+  -- Post gift actions: finish gift action - improve dialog forms; Send notifications on dialog actions; Add rate limiting to actions;
+  -- What if gifter cancels gift reservation and then another user pics it , how gifter is updated in post and gift in db?
+  -- Create gifts page;
+
+  -- Finish notifications feture with dropdown and realitme updates;
 
   -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
   - Finish post design:
