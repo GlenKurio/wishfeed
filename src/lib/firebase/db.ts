@@ -32,6 +32,7 @@ import {
   type DbPostType,
   type DbUserProfile,
   type DbWishlist,
+  type DeliveryMethod,
   type FollowerFollowingInfo,
   type NewWishType,
   type PostType,
@@ -1463,7 +1464,7 @@ export async function markGiftAsSent(
   options?: {
     trackingInfo?: string;
     messageToRecipient?: string;
-    deliveryMethod?: "shipped" | "digital" | "in-person" | "other";
+    deliveryMethod?: DeliveryMethod;
   },
 ) {
   const user = auth.currentUser;
@@ -1628,6 +1629,120 @@ export async function cancelGiftReservation(giftId: string) {
 
   // Alternatively, you could delete the gift document entirely:
   // await deleteDoc(giftRef);
+
+  return { success: true };
+}
+
+/**
+ * Revert a gift from "sent" back to "reserved"
+ * Allows gifter to undo marking gift as sent
+ */
+export async function revertGiftToReserved(giftId: string) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to revert gift status");
+  }
+
+  const giftRef = doc(db, "gifts", giftId);
+  const giftSnap = await getDoc(giftRef);
+
+  if (!giftSnap.exists()) {
+    throw new Error("Gift not found");
+  }
+
+  const giftData = giftSnap.data();
+
+  if (giftData.gifterId !== user.uid) {
+    throw new Error("Only the gifter can revert the gift status");
+  }
+
+  if (giftData.status !== "sent") {
+    throw new Error("Can only revert gifts that are marked as sent");
+  }
+
+  const postRef = doc(db, "posts", giftData.postId);
+
+  const batch = writeBatch(db);
+
+  // Revert gift to reserved
+  batch.update(giftRef, {
+    status: "reserved",
+    sentAt: null,
+    trackingInfo: null,
+    messageToRecipient: null,
+    deliveryMethod: null,
+    updatedAt: serverTimestamp(),
+  });
+
+  // Keep post as reserved
+  batch.update(postRef, {
+    giftStatus: "reserved",
+    updatedAt: serverTimestamp(),
+  });
+
+  await batch.commit();
+
+  return { success: true };
+}
+
+/**
+ * Revert a gift from "confirmed" back to "sent"
+ * Allows recipient to undo confirmation (within a time window)
+ */
+export async function revertGiftToSent(giftId: string) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to revert gift confirmation");
+  }
+
+  const giftRef = doc(db, "gifts", giftId);
+  const giftSnap = await getDoc(giftRef);
+
+  if (!giftSnap.exists()) {
+    throw new Error("Gift not found");
+  }
+
+  const giftData = giftSnap.data();
+
+  if (giftData.recipientId !== user.uid) {
+    throw new Error("Only the recipient can revert gift confirmation");
+  }
+
+  if (giftData.status !== "confirmed") {
+    throw new Error("Can only revert confirmed gifts");
+  }
+
+  // Optional: Add time limit for reverting (e.g., 24 hours)
+  const confirmedAt = giftData.confirmedAt?.toMillis();
+  const now = Date.now();
+  const hoursSinceConfirmation = (now - confirmedAt) / (1000 * 60 * 60);
+
+  if (hoursSinceConfirmation > 24) {
+    throw new Error("Cannot revert confirmation after 24 hours");
+  }
+
+  const postRef = doc(db, "posts", giftData.postId);
+
+  const batch = writeBatch(db);
+
+  // Revert gift to sent
+  batch.update(giftRef, {
+    status: "sent",
+    confirmedAt: null,
+    recipientNotes: null,
+    updatedAt: serverTimestamp(),
+  });
+
+  // Keep post as reserved (or gifted, depending on your preference)
+  batch.update(postRef, {
+    giftStatus: "reserved",
+    updatedAt: serverTimestamp(),
+  });
+
+  await batch.commit();
+
+  // Note: You'll need a Cloud Function to revert any stats that were updated
+  // when the gift was confirmed (userStats, userGifters, etc.)
 
   return { success: true };
 }

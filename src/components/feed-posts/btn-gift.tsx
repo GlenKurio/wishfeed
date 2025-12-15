@@ -1,71 +1,20 @@
 import { useAuth } from "@/hooks/use-auth";
-import { useWishGiftActions } from "@/hooks/use-wish-gift-actions";
 import type { PostType } from "@/lib/types";
-import { IconCheck, IconGift, IconClock, IconX } from "@tabler/icons-react";
+import { IconCheck, IconClock, IconGift, IconX } from "@tabler/icons-react";
+import { useState } from "react";
+import { GiftActionModal, type GiftModalType } from "./btn-gift-modal";
 
 export default function GiftButton({ post }: { post: PostType }) {
   const user = useAuth();
-  const {
-    reserveGift,
-    markAsSent,
-    confirmReceipt,
-    cancelReservation,
-    isLoading,
-  } = useWishGiftActions();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<GiftModalType>("reserve");
 
   const isGifter = user?.uid === post.gifter?.uid;
   const isAuthor = user?.uid === post.author.uid;
-
-  const handleReserveGift = () => {
-    if (!user || !post.id) return;
-    reserveGift({ postId: post.id, post });
+  const openModal = (type: GiftModalType) => {
+    setModalType(type);
+    setIsModalOpen(true);
   };
-
-  const handleMarkAsSent = () => {
-    if (!post.id || !user?.uid) return;
-
-    const giftId = `${post.id}_${user.uid}`;
-
-    markAsSent({
-      giftId,
-      postId: post.id,
-      postAuthorId: post.author.uid,
-      options: {
-        deliveryMethod: "shipped",
-        // TODO: Add modal to collect tracking info and message
-      },
-    });
-  };
-
-  const handleConfirmReceipt = () => {
-    if (!post.id || !post.gifter?.uid) return;
-
-    const giftId = `${post.id}_${post.gifter.uid}`;
-
-    confirmReceipt({
-      giftId,
-      postId: post.id,
-      postAuthorId: post.author.uid,
-      // TODO: Add modal to collect thank you message
-    });
-  };
-
-  const handleCancelReservation = () => {
-    if (!post.id || !user?.uid) return;
-
-    if (!confirm("Are you sure you want to cancel this gift reservation?")) {
-      return;
-    }
-
-    const giftId = `${post.id}_${user.uid}`;
-
-    cancelReservation({
-      giftId,
-      postId: post.id,
-      postAuthorId: post.author.uid,
-    });
-  };
-
   // Author's view
   if (isAuthor) {
     switch (post.giftStatus) {
@@ -90,18 +39,41 @@ export default function GiftButton({ post }: { post: PostType }) {
 
       case "sent":
         return (
-          <button
-            onClick={handleConfirmReceipt}
-            disabled={isLoading}
-            className="btn btn-xs lg:btn-sm btn-success flex items-center gap-1.5"
-          >
-            {isLoading ? (
-              <span className="loading loading-spinner loading-xs"></span>
-            ) : (
+          <>
+            <button
+              onClick={() => openModal("confirmReceipt")}
+              className="btn btn-xs lg:btn-sm btn-success flex items-center gap-1.5"
+            >
               <IconCheck className="size-3 lg:size-4" />
-            )}
-            <span>Confirm Receipt</span>
-          </button>
+              <span>Confirm Receipt</span>
+            </button>
+
+            <GiftActionModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              modalType={modalType}
+              post={post}
+            />
+          </>
+        );
+      case "gifted":
+        return (
+          <>
+            <button
+              onClick={() => openModal("revertToSent")}
+              className="btn btn-xs lg:btn-sm btn-success flex items-center gap-1.5"
+            >
+              <IconCheck className="size-3 lg:size-4" />
+              <span>Gifted</span>
+            </button>
+
+            <GiftActionModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              modalType={modalType}
+              post={post}
+            />
+          </>
         );
     }
   }
@@ -110,87 +82,84 @@ export default function GiftButton({ post }: { post: PostType }) {
   switch (post.giftStatus) {
     case "available":
       return (
-        <button
-          onClick={handleReserveGift}
-          disabled={isLoading}
-          className="btn btn-primary btn-xs lg:btn-sm flex items-center gap-1.5 transition-colors hover:scale-105"
-        >
-          {isLoading ? (
-            <>
-              <span className="loading loading-spinner loading-xs"></span>
-              <span>Reserving...</span>
-            </>
-          ) : (
-            <>
-              <IconGift className="size-3 lg:size-4" />
-              <span>Gift This</span>
-            </>
-          )}
-        </button>
+        <>
+          <button
+            onClick={() => openModal("reserve")}
+            className="btn btn-primary btn-xs lg:btn-sm flex items-center gap-1.5 transition-colors hover:scale-105"
+          >
+            <IconGift className="size-3 lg:size-4" />
+            <span>Gift This</span>
+          </button>
+
+          <GiftActionModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            modalType={modalType}
+            post={post}
+          />
+        </>
       );
 
     case "reserved":
-      if (isGifter) {
-        return (
+      return (
+        <>
           <div className="flex gap-2">
             <button
-              onClick={handleMarkAsSent}
-              disabled={isLoading}
+              onClick={() => openModal("markAsSent")}
               className="btn btn-success btn-xs lg:btn-sm flex items-center gap-1.5"
             >
-              {isLoading ? (
-                <span className="loading loading-spinner loading-xs"></span>
-              ) : (
-                <IconCheck className="size-3 lg:size-4" />
-              )}
+              <IconCheck className="size-3 lg:size-4" />
               <span>Mark as Sent</span>
             </button>
             <button
-              onClick={handleCancelReservation}
-              disabled={isLoading}
+              onClick={() => openModal("cancel")}
               className="btn btn-ghost btn-xs lg:btn-sm"
               title="Cancel reservation"
             >
               <IconX className="size-3 lg:size-4" />
             </button>
           </div>
-        );
-      }
 
+          <GiftActionModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            modalType={modalType}
+            post={post}
+          />
+        </>
+      );
+    case "sent":
       return (
-        <button
-          className="btn btn-xs lg:btn-sm btn-ghost flex cursor-default items-center gap-1.5"
-          disabled
-        >
-          <IconClock className="size-3 lg:size-4" />
-          <span>Reserved</span>
-        </button>
+        <>
+          <div className="flex gap-2">
+            <button
+              onClick={() => openModal("revertToReserved")}
+              className="btn btn-success btn-xs lg:btn-sm flex items-center gap-1.5"
+            >
+              <IconCheck className="size-3 lg:size-4" />
+              <span>Gift was sent</span>
+            </button>
+          </div>
+
+          <GiftActionModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            modalType={modalType}
+            post={post}
+          />
+        </>
       );
 
     case "gifted":
       if (isGifter) {
         return (
-          <button
-            className="btn btn-xs lg:btn-sm btn-success btn-soft flex items-center gap-1.5"
-            disabled
-          >
+          <button className="btn btn-xs lg:btn-sm btn-success flex items-center gap-1.5">
             <IconCheck className="size-3 lg:size-4" />
-            <span>Your Gift ✓</span>
+            <span>Your Gift</span>
           </button>
         );
       }
 
-      return (
-        <button
-          className="btn btn-xs lg:btn-sm btn-ghost flex cursor-default items-center gap-1.5"
-          disabled
-        >
-          <IconCheck className="text-success size-3 lg:size-4" />
-          <span className="text-success">Gifted</span>
-        </button>
-      );
-
-    default:
       return null;
   }
 }

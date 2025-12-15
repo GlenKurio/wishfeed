@@ -98,6 +98,14 @@ export type DbPostType = Omit<
   publishedAt: FieldValue | null;
 };
 
+export const deliveryMethods = [
+  "shipped",
+  "digital",
+  "in-person",
+  "other",
+] as const;
+
+export type DeliveryMethod = (typeof deliveryMethods)[number];
 // /gifts/{giftId}
 export type GiftType = {
   id?: string;
@@ -143,7 +151,7 @@ export type GiftType = {
   recipientNotes?: string; // Private notes from recipient (e.g., thank you message)
 
   // Optional: Delivery details
-  deliveryMethod?: "shipped" | "digital" | "in-person" | "other";
+  deliveryMethod?: DeliveryMethod;
   trackingInfo?: string;
 
   // Metadata

@@ -5,17 +5,20 @@ import {
   markGiftAsSent,
   confirmGiftReceipt,
   cancelGiftReservation,
+  revertGiftToReserved,
+  revertGiftToSent,
 } from "@/lib/firebase/db";
-import type { PostType } from "@/lib/types";
+import type { DeliveryMethod, PostType } from "@/lib/types";
 import { toast } from "sonner";
 import { useGetUserProfile } from "./use-get-user-profile";
 import type { InfiniteData } from "@tanstack/react-query";
+import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
 // Type for your paginated response
 type UserPostsPage = {
   posts: PostType[];
   hasMore: boolean;
-  lastDoc: any;
+  lastDoc: QueryDocumentSnapshot<DocumentData> | undefined;
 };
 
 export function useWishGiftActions() {
@@ -100,8 +103,6 @@ export function useWishGiftActions() {
   const markAsSentMutation = useMutation({
     mutationFn: ({
       giftId,
-      postId,
-      postAuthorId,
       options,
     }: {
       giftId: string;
@@ -110,7 +111,7 @@ export function useWishGiftActions() {
       options?: {
         trackingInfo?: string;
         messageToRecipient?: string;
-        deliveryMethod?: "shipped" | "digital" | "in-person" | "other";
+        deliveryMethod?: DeliveryMethod;
       };
     }) => markGiftAsSent(giftId, options),
 
@@ -140,7 +141,7 @@ export function useWishGiftActions() {
                   ? {
                       ...p,
                       // Keep as reserved or change to gifted
-                      giftStatus: "reserved" as const,
+                      giftStatus: "sent" as const,
                     }
                   : p,
               ),
@@ -152,7 +153,7 @@ export function useWishGiftActions() {
       return { previousData, authorQueryKey };
     },
 
-    onError: (error, { postAuthorId }, context) => {
+    onError: (error, _, context) => {
       if (context?.previousData && context?.authorQueryKey) {
         queryClient.setQueryData(context.authorQueryKey, context.previousData);
       }
@@ -177,8 +178,6 @@ export function useWishGiftActions() {
   const confirmReceiptMutation = useMutation({
     mutationFn: ({
       giftId,
-      postId,
-      postAuthorId,
       recipientNotes,
     }: {
       giftId: string;
@@ -223,7 +222,7 @@ export function useWishGiftActions() {
       return { previousData, authorQueryKey };
     },
 
-    onError: (error, { postAuthorId }, context) => {
+    onError: (error, _, context) => {
       if (context?.previousData && context?.authorQueryKey) {
         queryClient.setQueryData(context.authorQueryKey, context.previousData);
       }
@@ -255,8 +254,6 @@ export function useWishGiftActions() {
   const cancelReservationMutation = useMutation({
     mutationFn: ({
       giftId,
-      postId,
-      postAuthorId,
     }: {
       giftId: string;
       postId: string;
@@ -300,7 +297,7 @@ export function useWishGiftActions() {
       return { previousData, authorQueryKey };
     },
 
-    onError: (error, { postAuthorId }, context) => {
+    onError: (error, _, context) => {
       if (context?.previousData && context?.authorQueryKey) {
         queryClient.setQueryData(context.authorQueryKey, context.previousData);
       }
@@ -312,6 +309,140 @@ export function useWishGiftActions() {
 
     onSuccess: (_, { postAuthorId }) => {
       toast.success("Reservation cancelled. Gift is now available again.");
+
+      queryClient.invalidateQueries({
+        queryKey: ["posts", "user", postAuthorId, "all"],
+      });
+    },
+  });
+
+  // ==========================================
+  // Revert Gift to Reserved (undo "sent")
+  // ==========================================
+  const revertToReservedMutation = useMutation({
+    mutationFn: ({
+      giftId,
+    }: {
+      giftId: string;
+      postId: string;
+      postAuthorId: string;
+    }) => revertGiftToReserved(giftId),
+
+    onMutate: async ({ postId, postAuthorId }) => {
+      if (!user || !authUser) return;
+
+      const authorQueryKey = ["posts", "user", postAuthorId, "all"] as const;
+
+      await queryClient.cancelQueries({ queryKey: authorQueryKey });
+
+      const previousData =
+        queryClient.getQueryData<InfiniteData<UserPostsPage>>(authorQueryKey);
+
+      // Keep post as reserved
+      queryClient.setQueryData<InfiniteData<UserPostsPage>>(
+        authorQueryKey,
+        (old) => {
+          if (!old) return old;
+
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              posts: page.posts.map((p) =>
+                p.id === postId
+                  ? {
+                      ...p,
+                      giftStatus: "reserved" as const,
+                    }
+                  : p,
+              ),
+            })),
+          };
+        },
+      );
+
+      return { previousData, authorQueryKey };
+    },
+
+    onError: (error, _, context) => {
+      if (context?.previousData && context?.authorQueryKey) {
+        queryClient.setQueryData(context.authorQueryKey, context.previousData);
+      }
+
+      toast.error(
+        error instanceof Error ? error.message : "Failed to undo sent status",
+      );
+    },
+
+    onSuccess: (_, { postAuthorId }) => {
+      toast.success("Gift status reverted to reserved");
+
+      queryClient.invalidateQueries({
+        queryKey: ["posts", "user", postAuthorId, "all"],
+      });
+    },
+  });
+
+  // ==========================================
+  // Revert Gift to Sent (undo confirmation)
+  // ==========================================
+  const revertToSentMutation = useMutation({
+    mutationFn: ({
+      giftId,
+    }: {
+      giftId: string;
+      postId: string;
+      postAuthorId: string;
+    }) => revertGiftToSent(giftId),
+
+    onMutate: async ({ postId, postAuthorId }) => {
+      if (!user || !authUser) return;
+
+      const authorQueryKey = ["posts", "user", postAuthorId, "all"] as const;
+
+      await queryClient.cancelQueries({ queryKey: authorQueryKey });
+
+      const previousData =
+        queryClient.getQueryData<InfiniteData<UserPostsPage>>(authorQueryKey);
+
+      // Revert post to reserved
+      queryClient.setQueryData<InfiniteData<UserPostsPage>>(
+        authorQueryKey,
+        (old) => {
+          if (!old) return old;
+
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              posts: page.posts.map((p) =>
+                p.id === postId
+                  ? {
+                      ...p,
+                      giftStatus: "reserved" as const,
+                    }
+                  : p,
+              ),
+            })),
+          };
+        },
+      );
+
+      return { previousData, authorQueryKey };
+    },
+
+    onError: (error, _, context) => {
+      if (context?.previousData && context?.authorQueryKey) {
+        queryClient.setQueryData(context.authorQueryKey, context.previousData);
+      }
+
+      toast.error(
+        error instanceof Error ? error.message : "Failed to undo confirmation",
+      );
+    },
+
+    onSuccess: (_, { postAuthorId }) => {
+      toast.success("Gift confirmation reverted");
 
       queryClient.invalidateQueries({
         queryKey: ["posts", "user", postAuthorId, "all"],
@@ -340,11 +471,23 @@ export function useWishGiftActions() {
     cancelReservationAsync: cancelReservationMutation.mutateAsync,
     isCancellingReservation: cancelReservationMutation.isPending,
 
+    // Revert actions
+    revertToReserved: revertToReservedMutation.mutate,
+    revertToReservedAsync: revertToReservedMutation.mutateAsync,
+    isRevertingToReserved: revertToReservedMutation.isPending,
+
+    revertToSent: revertToSentMutation.mutate,
+    revertToSentAsync: revertToSentMutation.mutateAsync,
+    isRevertingToSent: revertToSentMutation.isPending,
+
+    // Combined loading state
     // Combined loading state
     isLoading:
       reserveGiftMutation.isPending ||
       markAsSentMutation.isPending ||
       confirmReceiptMutation.isPending ||
-      cancelReservationMutation.isPending,
+      cancelReservationMutation.isPending ||
+      revertToReservedMutation.isPending ||
+      revertToSentMutation.isPending,
   };
 }
