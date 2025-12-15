@@ -18,6 +18,7 @@ import {
   serverTimestamp,
   setDoc,
   startAfter,
+  Timestamp,
   updateDoc,
   where,
   writeBatch,
@@ -1342,4 +1343,367 @@ export async function getUserFollowing({
     lastDoc: hasMore ? docs[pageSize - 1] : null,
     hasMore,
   };
+}
+
+//*******************************
+// Gift functionality
+// ******************************
+
+/**
+ * Reserve a gift for a post
+ * @param postId - The ID of the post to gift
+ * @param post - The full post object (for denormalization)
+ * @returns The created gift document
+ */
+export async function reserveGift(postId: string, post: PostType) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to reserve a gift");
+  }
+
+  if (user.uid === post.author.uid) {
+    throw new Error("You cannot gift your own post");
+  }
+
+  if (post.giftStatus !== "available") {
+    throw new Error("This gift is already reserved or gifted");
+  }
+
+  const giftId = `${postId}_${user.uid}`;
+  const giftRef = doc(db, "gifts", giftId);
+  const postRef = doc(db, "posts", postId);
+
+  // Check if gift already exists
+  const existingGift = await getDoc(giftRef);
+  if (existingGift.exists() && existingGift.data().status === "reserved") {
+    throw new Error("You have already reserved this gift");
+  }
+
+  // Get current user's profile for denormalization
+  const userProfileRef = doc(db, "users", user.uid);
+  const userProfileSnap = await getDoc(userProfileRef);
+
+  if (!userProfileSnap.exists()) {
+    throw new Error("User profile not found");
+  }
+
+  const userData = userProfileSnap.data();
+
+  // Use batch write for atomicity
+  const batch = writeBatch(db);
+
+  const newGift = {
+    id: giftId,
+    postId: postId,
+    gifterId: user.uid,
+    recipientId: post.author.uid,
+
+    // Denormalized post info
+    post: {
+      title: post.title,
+      image: post.image,
+      brand: post.brand,
+      price: post.price,
+    },
+
+    // Denormalized user info
+    gifter: {
+      uid: user.uid,
+      photoUrl: userData.photoURL || undefined,
+      displayName: userData.displayName || "Anonymous",
+      handle: userData.handle || user.uid,
+    },
+
+    recipient: {
+      uid: post.author.uid,
+      photoUrl: post.author.photoUrl,
+      displayName: post.author.displayName,
+      handle: post.author.handle,
+    },
+
+    status: "reserved",
+    reservedAt: serverTimestamp(),
+    expiresAt: Timestamp.fromDate(
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+    ),
+    revealIdentityAfterConfirmation: true,
+
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  // Create gift document
+  batch.set(giftRef, newGift);
+
+  // Update post with reservation
+  batch.update(postRef, {
+    giftStatus: "reserved",
+    gifter: {
+      uid: user.uid,
+      photoUrl: userData.photoURL || undefined,
+      displayName: userData.displayName || "Anonymous",
+      handle: userData.handle || user.uid,
+    },
+    updatedAt: serverTimestamp(),
+  });
+
+  await batch.commit();
+
+  return { ...newGift, id: giftId };
+}
+
+/**
+ * Mark a gift as sent by the gifter
+ * @param giftId - The ID of the gift document
+ * @param trackingInfo - Optional tracking information
+ * @param messageToRecipient - Optional message to the recipient
+ */
+export async function markGiftAsSent(
+  giftId: string,
+  options?: {
+    trackingInfo?: string;
+    messageToRecipient?: string;
+    deliveryMethod?: "shipped" | "digital" | "in-person" | "other";
+  },
+) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to mark gift as sent");
+  }
+
+  const giftRef = doc(db, "gifts", giftId);
+  const giftSnap = await getDoc(giftRef);
+
+  if (!giftSnap.exists()) {
+    throw new Error("Gift not found");
+  }
+
+  const giftData = giftSnap.data();
+
+  if (giftData.gifterId !== user.uid) {
+    throw new Error("Only the gifter can mark the gift as sent");
+  }
+
+  if (giftData.status !== "reserved") {
+    throw new Error("Gift must be in reserved status to mark as sent");
+  }
+
+  const postRef = doc(db, "posts", giftData.postId);
+
+  const batch = writeBatch(db);
+
+  // Update gift document
+  batch.update(giftRef, {
+    status: "sent",
+    sentAt: serverTimestamp(),
+    ...(options?.trackingInfo && { trackingInfo: options.trackingInfo }),
+    ...(options?.messageToRecipient && {
+      messageToRecipient: options.messageToRecipient,
+    }),
+    ...(options?.deliveryMethod && {
+      deliveryMethod: options.deliveryMethod,
+    }),
+    updatedAt: serverTimestamp(),
+  });
+
+  // Update post status (keep as reserved or change to gifted - your choice)
+  batch.update(postRef, {
+    giftStatus: "sent", // Or "gifted" if you want to change it now
+    updatedAt: serverTimestamp(),
+  });
+
+  await batch.commit();
+
+  // TODO: Trigger notification to recipient
+  // "Your gift has been sent! Confirm when you receive it."
+
+  return { success: true };
+}
+
+/**
+ * Confirm receipt of a gift by the recipient
+ * @param giftId - The ID of the gift document
+ * @param recipientNotes - Optional thank you message
+ */
+export async function confirmGiftReceipt(
+  giftId: string,
+  recipientNotes?: string,
+) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to confirm gift receipt");
+  }
+
+  const giftRef = doc(db, "gifts", giftId);
+  const giftSnap = await getDoc(giftRef);
+
+  if (!giftSnap.exists()) {
+    throw new Error("Gift not found");
+  }
+
+  const giftData = giftSnap.data();
+
+  if (giftData.recipientId !== user.uid) {
+    throw new Error("Only the recipient can confirm gift receipt");
+  }
+
+  if (giftData.status !== "sent" && giftData.status !== "reserved") {
+    throw new Error("Gift must be sent before it can be confirmed");
+  }
+
+  const postRef = doc(db, "posts", giftData.postId);
+
+  const batch = writeBatch(db);
+
+  // Update gift document
+  batch.update(giftRef, {
+    status: "confirmed",
+    confirmedAt: serverTimestamp(),
+    ...(recipientNotes && { recipientNotes }),
+    updatedAt: serverTimestamp(),
+  });
+
+  // Update post to gifted status and reveal gifter
+  batch.update(postRef, {
+    giftStatus: "gifted",
+    updatedAt: serverTimestamp(),
+  });
+
+  await batch.commit();
+
+  // TODO: This is where you'd trigger Cloud Function to:
+  // 1. Update userStats for both gifter and recipient
+  // 2. Update userGifters collection
+  // 3. Send notification to gifter "Your gift was confirmed!"
+
+  return { success: true };
+}
+
+/**
+ * Cancel a gift reservation
+ * @param giftId - The ID of the gift document
+ */
+export async function cancelGiftReservation(giftId: string) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to cancel reservation");
+  }
+
+  const giftRef = doc(db, "gifts", giftId);
+  const giftSnap = await getDoc(giftRef);
+
+  if (!giftSnap.exists()) {
+    throw new Error("Gift not found");
+  }
+
+  const giftData = giftSnap.data();
+
+  if (giftData.gifterId !== user.uid) {
+    throw new Error("Only the gifter can cancel the reservation");
+  }
+
+  if (giftData.status === "confirmed") {
+    throw new Error("Cannot cancel a confirmed gift");
+  }
+
+  const postRef = doc(db, "posts", giftData.postId);
+
+  const batch = writeBatch(db);
+
+  // Update gift to cancelled status (or delete it)
+  batch.update(giftRef, {
+    status: "cancelled",
+    cancelledAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  // Return post to available status
+  batch.update(postRef, {
+    giftStatus: "available",
+    gifter: null, // Remove gifter info
+    updatedAt: serverTimestamp(),
+  });
+
+  await batch.commit();
+
+  // Alternatively, you could delete the gift document entirely:
+  // await deleteDoc(giftRef);
+
+  return { success: true };
+}
+
+/**
+ * Get gift details for a post
+ * @param postId - The ID of the post
+ * @param gifterId - Optional: specific gifter ID to look up
+ */
+export async function getGiftForPost(postId: string, gifterId?: string) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to view gift details");
+  }
+
+  const giftId = gifterId ? `${postId}_${gifterId}` : `${postId}_${user.uid}`;
+
+  const giftRef = doc(db, "gifts", giftId);
+  const giftSnap = await getDoc(giftRef);
+
+  if (!giftSnap.exists()) {
+    return null;
+  }
+
+  const giftData = giftSnap.data();
+
+  // Only allow access if user is gifter or recipient
+  if (giftData.gifterId !== user.uid && giftData.recipientId !== user.uid) {
+    throw new Error("Unauthorized to view this gift");
+  }
+
+  return { id: giftSnap.id, ...giftData };
+}
+
+/**
+ * Helper function to check if a gift reservation has expired
+ * Note: This should ideally run as a Cloud Function scheduled task
+ */
+export async function checkGiftExpiration(giftId: string) {
+  const giftRef = doc(db, "gifts", giftId);
+  const giftSnap = await getDoc(giftRef);
+
+  if (!giftSnap.exists()) {
+    return { expired: false };
+  }
+
+  const giftData = giftSnap.data();
+
+  if (giftData.status !== "reserved") {
+    return { expired: false };
+  }
+
+  const now = Timestamp.now();
+  const expiresAt = giftData.expiresAt;
+
+  if (expiresAt && expiresAt.toMillis() < now.toMillis()) {
+    // Gift has expired - return to available
+    const postRef = doc(db, "posts", giftData.postId);
+
+    const batch = writeBatch(db);
+
+    batch.update(giftRef, {
+      status: "expired",
+      updatedAt: serverTimestamp(),
+    });
+
+    batch.update(postRef, {
+      giftStatus: "available",
+      gifter: null,
+      updatedAt: serverTimestamp(),
+    });
+
+    await batch.commit();
+
+    return { expired: true };
+  }
+
+  return { expired: false };
 }

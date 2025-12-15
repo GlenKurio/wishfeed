@@ -65,7 +65,7 @@ export type PostType = {
     handle: string;
   };
 
-  giftStatus: "available" | "reserved" | "gifted";
+  giftStatus: "available" | "reserved" | "sent" | "gifted";
   // TODO: update gifter data on user profile update
   gifter?: {
     uid: string;

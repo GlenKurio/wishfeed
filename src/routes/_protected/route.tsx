@@ -3,6 +3,7 @@ import Gradient from "../../components/pattern";
 import { authQueryOptions } from "../../lib/firebase/auth";
 import AppHeader from "./-components/app-header";
 import Dock from "./-components/dock";
+import { useNotifications } from "@/hooks/use-notifications";
 
 export const Route = createFileRoute("/_protected")({
   beforeLoad: async ({ context }) => {
@@ -22,6 +23,11 @@ export const Route = createFileRoute("/_protected")({
 });
 
 function ProtectedLayout() {
+  const { user } = Route.useRouteContext();
+  useNotifications({
+    userId: user?.uid || "",
+    realtime: !!user?.uid,
+  });
   return (
     <div className="relative flex h-screen flex-col overflow-hidden py-11 md:py-13">
       <Gradient />
