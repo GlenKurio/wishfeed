@@ -1,5 +1,7 @@
 - Post:
 
+  -- Post gift actions: polish and finish; add functinality to 'undo' each action; also add a dialog to confirm each action; Continue with gift page and gifting feature;
+
   -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
   - Finish post design:
     -- Like posts (add ratelimit to it)
