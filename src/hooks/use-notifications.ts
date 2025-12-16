@@ -1,45 +1,31 @@
+import { db } from "@/lib/firebase";
+import {
+  deleteAllNotifications,
+  deleteNotification,
+  markAllNotificationsAsRead as markAllAsReadHelper,
+  markNotificationAsRead,
+} from "@/lib/firebase/firestore/notifications";
+import type { NotificationType } from "@/lib/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   collection,
+  limit,
+  onSnapshot,
+  orderBy,
   query,
   where,
-  orderBy,
-  onSnapshot,
-  limit,
-  Timestamp,
-  doc,
-  updateDoc,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { useEffect } from "react";
 import { toast } from "sonner";
-
-// Notification type
-export type Notification = {
-  id: string;
-  userId: string;
-  type: "gift_reserved" | "gift_sent" | "gift_confirmed" | "gift_cancelled";
-  postId: string;
-  postTitle?: string;
-  postImage?: string;
-  actorId?: string; // Who did the action (for confirmed gifts)
-  actorName?: string;
-  actorHandle?: string;
-  actorPhoto?: string;
-  message: string;
-  read: boolean;
-  createdAt: Timestamp;
-};
 
 // Query options for notifications
 export const notificationsQueryOptions = (userId: string) => ({
   queryKey: ["notifications", userId] as const,
   queryFn: async () => {
-    // This will be replaced by real-time listener
-    return [] as Notification[];
+    return [] as NotificationType[];
   },
   enabled: !!userId,
-  staleTime: Infinity, // Real-time data, never stale
+  staleTime: Infinity,
 });
 
 // Hook to get notifications with real-time updates
@@ -67,34 +53,50 @@ export function useNotifications({
       limit(notificationLimit),
     );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const notifications: Notification[] = [];
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const notifications: NotificationType[] = [];
+        const previousNotifications =
+          queryClient.getQueryData<NotificationType[]>([
+            "notifications",
+            userId,
+          ]) || [];
 
-      snapshot.docChanges().forEach((change) => {
-        const notification = {
-          id: change.doc.id,
-          ...change.doc.data(),
-        } as Notification;
+        const previousIds = new Set(previousNotifications.map((n) => n.id));
 
-        if (change.type === "added") {
-          // Show toast for new notifications
-          if (!notification.read) {
-            showNotificationToast(notification, queryClient);
-          }
+        snapshot.forEach((doc) => {
+          const notification = {
+            id: doc.id,
+            ...doc.data(),
+          } as NotificationType;
+
+          notifications.push(notification);
+        });
+
+        // Show toasts only for truly new notifications
+        if (previousNotifications.length > 0) {
+          snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+              const notification = {
+                id: change.doc.id,
+                ...change.doc.data(),
+              } as NotificationType;
+
+              if (!notification.isRead && !previousIds.has(notification.id)) {
+                showNotificationToast(notification, queryClient);
+              }
+            }
+          });
         }
-      });
 
-      // Update all notifications in cache
-      snapshot.forEach((doc) => {
-        notifications.push({
-          id: doc.id,
-          ...doc.data(),
-        } as Notification);
-      });
-
-      // Update the query cache with real-time data
-      queryClient.setQueryData(["notifications", userId], notifications);
-    });
+        queryClient.setQueryData(["notifications", userId], notifications);
+      },
+      (error) => {
+        console.error("Error in notifications listener:", error);
+        toast.error("Failed to load notifications");
+      },
+    );
 
     return () => unsubscribe();
   }, [realtime, userId, queryClient, notificationLimit]);
@@ -104,22 +106,27 @@ export function useNotifications({
 
 // Helper to show toast and invalidate queries
 function showNotificationToast(
-  notification: Notification,
+  notification: NotificationType,
   queryClient: ReturnType<typeof useQueryClient>,
 ) {
-  switch (notification.type) {
+  switch (notification.kind) {
+    case "follow":
+      toast.info(notification.message);
+      queryClient.invalidateQueries({
+        queryKey: ["user-profile", notification.userId],
+      });
+      break;
+
     case "gift_reserved":
       toast.info("🎁 " + notification.message, {
         action: {
           label: "View",
           onClick: () => {
-            // Navigate to post
             window.location.href = `/post/${notification.postId}`;
           },
         },
       });
 
-      // Invalidate user's posts to refresh gift status
       queryClient.invalidateQueries({
         queryKey: ["posts", "user"],
       });
@@ -145,7 +152,6 @@ function showNotificationToast(
         duration: 5000,
       });
 
-      // Invalidate gifts and stats
       queryClient.invalidateQueries({
         queryKey: ["gifts", "giving"],
       });
@@ -171,7 +177,7 @@ function showNotificationToast(
 export function useUnreadNotificationsCount(userId: string) {
   const { data: notifications } = useNotifications({ userId, realtime: true });
 
-  return notifications?.filter((n) => !n.read).length || 0;
+  return notifications?.filter((n) => !n.isRead).length || 0;
 }
 
 // Hook to mark notification as read
@@ -180,13 +186,10 @@ export function useMarkNotificationAsRead() {
 
   return async (notificationId: string, userId: string) => {
     try {
-      const notificationRef = doc(db, "notifications", notificationId);
-      await updateDoc(notificationRef, {
-        read: true,
-      });
+      await markNotificationAsRead(notificationId, userId);
 
       // Optimistically update cache
-      queryClient.setQueryData<Notification[]>(
+      queryClient.setQueryData<NotificationType[]>(
         ["notifications", userId],
         (old) => {
           if (!old) return old;
@@ -197,6 +200,7 @@ export function useMarkNotificationAsRead() {
       );
     } catch (error) {
       console.error("Error marking notification as read:", error);
+      toast.error("Failed to mark notification as read");
     }
   };
 }
@@ -207,23 +211,15 @@ export function useMarkAllNotificationsAsRead() {
 
   return async (userId: string) => {
     try {
-      const { data: notifications } = queryClient.getQueryData<{
-        data: Notification[];
-      }>(["notifications", userId]) || { data: [] };
+      const count = await markAllAsReadHelper(userId);
 
-      if (!notifications) return;
-
-      const unreadNotifications = notifications.filter((n) => !n.read);
-
-      // Update all unread notifications
-      await Promise.all(
-        unreadNotifications.map((n) =>
-          updateDoc(doc(db, "notifications", n.id), { read: true }),
-        ),
-      );
+      if (count === 0) {
+        toast.info("All notifications already read");
+        return;
+      }
 
       // Optimistically update cache
-      queryClient.setQueryData<Notification[]>(
+      queryClient.setQueryData<NotificationType[]>(
         ["notifications", userId],
         (old) => {
           if (!old) return old;
@@ -231,10 +227,56 @@ export function useMarkAllNotificationsAsRead() {
         },
       );
 
-      toast.success("All notifications marked as read");
+      toast.success(
+        `Marked ${count} notification${count > 1 ? "s" : ""} as read`,
+      );
     } catch (error) {
       console.error("Error marking all as read:", error);
       toast.error("Failed to mark notifications as read");
+    }
+  };
+}
+
+// Hook to delete a notification
+export function useDeleteNotification() {
+  const queryClient = useQueryClient();
+
+  return async (notificationId: string, userId: string) => {
+    try {
+      await deleteNotification(notificationId);
+
+      // Remove from cache
+      queryClient.setQueryData<NotificationType[]>(
+        ["notifications", userId],
+        (old) => {
+          if (!old) return old;
+          return old.filter((n) => n.id !== notificationId);
+        },
+      );
+
+      toast.success("Notification deleted");
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      toast.error("Failed to delete notification");
+    }
+  };
+}
+
+// Hook to delete all notifications
+export function useDeleteAllNotifications() {
+  const queryClient = useQueryClient();
+
+  return async (userId: string) => {
+    try {
+      await deleteAllNotifications(userId);
+
+      // Clear cache
+      queryClient.setQueryData<Notification[]>(["notifications", userId], []);
+
+      toast.success("All notifications deleted");
+    } catch (error) {
+      console.error("Error deleting all notifications:", error);
+      toast.error("Failed to delete notifications");
     }
   };
 }

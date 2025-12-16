@@ -365,9 +365,9 @@ export const notificationKinds = [
 ] as const;
 
 export type NotificationKind = (typeof notificationKinds)[number];
-
+export const NotificationKindSchema = z.enum(notificationKinds);
 // /notifications/{notificationId}
-export type Notification = {
+export type NotificationType = {
   id: string;
   userId: string;
   kind: NotificationKind;
@@ -380,3 +380,16 @@ export type Notification = {
   postId?: string;
   commentId?: string;
 };
+
+export const NotificationSchema = z.object({
+  userId: z.string(),
+  kind: NotificationKindSchema,
+  actorId: z.string(),
+  actorName: z.string(),
+  actorPhotoURL: z.string().optional(),
+  message: z.string(),
+  isRead: z.boolean(),
+  postId: z.string().optional(),
+  commentId: z.string().optional(),
+});
+export type NotificationSchemaType = z.infer<typeof NotificationSchema>;

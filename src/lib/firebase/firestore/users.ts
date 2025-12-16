@@ -1,3 +1,8 @@
+import type {
+  DbUserProfile,
+  FollowerFollowingInfo,
+  UserProfile,
+} from "@/lib/types";
 import { updateProfile, type User } from "firebase/auth";
 import {
   addDoc,
@@ -20,15 +25,11 @@ import {
   where,
   type DocumentData,
 } from "firebase/firestore";
-import { db } from "..";
-import type {
-  DbUserProfile,
-  FollowerFollowingInfo,
-  UserProfile,
-} from "@/lib/types";
-import { auth } from "../auth";
 import { deleteObject, ref } from "firebase/storage";
+import { db } from "..";
+import { auth } from "../auth";
 import { storage } from "../storage";
+import { createNotification } from "./notifications";
 
 export async function createUserProfile(user: User) {
   if (!user || !user.email) {
@@ -318,36 +319,15 @@ export async function followUser(
   });
 
   // Create notification
-  try {
-    await addDoc(collection(db, "notifications"), {
-      userId: targetUserId,
-      type: "follow",
-      actorId: currentUserId,
-      actorName: currentUserInfo.displayName,
-      actorPhotoURL: currentUserInfo.photoURL,
-      message: `${currentUserInfo.displayName} started following you`,
-      isRead: false,
-      createdAt: serverTimestamp(),
-    });
-  } catch (error) {
-    console.error("Error creating notification:", error);
-  }
-
-  // Create notification
-  try {
-    await addDoc(collection(db, "notifications"), {
-      userId: targetUserId,
-      type: "follow",
-      actorId: currentUserId,
-      actorName: currentUserInfo.displayName,
-      actorPhotoURL: currentUserInfo.photoURL,
-      message: `${currentUserInfo.displayName} started following you`,
-      isRead: false,
-      createdAt: serverTimestamp(),
-    });
-  } catch (error) {
-    console.error("Error creating notification:", error);
-  }
+  await createNotification({
+    userId: targetUserId,
+    kind: "follow",
+    actorId: currentUserId,
+    actorName: currentUserInfo.displayName,
+    actorPhotoURL: currentUserInfo.photoURL,
+    message: `${currentUserInfo.displayName} started following you`,
+    isRead: false,
+  });
 }
 
 // Unfollow user
@@ -463,20 +443,15 @@ export async function sendFollowRequest(
   });
 
   // Create notification
-  try {
-    await addDoc(collection(db, "notifications"), {
-      userId: targetUserId,
-      type: "follow_request",
-      actorId: currentUserId,
-      actorName: currentUserInfo.displayName,
-      actorPhotoURL: currentUserInfo.photoURL,
-      message: `${currentUserInfo.displayName} requested to follow you`,
-      isRead: false,
-      createdAt: serverTimestamp(),
-    });
-  } catch (error) {
-    console.error("Error creating notification:", error);
-  }
+  await createNotification({
+    userId: targetUserId,
+    kind: "follow_request",
+    actorId: currentUserId,
+    actorName: currentUserInfo.displayName,
+    actorPhotoURL: currentUserInfo.photoURL,
+    message: `${currentUserInfo.displayName} requested to follow you`,
+    isRead: false,
+  });
 }
 
 // Cancel follow request

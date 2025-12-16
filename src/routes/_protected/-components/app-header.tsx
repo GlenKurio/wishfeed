@@ -18,7 +18,7 @@ export default function AppHeader() {
             className="btn btn-ghost rounded-full p-2.5"
           >
             <IconBellRinging2 className="size-5" />
-            <span className="sr-only">Explore</span>
+            <span className="sr-only">Notifications</span>
           </Link>
         </div>
       </div>
