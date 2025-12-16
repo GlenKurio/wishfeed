@@ -109,9 +109,9 @@ export function useWishGiftActions() {
       postId: string;
       postAuthorId: string;
       options?: {
-        trackingInfo?: string;
-        messageToRecipient?: string;
-        deliveryMethod?: DeliveryMethod;
+        trackingInfo: string;
+        messageToRecipient: string;
+        deliveryMethod: DeliveryMethod;
       };
     }) => markGiftAsSent(giftId, options),
 
@@ -375,7 +375,7 @@ export function useWishGiftActions() {
     },
 
     onSuccess: (_, { postAuthorId }) => {
-      toast.success("Gift status reverted to reserved");
+      toast.success("Gift status set to reserved");
 
       queryClient.invalidateQueries({
         queryKey: ["posts", "user", postAuthorId, "all"],
@@ -442,7 +442,7 @@ export function useWishGiftActions() {
     },
 
     onSuccess: (_, { postAuthorId }) => {
-      toast.success("Gift confirmation reverted");
+      toast.success("Gift marked as not recieved yet");
 
       queryClient.invalidateQueries({
         queryKey: ["posts", "user", postAuthorId, "all"],

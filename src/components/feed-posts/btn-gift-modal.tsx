@@ -2,14 +2,19 @@
 import { useWishGiftActions } from "@/hooks/use-wish-gift-actions";
 import {
   confirmReceiptSchema,
-  deliveryMethods,
   markAsSentSchema,
   type DeliveryMethod,
   type GiftActionModalProps,
 } from "@/lib/types";
-import { IconCheck, IconGift, IconPackage, IconX } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconFileText,
+  IconGift,
+  IconPackage,
+  IconX,
+} from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export function GiftActionModal({
   isOpen,
@@ -18,10 +23,6 @@ export function GiftActionModal({
   post,
 }: GiftActionModalProps) {
   const modalRef = useRef<HTMLDialogElement>(null);
-  const [trackingInfo, setTrackingInfo] = useState("");
-  const [message, setMessage] = useState("");
-  const [deliveryMethod, setDeliveryMethod] =
-    useState<DeliveryMethod>("shipped");
 
   const {
     revertToReserved,
@@ -36,7 +37,7 @@ export function GiftActionModal({
   // Forms
   const markAsSentForm = useForm({
     defaultValues: {
-      deliveryMethod: "shipped" as DeliveryMethod,
+      deliveryMethod: "delivery" as DeliveryMethod,
       trackingInfo: "",
       message: "",
     },
@@ -53,8 +54,8 @@ export function GiftActionModal({
           postId: post.id,
           postAuthorId: post.author.uid,
           options: {
-            trackingInfo: value.trackingInfo || undefined,
-            messageToRecipient: value.message || undefined,
+            trackingInfo: value.trackingInfo,
+            messageToRecipient: value.message,
             deliveryMethod: value.deliveryMethod,
           },
         },
@@ -67,6 +68,9 @@ export function GiftActionModal({
       );
     },
   });
+
+  const markAsSentFormDisabled =
+    markAsSentForm.state.isSubmitting || markAsSentForm.state.isValidating;
 
   const confirmReceiptForm = useForm({
     defaultValues: {
@@ -84,7 +88,7 @@ export function GiftActionModal({
           giftId: `${post.id}_${post.gifter.uid}`,
           postId: post.id,
           postAuthorId: post.author.uid,
-          recipientNotes: value.message || undefined,
+          recipientNotes: value.message,
         },
         {
           onSuccess: () => {
@@ -102,10 +106,6 @@ export function GiftActionModal({
       modalRef.current.showModal();
     } else if (!isOpen && modalRef.current) {
       modalRef.current.close();
-      // Reset form
-      // setTrackingInfo("");
-      setMessage("");
-      setDeliveryMethod("shipped");
     }
   }, [isOpen]);
 
@@ -154,6 +154,7 @@ export function GiftActionModal({
         );
         break;
       case "revertToSent":
+        handleClose();
         revertToSent(
           {
             giftId: `${post.id}_${post.gifter?.uid}`,
@@ -220,12 +221,12 @@ export function GiftActionModal({
                 Let <strong>@{post.author.handle}</strong> know you've sent
                 their gift!
               </p>
-              <div>
+              <div className="flex flex-col gap-4">
                 <markAsSentForm.Field
                   name="deliveryMethod"
                   children={(field) => {
                     const { isTouched, errors } = field.state.meta;
-                    const hasError = isTouched && errors.length > 0;
+
                     const message = isTouched ? errors[0]?.message : null;
 
                     return (
@@ -234,14 +235,15 @@ export function GiftActionModal({
                           <span className="label-text">Delivery Method</span>
                         </label>
                         <select
-                          className="select select-bordered"
+                          className="select select-bordered w-full"
                           value={field.state.value}
                           onChange={(e) =>
                             field.handleChange(e.target.value as DeliveryMethod)
                           }
                           onBlur={field.handleBlur}
+                          disabled={markAsSentFormDisabled}
                         >
-                          <option value="shipped">📦 Shipped</option>
+                          <option value="delivery">📦 Delivery</option>
                           <option value="digital">💻 Digital</option>
                           <option value="in-person">🤝 In Person</option>
                           <option value="other">📋 Other</option>
@@ -255,42 +257,99 @@ export function GiftActionModal({
                     );
                   }}
                 />
-              </div>
 
-              {deliveryMethod === deliveryMethods[0] && (
-                <div className="form-control mt-4 w-full">
-                  <label className="label">
-                    <span className="label-text">
-                      Tracking Number (Optional)
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="1Z999AA10123456784"
-                    className="input input-bordered"
-                    value={trackingInfo}
-                    onChange={(e) => setTrackingInfo(e.target.value)}
-                  />
-                </div>
-              )}
+                <markAsSentForm.Subscribe
+                  selector={(state) => state.values.deliveryMethod}
+                  children={(deliveryMethod) =>
+                    deliveryMethod === "delivery" ? (
+                      <markAsSentForm.Field
+                        name="trackingInfo"
+                        children={(field) => {
+                          const { isTouched, errors } = field.state.meta;
+                          const hasError = isTouched && errors.length > 0;
+                          const message = isTouched ? errors[0]?.message : null;
 
-              <div className="form-control mt-4 w-full">
-                <label className="label">
-                  <span className="label-text">
-                    Message to Recipient (Optional)
-                  </span>
-                </label>
-                <textarea
-                  className="textarea textarea-bordered h-24"
-                  placeholder="Hope you enjoy this! 🎁"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  maxLength={500}
+                          return (
+                            <div className="flex flex-col gap-1">
+                              <label className="label">
+                                <span className="label-text">
+                                  Tracking Number (Optional)
+                                </span>
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="1Z999AA10123456784"
+                                className={`input input-bordered w-full ${hasError ? "input-error" : ""}`}
+                                value={field.state.value}
+                                onChange={(e) =>
+                                  field.handleChange(e.target.value)
+                                }
+                                onBlur={field.handleBlur}
+                                disabled={markAsSentFormDisabled}
+                              />
+                              {message && (
+                                <div className="text-error mt-1.5 ml-1.5 text-xs">
+                                  {message}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }}
+                      />
+                    ) : null
+                  }
                 />
-                <label className="label">
-                  <span className="label-text-alt"></span>
-                  <span className="label-text-alt">{message.length}/500</span>
-                </label>
+
+                {/* Message Field */}
+                <markAsSentForm.Field
+                  name="message"
+                  children={(field) => {
+                    const { isTouched, errors } = field.state.meta;
+                    const hasError = isTouched && errors.length > 0;
+                    const message = isTouched ? errors[0]?.message : null;
+                    const charCount = field.state.value.length;
+
+                    return (
+                      <div className="flex flex-col gap-1">
+                        <label className="label">
+                          <span className="label-text font-medium">
+                            Message to Recipient (Optional)
+                          </span>
+                          <span className="label-text-alt text-neutral/70">
+                            {charCount}/500
+                          </span>
+                        </label>
+                        <label
+                          className={`textarea textarea-bordered border-base-content/50 flex w-full gap-2 p-3 ${hasError ? "textarea-error border-error" : ""}`}
+                        >
+                          <IconFileText
+                            width="20"
+                            height="20"
+                            className={`shrink-0 ${hasError ? "text-error" : "text-base-content/50"}`}
+                          />
+                          <textarea
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            placeholder="Hope you enjoy this! 🎁"
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            onBlur={field.handleBlur}
+                            aria-invalid={hasError}
+                            rows={3}
+                            className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                            disabled={markAsSentFormDisabled}
+                            maxLength={500}
+                          />
+                        </label>
+                        {message && (
+                          <div className="text-error mt-1.5 ml-1.5 text-xs">
+                            {message}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }}
+                />
               </div>
             </>
           ),
@@ -316,25 +375,55 @@ export function GiftActionModal({
                   <p className="text-sm">{post.title}</p>
                 </div>
               </div>
+              <confirmReceiptForm.Field
+                name="message"
+                children={(field) => {
+                  const { isTouched, errors } = field.state.meta;
+                  const hasError = isTouched && errors.length > 0;
+                  const message = isTouched ? errors[0]?.message : null;
+                  const charCount = field.state.value.length;
 
-              <div className="form-control w-full">
-                <label className="label">
-                  <span className="label-text">
-                    Thank You Message (Optional)
-                  </span>
-                </label>
-                <textarea
-                  className="textarea textarea-bordered h-24"
-                  placeholder="Thank you so much! I love it! 💝"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  maxLength={500}
-                />
-                <label className="label">
-                  <span className="label-text-alt"></span>
-                  <span className="label-text-alt">{message.length}/500</span>
-                </label>
-              </div>
+                  return (
+                    <div className="flex flex-col gap-1">
+                      <label className="label">
+                        <span className="label-text font-medium">
+                          Thank You Message (Optional)
+                        </span>
+                        <span className="label-text-alt text-neutral/70">
+                          {charCount}/500
+                        </span>
+                      </label>
+                      <label
+                        className={`textarea textarea-bordered border-base-content/50 flex w-full gap-2 p-3 ${hasError ? "textarea-error border-error" : ""}`}
+                      >
+                        <IconFileText
+                          width="20"
+                          height="20"
+                          className={`shrink-0 ${hasError ? "text-error" : "text-base-content/50"}`}
+                        />
+                        <textarea
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          placeholder="Thank you so much! I love it! 💝"
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          onBlur={field.handleBlur}
+                          aria-invalid={hasError}
+                          rows={3}
+                          maxLength={500}
+                          className={`grow ${hasError ? "placeholder:text-error/50" : ""}`}
+                          disabled={markAsSentFormDisabled}
+                        />
+                      </label>
+                      {message && (
+                        <div className="text-error mt-1.5 ml-1.5 text-xs">
+                          {message}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }}
+              />
             </>
           ),
           confirmText: "Confirm Receipt",
@@ -398,17 +487,17 @@ export function GiftActionModal({
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                   />
                 </svg>
-                <span>The gift status will be reverted to rserved.</span>
+                <span>The gift status will be set to reserved.</span>
               </div>
             </>
           ),
-          confirmText: "Yes, Cancel Reservation",
+          confirmText: "Yes, gift wasn't sent yet",
           confirmClass: "btn-error",
         };
       case "revertToSent":
         return {
           icon: <IconX className="text-error size-8" />,
-          title: "Didn't get your this gift yet?",
+          title: "Didn't get  this gift yet?",
           description: (
             <>
               <p className="mb-4">
@@ -429,13 +518,11 @@ export function GiftActionModal({
                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                   />
                 </svg>
-                <span>
-                  The gift status will be reverted to awaiting to be received.
-                </span>
+                <span>The gift status will be set to sent.</span>
               </div>
             </>
           ),
-          confirmText: "Yes, Mark as Not Sent",
+          confirmText: "Yes, mark gift as not recieved",
           confirmClass: "btn-error",
         };
     }

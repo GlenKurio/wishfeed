@@ -1462,9 +1462,9 @@ export async function reserveGift(postId: string, post: PostType) {
 export async function markGiftAsSent(
   giftId: string,
   options?: {
-    trackingInfo?: string;
-    messageToRecipient?: string;
-    deliveryMethod?: DeliveryMethod;
+    trackingInfo: string;
+    messageToRecipient: string;
+    deliveryMethod: DeliveryMethod;
   },
 ) {
   const user = auth.currentUser;
@@ -1497,13 +1497,12 @@ export async function markGiftAsSent(
   batch.update(giftRef, {
     status: "sent",
     sentAt: serverTimestamp(),
-    ...(options?.trackingInfo && { trackingInfo: options.trackingInfo }),
-    ...(options?.messageToRecipient && {
-      messageToRecipient: options.messageToRecipient,
-    }),
-    ...(options?.deliveryMethod && {
-      deliveryMethod: options.deliveryMethod,
-    }),
+    trackingInfo: options?.trackingInfo,
+
+    messageToRecipient: options?.messageToRecipient,
+
+    deliveryMethod: options?.deliveryMethod,
+
     updatedAt: serverTimestamp(),
   });
 
@@ -1735,7 +1734,7 @@ export async function revertGiftToSent(giftId: string) {
 
   // Keep post as reserved (or gifted, depending on your preference)
   batch.update(postRef, {
-    giftStatus: "reserved",
+    giftStatus: "sent",
     updatedAt: serverTimestamp(),
   });
 

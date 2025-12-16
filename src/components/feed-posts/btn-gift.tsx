@@ -12,6 +12,7 @@ export default function GiftButton({ post }: { post: PostType }) {
   const isGifter = user?.uid === post.gifter?.uid;
   const isAuthor = user?.uid === post.author.uid;
   const openModal = (type: GiftModalType) => {
+    if (isModalOpen) return;
     setModalType(type);
     setIsModalOpen(true);
   };

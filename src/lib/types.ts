@@ -99,7 +99,7 @@ export type DbPostType = Omit<
 };
 
 export const deliveryMethods = [
-  "shipped",
+  "delivery",
   "digital",
   "in-person",
   "other",
@@ -356,17 +356,19 @@ export type GiftActionModalProps = {
 
 // Zod schemas for validation
 export const markAsSentSchema = z.object({
-  deliveryMethod: z.enum(deliveryMethods),
-  trackingInfo: z.string().optional(),
+  deliveryMethod: z.enum(deliveryMethods, {
+    message: "Delivery method must one of the known ones.",
+  }),
+  trackingInfo: z.string().max(100, {
+    message: "Tracking info cannot be longet than 100 characters.",
+  }),
   message: z
     .string()
-    .max(500, "Message must be 500 characters or less")
-    .optional(),
+    .max(500, { message: "Message must be 500 characters or less" }),
 });
 
 export const confirmReceiptSchema = z.object({
   message: z
     .string()
-    .max(500, "Message must be 500 characters or less")
-    .optional(),
+    .max(500, { message: "Message must be 500 characters or less" }),
 });
