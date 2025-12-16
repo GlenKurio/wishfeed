@@ -1,6 +1,11 @@
 - Post:
 
   -- Post gift actions: finish gift action - improve dialog forms; Send notifications on dialog actions; Add rate limiting to actions;
+  -- Ways to send the gift: address, email address (digital), in person, Other;
+  -- When reserves the gift, send a notification; show the reserved gifts with gifting info (address, email address);
+
+  -- Make all profiles private by default; So users have to approve the following requests;
+
   -- What if gifter cancels gift reservation and then another user pics it , how gifter is updated in post and gift in db?
   -- Create gifts page;
 
