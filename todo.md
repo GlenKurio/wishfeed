@@ -1,5 +1,3 @@
-Post:
-
 - Finish notifications feture with dropdown and realitme updates:
   -- remove old notifications;
   -- How do I limit the creation of notifications in db if user follows/unfollows many times during short period of time? how do i rewrite the existing notification?
