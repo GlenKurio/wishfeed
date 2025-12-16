@@ -1,25 +1,15 @@
 // components/gift-action-modal.tsx
 import { useWishGiftActions } from "@/hooks/use-wish-gift-actions";
-import { useEffect, useRef, useState } from "react";
-import { IconGift, IconPackage, IconCheck, IconX } from "@tabler/icons-react";
 import {
+  confirmReceiptSchema,
   deliveryMethods,
+  markAsSentSchema,
   type DeliveryMethod,
-  type PostType,
+  type GiftActionModalProps,
 } from "@/lib/types";
-export type GiftModalType =
-  | "reserve"
-  | "markAsSent"
-  | "confirmReceipt"
-  | "cancel"
-  | "revertToReserved"
-  | "revertToSent";
-type GiftActionModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  modalType: GiftModalType;
-  post: PostType;
-};
+import { IconCheck, IconGift, IconPackage, IconX } from "@tabler/icons-react";
+import { useForm } from "@tanstack/react-form";
+import { useEffect, useRef, useState } from "react";
 
 export function GiftActionModal({
   isOpen,
@@ -30,9 +20,8 @@ export function GiftActionModal({
   const modalRef = useRef<HTMLDialogElement>(null);
   const [trackingInfo, setTrackingInfo] = useState("");
   const [message, setMessage] = useState("");
-  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>(
-    deliveryMethods[0],
-  );
+  const [deliveryMethod, setDeliveryMethod] =
+    useState<DeliveryMethod>("shipped");
 
   const {
     revertToReserved,
@@ -43,6 +32,69 @@ export function GiftActionModal({
     cancelReservation,
     isLoading,
   } = useWishGiftActions();
+
+  // Forms
+  const markAsSentForm = useForm({
+    defaultValues: {
+      deliveryMethod: "shipped" as DeliveryMethod,
+      trackingInfo: "",
+      message: "",
+    },
+
+    validators: {
+      onChange: markAsSentSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (!post.id) return;
+
+      markAsSent(
+        {
+          giftId: `${post.id}_${post.gifter?.uid}`,
+          postId: post.id,
+          postAuthorId: post.author.uid,
+          options: {
+            trackingInfo: value.trackingInfo || undefined,
+            messageToRecipient: value.message || undefined,
+            deliveryMethod: value.deliveryMethod,
+          },
+        },
+        {
+          onSuccess: () => {
+            markAsSentForm.reset();
+            onClose();
+          },
+        },
+      );
+    },
+  });
+
+  const confirmReceiptForm = useForm({
+    defaultValues: {
+      message: "",
+    },
+
+    validators: {
+      onChange: confirmReceiptSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (!post.id || !post.gifter?.uid) return;
+
+      confirmReceipt(
+        {
+          giftId: `${post.id}_${post.gifter.uid}`,
+          postId: post.id,
+          postAuthorId: post.author.uid,
+          recipientNotes: value.message || undefined,
+        },
+        {
+          onSuccess: () => {
+            confirmReceiptForm.reset();
+            onClose();
+          },
+        },
+      );
+    },
+  });
 
   // Handle modal open/close
   useEffect(() => {
@@ -73,31 +125,11 @@ export function GiftActionModal({
         break;
 
       case "markAsSent":
-        markAsSent(
-          {
-            giftId: `${post.id}_${post.gifter?.uid}`,
-            postId: post.id,
-            postAuthorId: post.author.uid,
-            options: {
-              trackingInfo: trackingInfo || undefined,
-              messageToRecipient: message || undefined,
-              deliveryMethod,
-            },
-          },
-          { onSuccess: () => handleClose() },
-        );
+        markAsSentForm.handleSubmit();
         break;
 
       case "confirmReceipt":
-        confirmReceipt(
-          {
-            giftId: `${post.id}_${post.gifter?.uid}`,
-            postId: post.id,
-            postAuthorId: post?.author?.uid,
-            recipientNotes: message || undefined,
-          },
-          { onSuccess: () => handleClose() },
-        );
+        confirmReceiptForm.handleSubmit();
         break;
 
       case "cancel":
@@ -163,9 +195,12 @@ export function GiftActionModal({
                 <div className="text-sm">
                   <p className="font-semibold">Important:</p>
                   <ul className="mt-1 ml-4 list-disc">
-                    <li>You have 30 days to send this gift</li>
-                    <li>The recipient won't know it's you until confirmed</li>
-                    <li>You can cancel anytime before sending</li>
+                    <li>You have 30 days to send this gift.</li>
+                    <li>
+                      The recipient won't know it's you until they get the gift
+                      and confirm they recieved it.
+                    </li>
+                    <li>You can cancel anytime before sending.</li>
                   </ul>
                 </div>
               </div>
@@ -185,23 +220,41 @@ export function GiftActionModal({
                 Let <strong>@{post.author.handle}</strong> know you've sent
                 their gift!
               </p>
+              <div>
+                <markAsSentForm.Field
+                  name="deliveryMethod"
+                  children={(field) => {
+                    const { isTouched, errors } = field.state.meta;
+                    const hasError = isTouched && errors.length > 0;
+                    const message = isTouched ? errors[0]?.message : null;
 
-              <div className="form-control w-full">
-                <label className="label">
-                  <span className="label-text">Delivery Method</span>
-                </label>
-                <select
-                  className="select select-bordered"
-                  value={deliveryMethod}
-                  onChange={(e) =>
-                    setDeliveryMethod(e.target.value as DeliveryMethod)
-                  }
-                >
-                  <option value="shipped">📦 Shipped</option>
-                  <option value="digital">💻 Digital</option>
-                  <option value="in-person">🤝 In Person</option>
-                  <option value="other">📋 Other</option>
-                </select>
+                    return (
+                      <div className="flex flex-col gap-1">
+                        <label className="label">
+                          <span className="label-text">Delivery Method</span>
+                        </label>
+                        <select
+                          className="select select-bordered"
+                          value={field.state.value}
+                          onChange={(e) =>
+                            field.handleChange(e.target.value as DeliveryMethod)
+                          }
+                          onBlur={field.handleBlur}
+                        >
+                          <option value="shipped">📦 Shipped</option>
+                          <option value="digital">💻 Digital</option>
+                          <option value="in-person">🤝 In Person</option>
+                          <option value="other">📋 Other</option>
+                        </select>
+                        {message && (
+                          <div className="text-error mt-1.5 ml-1.5 text-xs">
+                            {message}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }}
+                />
               </div>
 
               {deliveryMethod === deliveryMethods[0] && (

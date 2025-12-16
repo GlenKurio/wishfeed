@@ -338,3 +338,35 @@ export type DbWishlist = Omit<Wishlist, "createdAt" | "updatedAt"> & {
 };
 
 export type CreateWishlist = z.infer<typeof createWishlistSchema>;
+
+export type GiftModalType =
+  | "reserve"
+  | "markAsSent"
+  | "confirmReceipt"
+  | "cancel"
+  | "revertToReserved"
+  | "revertToSent";
+
+export type GiftActionModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  modalType: GiftModalType;
+  post: PostType;
+};
+
+// Zod schemas for validation
+export const markAsSentSchema = z.object({
+  deliveryMethod: z.enum(deliveryMethods),
+  trackingInfo: z.string().optional(),
+  message: z
+    .string()
+    .max(500, "Message must be 500 characters or less")
+    .optional(),
+});
+
+export const confirmReceiptSchema = z.object({
+  message: z
+    .string()
+    .max(500, "Message must be 500 characters or less")
+    .optional(),
+});

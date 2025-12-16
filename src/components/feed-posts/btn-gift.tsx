@@ -1,8 +1,8 @@
 import { useAuth } from "@/hooks/use-auth";
-import type { PostType } from "@/lib/types";
+import type { GiftModalType, PostType } from "@/lib/types";
 import { IconCheck, IconClock, IconGift, IconX } from "@tabler/icons-react";
 import { useState } from "react";
-import { GiftActionModal, type GiftModalType } from "./btn-gift-modal";
+import { GiftActionModal } from "./btn-gift-modal";
 
 export default function GiftButton({ post }: { post: PostType }) {
   const user = useAuth();
