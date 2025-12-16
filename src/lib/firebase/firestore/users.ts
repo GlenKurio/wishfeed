@@ -50,7 +50,7 @@ export async function createUserProfile(user: User) {
     photoURL: user.photoURL || "",
     bio: "",
     birthday: "",
-    isPublic: true,
+    isPublic: false,
     handle: user.email?.split("@")[0],
     updatedAt: serverTimestamp(),
     followersCount: 0,

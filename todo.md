@@ -13,8 +13,6 @@ Post:
 - Ways to send the gift: address, email address (digital), in person, Other;
 - When reserves the gift, send a notification; show the reserved gifts with gifting info (address, email address);
 
-- Make all profiles private by default; So users have to approve the following requests;
-
 - Create gifts page;
 
 - Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
