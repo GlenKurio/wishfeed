@@ -2,7 +2,7 @@ import PageHeading from "@/components/page-heading";
 import { useAuth } from "@/hooks/use-auth";
 import { useEditProfile } from "@/hooks/use-edit-profile";
 import { profileQueryOptions } from "@/lib/api";
-import { validateHandle } from "@/lib/firebase/db";
+import { validateHandle } from "@/lib/firebase/firestore/users";
 import { updateUserProfileSchema, type UpdatedUserProfile } from "@/lib/types";
 import { isoToDateInput } from "@/lib/utils";
 import {

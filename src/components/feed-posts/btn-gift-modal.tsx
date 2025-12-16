@@ -14,6 +14,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
+import { Loader } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 export function GiftActionModal({
@@ -551,7 +552,7 @@ export function GiftActionModal({
           >
             {isLoading ? (
               <>
-                <span className="loading loading-spinner loading-xs"></span>
+                <Loader className="size-4 animate-spin" />
                 Processing...
               </>
             ) : (

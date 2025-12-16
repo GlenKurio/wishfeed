@@ -245,27 +245,6 @@ export type DbUserProfile = Omit<UserProfile, "createdAt" | "updatedAt"> & {
   updatedAt: FieldValue;
 };
 
-// /notifications/{notificationId}
-export type Notification = {
-  id: string;
-  userId: string;
-  type:
-    | "follow"
-    | "follow_request"
-    | "follow_request_accepted"
-    | "like"
-    | "comment"
-    | "mention";
-  actorId: string;
-  actorName: string;
-  actorPhotoURL?: string;
-  message: string;
-  isRead: boolean;
-  createdAt: Timestamp;
-  postId?: string;
-  commentId?: string;
-};
-
 export const updateUserProfileSchema = z.object({
   // Display Name: Required, max 50 chars
   displayName: z
@@ -372,3 +351,32 @@ export const confirmReceiptSchema = z.object({
     .string()
     .max(500, { message: "Message must be 500 characters or less" }),
 });
+
+export const notificationKinds = [
+  "follow",
+  "follow_request",
+  "follow_request_accepted",
+  "like",
+  "repost",
+  "gift_reserved",
+  "gift_sent",
+  "gift_confirmed",
+  "gift_cancelled",
+] as const;
+
+export type NotificationKind = (typeof notificationKinds)[number];
+
+// /notifications/{notificationId}
+export type Notification = {
+  id: string;
+  userId: string;
+  kind: NotificationKind;
+  actorId: string;
+  actorName: string;
+  actorPhotoURL?: string;
+  message: string;
+  isRead: boolean;
+  createdAt: Timestamp;
+  postId?: string;
+  commentId?: string;
+};

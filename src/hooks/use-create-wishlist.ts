@@ -1,4 +1,4 @@
-import { saveWishlistToDb } from "@/lib/firebase/db";
+import { saveWishlistToDb } from "@/lib/firebase/firestore/wishlists";
 import { uploadWishlistImage } from "@/lib/firebase/storage";
 import type { CreateWishlist } from "@/lib/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

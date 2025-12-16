@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { saveWishPostToDb } from "../lib/firebase/db";
+import { saveWishPostToDb } from "../lib/firebase/firestore/posts";
 import { uploadPostImage } from "../lib/firebase/storage";
 import {
   clearScrapedWish,

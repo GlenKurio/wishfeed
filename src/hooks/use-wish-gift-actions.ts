@@ -7,7 +7,7 @@ import {
   cancelGiftReservation,
   revertGiftToReserved,
   revertGiftToSent,
-} from "@/lib/firebase/db";
+} from "@/lib/firebase/firestore/gifts";
 import type { DeliveryMethod, PostType } from "@/lib/types";
 import { toast } from "sonner";
 import { useGetUserProfile } from "./use-get-user-profile";

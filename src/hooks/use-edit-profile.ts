@@ -3,7 +3,7 @@ import { useAuth } from "./use-auth";
 import { useGetUserProfile } from "./use-get-user-profile";
 import type { UpdatedUserProfile, UserProfile } from "../lib/types";
 import { uploadAvatar } from "../lib/firebase/storage";
-import { editUserProfile } from "../lib/firebase/db";
+import { editUserProfile } from "../lib/firebase/firestore/users";
 import { Timestamp } from "firebase/firestore";
 import { toast } from "sonner";
 import { dateInputToISO } from "@/lib/utils";

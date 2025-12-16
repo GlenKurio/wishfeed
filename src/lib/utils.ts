@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { UserProfile } from "./types";
-import { isFollowing } from "./firebase/db";
+import { isFollowing } from "./firebase/firestore/users";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

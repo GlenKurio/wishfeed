@@ -1,4 +1,4 @@
-import { deleteWishlist } from "@/lib/firebase/db";
+import { deleteWishlist } from "@/lib/firebase/firestore/wishlists";
 import { useAuth } from "./use-auth";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

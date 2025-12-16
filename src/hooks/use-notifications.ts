@@ -10,7 +10,7 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase/db";
+import { db } from "@/lib/firebase";
 import { useEffect } from "react";
 import { toast } from "sonner";
 

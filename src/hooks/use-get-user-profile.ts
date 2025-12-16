@@ -1,5 +1,5 @@
 import { profileQueryOptions } from "@/lib/api";
-import { db } from "@/lib/firebase/db";
+import { db } from "@/lib/firebase";
 import type { UserProfile } from "@/lib/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { doc, onSnapshot } from "firebase/firestore";

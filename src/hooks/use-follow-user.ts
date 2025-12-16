@@ -11,7 +11,7 @@ import {
   isFollowing,
   hasFollowRequest,
   hasIncomingFollowRequest,
-} from "@/lib/firebase/db";
+} from "@/lib/firebase/firestore/users";
 import { useQuery } from "@tanstack/react-query";
 
 export function useFollowUser({ userId }: { userId: string }) {

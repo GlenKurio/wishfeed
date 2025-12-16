@@ -1,15 +1,16 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
-import {
-  getUserFollowers,
-  getUserFollowing,
-  getUserPostsPaginated,
-  getUserProfileById,
-  getUserWishlists,
-} from "./firebase/db";
+
 import type { UserProfile } from "./types";
 import { USER_POSTS_PAGE_SIZE } from "./constsnts";
 import { searchFollowers, searchFollowing } from "./firebase/functions";
+import {
+  getUserFollowers,
+  getUserFollowing,
+  getUserProfileById,
+} from "./firebase/firestore/users";
+import { getUserPostsPaginated } from "./firebase/firestore/posts";
+import { getUserWishlists } from "./firebase/firestore/wishlists";
 
 export const profileQueryOptions = (userProfileId: string) =>
   queryOptions<UserProfile | null>({
