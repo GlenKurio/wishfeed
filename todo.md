@@ -1,25 +1,32 @@
-- Post:
+Post:
 
-  -- Post gift actions: finish gift action - improve dialog forms; Send notifications on dialog actions; Add rate limiting to actions;
-  -- Ways to send the gift: address, email address (digital), in person, Other;
-  -- When reserves the gift, send a notification; show the reserved gifts with gifting info (address, email address);
+- Finish notifications feture with dropdown and realitme updates:
+  -- remove old notifications;
+  -- How do I limit the creation of notifications in db if user follows/unfollows many times during short period of time? how do i rewrite the existing notification?
+  -- Add ratelimit to all the ui actions that trigger notifications as well as to db function that create notifications;
 
-  -- Make all profiles private by default; So users have to approve the following requests;
+- Post gift actions:
+  --- improve dialog forms: show info on how to send the gift and add a link to gifts page where all info about the gift will be shown;  
+   --- Send notifications on dialog actions;
+  --- Add rate limiting to actions;
 
-  -- What if gifter cancels gift reservation and then another user pics it , how gifter is updated in post and gift in db?
-  -- Create gifts page;
+- Ways to send the gift: address, email address (digital), in person, Other;
+- When reserves the gift, send a notification; show the reserved gifts with gifting info (address, email address);
 
-  -- Finish notifications feture with dropdown and realitme updates;
+- Make all profiles private by default; So users have to approve the following requests;
 
-  -- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
-  - Finish post design:
-    -- Like posts (add ratelimit to it)
-    -- Save post
-    -- Finish all the todos in the component;
-    -- Add actions to post (report, delete, edit, hide?)
-    In post actions for owner allow to select wishlists to add post to;
+- Create gifts page;
 
-  -- Get Feed posts for user from people user follows;
+- Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
+
+- Finish post design:
+  -- Like posts (add ratelimit to it)
+  -- Save post
+  -- Finish all the todos in the component;
+  -- Add actions to post (report, delete, edit, hide?)
+  In post actions for owner allow to select wishlists to add post to;
+
+-- Get Feed posts for user from people user follows;
 
 - Gifting:
   -- How 'gifting' will work?
