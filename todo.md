@@ -28,6 +28,11 @@
 -- Get Feed posts for user from people user follows;
 
 - Gifting:
+
+  -- Create a separate shipping adress collection for users in db;
+  -- Create a form to create a shipping on the client on Gift action click;
+  -- Make it a stepper? Step 1: select from address (save to DB), Step 2: Provide package info (save the shipment in db), Step 3: Pay and get the label(trigger a function after successfull payment, get all the details from DB and return the label);
+
   -- How 'gifting' will work?
   -- SHould I implement gift cards? for the price of the wish? User reserves, buys our (through partner platform) gift card, we send gift card to recepients profile + email? Is there a universal giftcards that can be used as cash in any store like apple, etc?
   -- Or allow Anonymous Shipping Labels - so user A shraes their address with it, and user B by gifting, gets a label, buys product themselves and sends using this lable without nowing the address?
