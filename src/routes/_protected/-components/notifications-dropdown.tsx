@@ -43,7 +43,7 @@ export default function NotificationsDropdown() {
       markAllAsRead(user.uid);
     }
   };
-
+  // TODO: optimize this:
   const closeDropdown = () => {
     if (detailsRef.current) {
       detailsRef.current.open = false;
