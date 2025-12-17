@@ -1,5 +1,8 @@
 - Finish notifications feture with dropdown and realitme updates:
-  -- remove old notifications;
+  -- Imrpove the ui of the dropdown;
+  -- Imporve hook to make calls to mark as unread only if there is unread notifications;
+  -- Finish all cases for showing toasts in notifications hook; Make toasts to look nicer;
+  -- remove old notifications - create firebase function?;
   -- How do I limit the creation of notifications in db if user follows/unfollows many times during short period of time? how do i rewrite the existing notification?
   -- Add ratelimit to all the ui actions that trigger notifications as well as to db function that create notifications;
 
