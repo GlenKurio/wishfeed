@@ -1,7 +1,6 @@
 - Finish notifications feture with dropdown and realitme updates:
   -- Imrpove the ui of the dropdown;
   -- Add button to "Show more recent activity"
-  -- Imporve hook to make calls to mark as unread only if there is unread notifications;
 
   -- remove old notifications - create firebase function?;
   -- How do I limit the creation of notifications in db if user follows/unfollows many times during short period of time? how do i rewrite the existing notification?

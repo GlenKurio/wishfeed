@@ -80,22 +80,6 @@ export async function deleteAllNotifications(userId: string) {
   await batch.commit();
 }
 
-// Mark a notification as read
-export async function markNotificationAsRead(
-  notificationId: string,
-  userId: string,
-) {
-  const currentUser = auth.currentUser;
-  if (!currentUser || currentUser.uid !== userId) {
-    throw new Error("Not authenticated");
-  }
-
-  const notificationRef = doc(db, "notifications", notificationId);
-  await updateDoc(notificationRef, {
-    isRead: true,
-  });
-}
-
 // Mark a notification as unread
 export async function markNotificationAsUnread(
   notificationId: string,

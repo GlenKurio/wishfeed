@@ -15,35 +15,42 @@ import {
 } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
+import { useRef } from "react";
 
 export default function NotificationsDropdown() {
   const user = useAuth();
-
-  const { data: notifications, isLoading } = useNotifications({
-    userId: user?.uid || "",
-    realtime: true,
-  });
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useNotifications({
+      userId: user?.uid || "",
+      realtime: true,
+    });
 
   const unreadCount = useUnreadNotificationsCount(user?.uid || "");
   const markAllAsRead = useMarkAllNotificationsAsRead();
 
-  const handleDropdownClose = () => {
-    if (unreadCount > 0 && user?.uid) {
+  // Flatten all pages into a single array
+  const notifications = data?.pages.flatMap((page) => page.notifications) || [];
+
+  const handleToggle = (e: React.SyntheticEvent<HTMLDetailsElement>) => {
+    const isOpen = e.currentTarget.open;
+
+    // When closing the dropdown (open becomes false)
+    if (!isOpen && unreadCount > 0 && user?.uid) {
       markAllAsRead(user.uid);
     }
   };
-
   if (!user) return null;
 
   return (
-    <div className="dropdown dropdown-end">
-      <summary
-        onBlur={handleDropdownClose}
-        tabIndex={0}
-        className="btn btn-ghost list-none rounded-full p-2.5"
-      >
+    <details
+      className="dropdown dropdown-end"
+      onToggle={handleToggle}
+      ref={detailsRef}
+    >
+      <summary className="btn btn-ghost list-none rounded-full p-2.5">
         <div
-          className="tooltip tooltip-left tooltip-primary"
+          className="tooltip tooltip-left tooltip-primary flex items-center"
           data-tip="Notifications"
         >
           <div className="indicator">
@@ -57,12 +64,9 @@ export default function NotificationsDropdown() {
         </div>
       </summary>
 
-      <div
-        tabIndex={-1}
-        className="dropdown-content menu bg-base-100 border-primary z-1 mt-3 w-[350px] overflow-hidden rounded-3xl border-dashed p-0 shadow-md md:w-[400px] lg:w-[500px]"
-      >
+      <div className="dropdown-content menu bg-base-100 border-primary z-1 mt-2 w-[350px] overflow-hidden rounded-3xl border-dashed p-0 shadow-md md:w-[400px] lg:w-[500px]">
         <p className="bg-primary text-base-100 w-full p-4 text-xl font-bold tracking-wide">
-          Notifications
+          Notifications {unreadCount > 0 && `(${unreadCount} new)`}
         </p>
         {/* Notifications List */}
         <div className="flex max-h-[500px] w-full flex-col gap-1 overflow-y-auto p-2">
@@ -71,12 +75,32 @@ export default function NotificationsDropdown() {
               <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
             </div>
           ) : notifications && notifications.length > 0 ? (
-            notifications.map((notification) => (
-              <NotificationItem
-                key={notification.id}
-                notification={notification}
-              />
-            ))
+            <>
+              {notifications.map((notification) => (
+                <NotificationItem
+                  key={notification.id}
+                  notification={notification}
+                />
+              ))}
+
+              {/* Load More Button */}
+              {hasNextPage && (
+                <button
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="hover:bg-primary/10 border-primary/30 mx-2 my-2 rounded-xl border border-dashed py-3 text-sm font-medium transition-colors disabled:opacity-50"
+                >
+                  {isFetchingNextPage ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+                      Loading...
+                    </span>
+                  ) : (
+                    "Show more recent activity"
+                  )}
+                </button>
+              )}
+            </>
           ) : (
             <div className="text-base-content flex flex-col items-center justify-center py-12 text-center">
               <IconBell className="mb-3 size-12" />
@@ -88,7 +112,7 @@ export default function NotificationsDropdown() {
           )}
         </div>
       </div>
-    </div>
+    </details>
   );
 }
 
