@@ -1,5 +1,4 @@
-import { IconBellRinging2 } from "@tabler/icons-react";
-import { Link } from "@tanstack/react-router";
+import NotificationsDropdown from "./notifications-dropdown";
 export default function AppHeader() {
   // const { pathname } = useMatches().at(-1)!;
 
@@ -9,18 +8,7 @@ export default function AppHeader() {
         <figure>
           <img src="/logo-full.png" className="h-8" />
         </figure>
-        <div
-          className="tooltip tooltip-left tooltip-primary"
-          data-tip="Notifications"
-        >
-          <Link
-            to="/notifications"
-            className="btn btn-ghost rounded-full p-2.5"
-          >
-            <IconBellRinging2 className="size-5" />
-            <span className="sr-only">Notifications</span>
-          </Link>
-        </div>
+        <NotificationsDropdown />
       </div>
     );
   };

@@ -223,7 +223,7 @@ export function useMarkAllNotificationsAsRead() {
         ["notifications", userId],
         (old) => {
           if (!old) return old;
-          return old.map((n) => ({ ...n, read: true }));
+          return old.map((n) => ({ ...n, isRead: true }));
         },
       );
 

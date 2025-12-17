@@ -92,7 +92,7 @@ export async function markNotificationAsRead(
 
   const notificationRef = doc(db, "notifications", notificationId);
   await updateDoc(notificationRef, {
-    read: true,
+    isRead: true,
   });
 }
 
@@ -108,7 +108,7 @@ export async function markNotificationAsUnread(
 
   const notificationRef = doc(db, "notifications", notificationId);
   await updateDoc(notificationRef, {
-    read: false,
+    isRead: false,
   });
 }
 
@@ -123,7 +123,7 @@ export async function markAllNotificationsAsRead(userId: string) {
   const q = query(
     notificationsRef,
     where("userId", "==", userId),
-    where("read", "==", false),
+    where("isRead", "==", false),
   );
 
   const snapshot = await getDocs(q);
@@ -132,7 +132,7 @@ export async function markAllNotificationsAsRead(userId: string) {
 
   const batch = writeBatch(db);
   snapshot.docs.forEach((doc) => {
-    batch.update(doc.ref, { read: true });
+    batch.update(doc.ref, { isRead: true });
   });
 
   await batch.commit();
@@ -161,7 +161,7 @@ export async function getNotifications(
   );
 
   if (options?.onlyUnread) {
-    q = query(q, where("read", "==", false));
+    q = query(q, where("isRead", "==", false));
   }
 
   if (options?.limitCount) {
@@ -187,7 +187,7 @@ export async function getUnreadNotificationsCount(userId: string) {
   const q = query(
     notificationsRef,
     where("userId", "==", userId),
-    where("read", "==", false),
+    where("isRead", "==", false),
   );
 
   const snapshot = await getDocs(q);
@@ -211,7 +211,7 @@ export async function deleteOldReadNotifications(
   const q = query(
     notificationsRef,
     where("userId", "==", userId),
-    where("read", "==", true),
+    where("isRead", "==", true),
     where("createdAt", "<", Timestamp.fromDate(cutoffDate)),
   );
 
