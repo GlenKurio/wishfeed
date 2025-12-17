@@ -1,10 +1,12 @@
 - Finish notifications feture with dropdown and realitme updates:
   -- Imrpove the ui of the dropdown;
+  -- Add button to "Show more recent activity"
   -- Imporve hook to make calls to mark as unread only if there is unread notifications;
-  -- Finish all cases for showing toasts in notifications hook; Make toasts to look nicer;
+
   -- remove old notifications - create firebase function?;
   -- How do I limit the creation of notifications in db if user follows/unfollows many times during short period of time? how do i rewrite the existing notification?
   -- Add ratelimit to all the ui actions that trigger notifications as well as to db function that create notifications;
+  -- Add a schema to limit the number of charachters and add to create notification validation during runtime;
 
 - Post gift actions:
   --- improve dialog forms: show info on how to send the gift and add a link to gifts page where all info about the gift will be shown;  

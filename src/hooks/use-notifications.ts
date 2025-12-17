@@ -109,6 +109,7 @@ function showNotificationToast(
   notification: NotificationType,
   queryClient: ReturnType<typeof useQueryClient>,
 ) {
+  // TODO: finish notification toasts and queries invalidation
   switch (notification.kind) {
     case "follow":
       toast.info(notification.message);
