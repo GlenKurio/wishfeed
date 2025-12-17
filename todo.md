@@ -29,9 +29,14 @@
 
 - Gifting:
   -- How 'gifting' will work?
-
-- Notifications:
-  -- Notifications feature
+  -- SHould I implement gift cards? for the price of the wish? User reserves, buys our (through partner platform) gift card, we send gift card to recepients profile + email? Is there a universal giftcards that can be used as cash in any store like apple, etc?
+  -- Or allow Anonymous Shipping Labels - so user A shraes their address with it, and user B by gifting, gets a label, buys product themselves and sends using this lable without nowing the address?
+  -- In app wallet? Give an option to send the money to user A, for a specific gift in the app?
+  -- Just use conditional address reveal - when gifter reserves the gift - recepient gets notification and has to allow access to their address, if not allowed, reservation is being cancelled; In notification show ttrast indicators: Show how long users have known each other
+  Display mutual followers count
+  Add verified badge for users who've completed gifts successfully
+  Rating system for gifters (did the gift arrive as promised?)
+  -- Just allow prepaid visa/mastercard cards using 3rd party api for gifts under $1000; Over - use anonymous shipping?
 
 - Search:
   -- Search feature
