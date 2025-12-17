@@ -20,7 +20,6 @@ import { Route as ProtectedNewWishIndexRouteImport } from './routes/_protected/n
 import { Route as ProtectedProfileUserIdRouteImport } from './routes/_protected/profile/$userId'
 import { Route as ProtectedNewWishPreviewRouteImport } from './routes/_protected/new-wish/preview'
 import { Route as ProtectedsearchSearchRouteImport } from './routes/_protected/(search)/search'
-import { Route as ProtectednotificationsNotificationsRouteImport } from './routes/_protected/(notifications)/notifications'
 import { Route as ProtectedhomeHomeRouteImport } from './routes/_protected/(home)/home'
 import { Route as ProtectedgiftsGiftsRouteImport } from './routes/_protected/(gifts)/gifts'
 import { Route as ProtectedProfileUserIdWishlistRouteImport } from './routes/_protected/profile/$userId/$wishlist'
@@ -87,12 +86,6 @@ const ProtectedsearchSearchRoute = ProtectedsearchSearchRouteImport.update({
   path: '/search',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
-const ProtectednotificationsNotificationsRoute =
-  ProtectednotificationsNotificationsRouteImport.update({
-    id: '/(notifications)/notifications',
-    path: '/notifications',
-    getParentRoute: () => ProtectedRouteRoute,
-  } as any)
 const ProtectedhomeHomeRoute = ProtectedhomeHomeRouteImport.update({
   id: '/(home)/home',
   path: '/home',
@@ -167,7 +160,6 @@ export interface FileRoutesByFullPath {
   '/auth/': typeof AuthIndexRoute
   '/gifts': typeof ProtectedgiftsGiftsRoute
   '/home': typeof ProtectedhomeHomeRoute
-  '/notifications': typeof ProtectednotificationsNotificationsRoute
   '/search': typeof ProtectedsearchSearchRoute
   '/new-wish/preview': typeof ProtectedNewWishPreviewRoute
   '/profile/$userId': typeof ProtectedProfileUserIdRouteWithChildren
@@ -189,7 +181,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthIndexRoute
   '/gifts': typeof ProtectedgiftsGiftsRoute
   '/home': typeof ProtectedhomeHomeRoute
-  '/notifications': typeof ProtectednotificationsNotificationsRoute
   '/search': typeof ProtectedsearchSearchRoute
   '/new-wish/preview': typeof ProtectedNewWishPreviewRoute
   '/profile/$userId': typeof ProtectedProfileUserIdRouteWithChildren
@@ -213,7 +204,6 @@ export interface FileRoutesById {
   '/auth/': typeof AuthIndexRoute
   '/_protected/(gifts)/gifts': typeof ProtectedgiftsGiftsRoute
   '/_protected/(home)/home': typeof ProtectedhomeHomeRoute
-  '/_protected/(notifications)/notifications': typeof ProtectednotificationsNotificationsRoute
   '/_protected/(search)/search': typeof ProtectedsearchSearchRoute
   '/_protected/new-wish/preview': typeof ProtectedNewWishPreviewRoute
   '/_protected/profile/$userId': typeof ProtectedProfileUserIdRouteWithChildren
@@ -239,7 +229,6 @@ export interface FileRouteTypes {
     | '/auth/'
     | '/gifts'
     | '/home'
-    | '/notifications'
     | '/search'
     | '/new-wish/preview'
     | '/profile/$userId'
@@ -261,7 +250,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/gifts'
     | '/home'
-    | '/notifications'
     | '/search'
     | '/new-wish/preview'
     | '/profile/$userId'
@@ -284,7 +272,6 @@ export interface FileRouteTypes {
     | '/auth/'
     | '/_protected/(gifts)/gifts'
     | '/_protected/(home)/home'
-    | '/_protected/(notifications)/notifications'
     | '/_protected/(search)/search'
     | '/_protected/new-wish/preview'
     | '/_protected/profile/$userId'
@@ -384,13 +371,6 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof ProtectedsearchSearchRouteImport
-      parentRoute: typeof ProtectedRouteRoute
-    }
-    '/_protected/(notifications)/notifications': {
-      id: '/_protected/(notifications)/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof ProtectednotificationsNotificationsRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
     '/_protected/(home)/home': {
@@ -555,7 +535,6 @@ interface ProtectedRouteRouteChildren {
   ProtectedNewWishRouteRoute: typeof ProtectedNewWishRouteRouteWithChildren
   ProtectedgiftsGiftsRoute: typeof ProtectedgiftsGiftsRoute
   ProtectedhomeHomeRoute: typeof ProtectedhomeHomeRoute
-  ProtectednotificationsNotificationsRoute: typeof ProtectednotificationsNotificationsRoute
   ProtectedsearchSearchRoute: typeof ProtectedsearchSearchRoute
   ProtectedProfileUserIdRoute: typeof ProtectedProfileUserIdRouteWithChildren
 }
@@ -564,8 +543,6 @@ const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
   ProtectedNewWishRouteRoute: ProtectedNewWishRouteRouteWithChildren,
   ProtectedgiftsGiftsRoute: ProtectedgiftsGiftsRoute,
   ProtectedhomeHomeRoute: ProtectedhomeHomeRoute,
-  ProtectednotificationsNotificationsRoute:
-    ProtectednotificationsNotificationsRoute,
   ProtectedsearchSearchRoute: ProtectedsearchSearchRoute,
   ProtectedProfileUserIdRoute: ProtectedProfileUserIdRouteWithChildren,
 }

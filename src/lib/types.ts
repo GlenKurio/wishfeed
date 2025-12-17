@@ -373,6 +373,7 @@ export type NotificationType = {
   kind: NotificationKind;
   actorId: string;
   actorName: string;
+  actorHandle: string;
   actorPhotoURL?: string;
   message: string;
   isRead: boolean;
