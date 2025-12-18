@@ -388,9 +388,16 @@ export const NotificationSchema = z.object({
   userId: z.string(),
   kind: NotificationKindSchema,
   actorId: z.string(),
-  actorName: z.string(),
+  actorName: z
+    .string()
+    .max(50, { message: "Actor name cannot exceed 50 characters" }),
+  actorHandle: z
+    .string()
+    .max(20, { message: "Actor name cannot exceed 20 characters" }),
   actorPhotoURL: z.string().optional(),
-  message: z.string(),
+  message: z
+    .string()
+    .max(100, { message: "Message cannot exceed 100 characters" }),
   postId: z.string().optional(),
   commentId: z.string().optional(),
 });

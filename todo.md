@@ -1,7 +1,5 @@
 - Finish notifications feture with dropdown and realitme updates:
 
-  -- Add a schema to limit the number of charachters and add to create notification validation during runtime;
-
 - Post gift actions:
   --- improve dialog forms: show info on how to send the gift and add a link to gifts page where all info about the gift will be shown;  
   --- Send notifications on dialog actions;

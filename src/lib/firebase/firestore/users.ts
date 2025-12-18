@@ -325,6 +325,7 @@ export async function followUser(
     actorId: currentUserId,
     actorName: currentUserInfo.displayName,
     actorPhotoURL: currentUserInfo.photoURL,
+    actorHandle: currentUserInfo.handle,
     message: `${currentUserInfo.displayName} started following you`,
   });
 }
@@ -448,6 +449,7 @@ export async function sendFollowRequest(
     actorId: currentUserId,
     actorName: currentUserInfo.displayName,
     actorPhotoURL: currentUserInfo.photoURL,
+    actorHandle: currentUserInfo.handle,
     message: `${currentUserInfo.displayName} requested to follow you`,
   });
 }
