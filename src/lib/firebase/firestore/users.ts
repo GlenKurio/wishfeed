@@ -326,7 +326,6 @@ export async function followUser(
     actorName: currentUserInfo.displayName,
     actorPhotoURL: currentUserInfo.photoURL,
     message: `${currentUserInfo.displayName} started following you`,
-    isRead: false,
   });
 }
 
@@ -450,7 +449,6 @@ export async function sendFollowRequest(
     actorName: currentUserInfo.displayName,
     actorPhotoURL: currentUserInfo.photoURL,
     message: `${currentUserInfo.displayName} requested to follow you`,
-    isRead: false,
   });
 }
 

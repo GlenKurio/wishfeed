@@ -378,6 +378,8 @@ export type NotificationType = {
   message: string;
   isRead: boolean;
   createdAt: Timestamp;
+  updatedAt: Timestamp;
+  expireAt: Timestamp;
   postId?: string;
   commentId?: string;
 };
@@ -389,7 +391,6 @@ export const NotificationSchema = z.object({
   actorName: z.string(),
   actorPhotoURL: z.string().optional(),
   message: z.string(),
-  isRead: z.boolean(),
   postId: z.string().optional(),
   commentId: z.string().optional(),
 });

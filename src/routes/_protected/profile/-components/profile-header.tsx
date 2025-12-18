@@ -3,14 +3,20 @@ import { useFollowUser } from "@/hooks/use-follow-user";
 import type { UserProfile } from "@/lib/types";
 import {
   IconCake,
+  IconCheck,
   IconEdit,
   IconLock,
-  IconCheck,
-  IconX,
   IconUserPlus,
+  IconX,
 } from "@tabler/icons-react";
+import {
+  useDebouncedCallback,
+  useRateLimitedCallback,
+  useThrottler,
+} from "@tanstack/react-pacer";
 import { Link } from "@tanstack/react-router";
 import { format, parseISO } from "date-fns";
+import { toast } from "sonner";
 
 export default function ProfileHeader({
   hasFullAccess,
@@ -38,6 +44,16 @@ export default function ProfileHeader({
   const canViewPosts = hasFullAccess && userProfile.postsCount > 0;
   const canViewFollowing = hasFullAccess && userProfile.followingCount > 0;
   const canViewFollowers = hasFullAccess && userProfile.followersCount > 0;
+
+  const handleFollowUser = useRateLimitedCallback(followUser, {
+    limit: 2,
+    window: 30 * 1000,
+    onReject: (rateLimiter) => {
+      toast.warning(
+        `Rate limit exceeded. Try again in ${rateLimiter.getMsUntilNextWindow() / 1000}s`,
+      );
+    },
+  });
 
   // Determine follow button state and appearance
   const getFollowButtons = () => {
@@ -70,7 +86,7 @@ export default function ProfileHeader({
       return (
         <button
           className="btn btn-xs btn-primary w-full sm:w-auto"
-          onClick={followUser}
+          onClick={handleFollowUser}
           disabled={isPending}
         >
           {isPending ? (
@@ -90,7 +106,7 @@ export default function ProfileHeader({
       return (
         <button
           className="btn btn-xs btn-primary btn-soft w-full sm:w-auto"
-          onClick={followUser}
+          onClick={handleFollowUser}
           disabled={isPending}
         >
           {isPending ? (
@@ -110,7 +126,7 @@ export default function ProfileHeader({
       return (
         <button
           className="btn btn-xs btn-neutral btn-soft w-full sm:w-auto"
-          onClick={followUser}
+          onClick={handleFollowUser}
           disabled={isPending}
         >
           {isPending ? (
@@ -129,7 +145,7 @@ export default function ProfileHeader({
     return (
       <button
         className="btn btn-xs btn-primary w-full sm:w-auto"
-        onClick={followUser}
+        onClick={handleFollowUser}
         disabled={isPending}
       >
         {isPending ? "Loading..." : isPrivateAccount ? "Request" : "Follow"}

@@ -9,15 +9,11 @@ export const Route = createFileRoute("/_protected/(gifts)/gifts")({
 // When mark the the wish as 'gifted' ask who gifted it; Allow to send 'thank you' notification; Show the thank you notification/message with the gift in gifted collection;
 function RouteComponent() {
   // const user = useAuth();
-  const handleCreate = async () => {
-    toast.success("You've made a wish");
-  };
+
   return (
     <div className="">
       Hello "/_protected/(gifts)/gifts"!
-      <button onClick={handleCreate} className="btn btn-primary">
-        create user
-      </button>
+      <div>Gifts (giving, receiving) Requests</div>
     </div>
   );
 }

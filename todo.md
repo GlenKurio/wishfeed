@@ -1,17 +1,11 @@
 - Finish notifications feture with dropdown and realitme updates:
-  -- Optimize the component
-  -- remove old notifications - create firebase function?;
-  -- How do I limit the creation of notifications in db if user follows/unfollows many times during short period of time? how do i rewrite the existing notification?
-  -- Add ratelimit to all the ui actions that trigger notifications as well as to db function that create notifications;
+
   -- Add a schema to limit the number of charachters and add to create notification validation during runtime;
 
 - Post gift actions:
   --- improve dialog forms: show info on how to send the gift and add a link to gifts page where all info about the gift will be shown;  
-   --- Send notifications on dialog actions;
+  --- Send notifications on dialog actions;
   --- Add rate limiting to actions;
-
-- Ways to send the gift: address, email address (digital), in person, Other;
-- When reserves the gift, send a notification; show the reserved gifts with gifting info (address, email address);
 
 - Create gifts page;
 
@@ -69,7 +63,7 @@
 # Finishing
 
 - Finish all todo; especially ones with keeping db data in sync;
-- Remove notifications from db after some time; make usre notifications are not being abused by clicking like button or follow/unfollow;
+- Remove notifications from db after some time; make usre notifications are not being abused by clicking like button or follow/unfollow; Add rate limiting to all db callable actions;
 
 - Make sure images are optimized, do not cause layout shifts, accessible or hidden from screen readers;
 

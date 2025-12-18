@@ -12,8 +12,7 @@ import {
   limit,
   orderBy,
   query,
-  serverTimestamp,
-  setDoc,
+  runTransaction,
   Timestamp,
   updateDoc,
   where,
@@ -28,12 +27,42 @@ export async function createNotification(notification: NotificationSchemaType) {
 
   const validatedNotification = NotificationSchema.parse(notification);
 
-  const newNotificationRef = doc(collection(db, "notifications"));
+  const thirtyDaysFromNow = new Date();
+  thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
 
-  await setDoc(newNotificationRef, {
-    ...validatedNotification,
-    id: newNotificationRef.id,
-    createdAt: serverTimestamp(),
+  const notificationId = `${notification.kind}_${notification.userId}_${notification.actorId}`;
+
+  const notificationRef = doc(db, "notifications", notificationId);
+  await runTransaction(db, async (transaction) => {
+    const notificationDoc = await transaction.get(notificationRef);
+
+    const now = Timestamp.now();
+
+    if (notificationDoc.exists()) {
+      const data = notificationDoc.data();
+      const lastUpdate = data.updatedAt?.toDate() || new Date(0);
+      const fiveMinutesAgo = new Date();
+      fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+
+      // Only update if last update was recent
+      if (lastUpdate > fiveMinutesAgo) {
+        transaction.update(notificationRef, {
+          createdAt: now, // Bump to top
+          updatedAt: now,
+          isRead: false,
+          expireAt: Timestamp.fromDate(thirtyDaysFromNow),
+        });
+        return;
+      }
+    }
+
+    transaction.set(notificationRef, {
+      ...validatedNotification,
+      isRead: false,
+      createdAt: now,
+      updatedAt: now,
+      expireAt: Timestamp.fromDate(thirtyDaysFromNow),
+    });
   });
 }
 

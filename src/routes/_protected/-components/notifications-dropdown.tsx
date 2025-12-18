@@ -15,7 +15,7 @@ import {
 } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 
 export default function NotificationsDropdown() {
   const user = useAuth();
@@ -43,8 +43,7 @@ export default function NotificationsDropdown() {
       markAllAsRead(user.uid);
     }
   };
-  // TODO: optimize this:
-  const closeDropdown = () => {
+  const closeDropdown = useCallback(() => {
     if (detailsRef.current) {
       detailsRef.current.open = false;
       setIsOpen(false);
@@ -54,7 +53,7 @@ export default function NotificationsDropdown() {
         markAllAsRead(user.uid);
       }
     }
-  };
+  }, [unreadCount, user, markAllAsRead]);
 
   // Close on escape key
   useEffect(() => {
