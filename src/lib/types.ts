@@ -338,18 +338,6 @@ export const GIFT_STATUS = {
 export const giftStatuses = Object.values(GIFT_STATUS);
 export type GiftStatus = (typeof giftStatuses)[number];
 
-export const CANCELLATION_REASONS = {
-  GIFTER_CHANGED_MIND: "gifter_changed_mind",
-  ITEM_UNAVAILABLE: "item_unavailable",
-  RECIPIENT_REQUESTED: "recipient_requested",
-  PAYMENT_FAILED: "payment_failed",
-  SHIPPING_ISSUE: "shipping_issue",
-  OTHER: "other",
-} as const;
-
-export const cancellationReasons = Object.values(CANCELLATION_REASONS);
-export type CancellationReason = (typeof cancellationReasons)[number];
-
 /**
  * Embedded wish data - denormalized from the post
  * Updated via Cloud Function when post changes
@@ -407,8 +395,6 @@ export interface ShippingInfo {
 // =============================================================================
 
 export interface EGiftDelivery {
-  /** How the e-gift will be delivered */
-  deliveryType: "email" | "in_app";
   /** Recipient email (if email delivery) */
   recipientEmail?: string | null;
   /** Gift code/voucher (if applicable) */
@@ -455,7 +441,7 @@ export interface GiftType {
   deliveredAt?: Timestamp | null;
   receivedAt?: Timestamp | null;
   thankedAt?: Timestamp | null;
-  cancelledAt?: Timestamp | null;
+
   expiredAt?: Timestamp | null;
 
   // === Delivery Details ===
@@ -469,11 +455,6 @@ export interface GiftType {
   gifterNotes?: string | null;
   /** Thank you message from recipient */
   thankYouMessage?: string | null;
-
-  // === Cancellation ===
-  cancellationReason?: CancellationReason | null;
-  cancellationNote?: string | null;
-  cancelledBy?: "gifter" | "recipient" | "system" | null;
 
   // === Privacy & Settings ===
   /** If false, gifter identity hidden until confirmation */

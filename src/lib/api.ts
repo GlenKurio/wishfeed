@@ -152,3 +152,21 @@ export const searchFollowingQueryOptions = ({
     queryFn: () => searchFollowing(searchTerm),
     enabled: !!userId && !!searchTerm && searchTerm !== "",
   });
+
+export const getExistingGiftQueryOptions = () =>
+  queryOptions({
+    queryKey: ["gift", postId, user?.uid],
+    queryFn: async (): Promise<GiftType | null> => {
+      if (!postId || !user?.uid) return null;
+
+      const giftId = `${postId}_${user.uid}`;
+      const giftRef = doc(db, "gifts", giftId);
+      const giftSnap = await getDoc(giftRef);
+
+      if (!giftSnap.exists()) return null;
+
+      return { id: giftSnap.id, ...giftSnap.data() } as GiftType;
+    },
+    enabled: !!postId && !!user?.uid && isGifter,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });

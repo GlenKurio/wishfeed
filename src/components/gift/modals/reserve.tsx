@@ -18,6 +18,7 @@ import { useForm } from "@tanstack/react-form";
 import { useRef } from "react";
 import ShipLabelDialog, { type DialogHandle } from "./ship-label";
 import EGiftDialog from "./e-gift";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ReserveDialog({
   post,
@@ -30,6 +31,10 @@ export default function ReserveDialog({
     gap: string;
   };
 }) {
+
+  const {data: giftData} = useQuery({
+    queryFn: get
+  })
   const { reserveGift, isLoading } = useWishGiftActions();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const shipLabelDialogRef = useRef<DialogHandle>(null);
@@ -37,7 +42,7 @@ export default function ReserveDialog({
 
   const reserveWishForm = useForm({
     defaultValues: {
-      deliveryMethod: "ship_label",
+      deliveryMethod: post.giftStatus === 'reserved' ? post.,
     },
 
     validators: {

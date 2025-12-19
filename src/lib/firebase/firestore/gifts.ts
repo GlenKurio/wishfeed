@@ -5,7 +5,7 @@ import {
   Timestamp,
   writeBatch,
 } from "firebase/firestore";
-import { type DeliveryMethod, type PostType } from "../../types";
+import { type DeliveryMethod, type GiftType, type PostType } from "../../types";
 
 import { db } from "..";
 import { auth } from "../auth";
@@ -53,7 +53,7 @@ export async function reserveGift(postId: string, post: PostType) {
   // Use batch write for atomicity
   const batch = writeBatch(db);
 
-  const newGift = {
+  const newGift: GiftType = {
     id: giftId,
     postId: postId,
     gifterId: user.uid,
