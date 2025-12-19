@@ -20,7 +20,7 @@ import { useEffect, useRef } from "react";
 export function GiftActionModal({
   isOpen,
   onClose,
-  modalType,
+  modalKind,
   post,
 }: GiftActionModalProps) {
   const modalRef = useRef<HTMLDialogElement>(null);
@@ -35,10 +35,27 @@ export function GiftActionModal({
     isLoading,
   } = useWishGiftActions();
 
-  // Forms
+  //=====================================================================
+  // FORMS
+  //=====================================================================
+
+  // This from allows gifter to choose th gifting method and creates the gift entry with 'reserved' status and "gifting method" in db on confirm. Also redirects gifter to the next form based on the gifting method;
+  const reserveWishForm = useForm({});
+
+  // This form is used to provide all the required info to create the label for the gift; Confirm sets the gift into 'label created' status;
+  const createLabelForm = useForm({});
+
+  // This form is used to provide all the required infor to send the digital gift. We gonna redirect it to recepient's email;
+  const eGiftForm = useForm({});
+
+  // This shown only when gift status is "label created"
+  // Allow to specify the date when was sent exactly?
+  const markAsShippedForm = useForm({});
+
+  // This form showed for 'in person' gifting method and marks gift as sent;
   const markAsSentForm = useForm({
     defaultValues: {
-      deliveryMethod: "delivery" as DeliveryMethod,
+      deliveryMethod: "ship_label" as DeliveryMethod,
       trackingInfo: "",
       message: "",
     },
@@ -73,6 +90,9 @@ export function GiftActionModal({
   const markAsSentFormDisabled =
     markAsSentForm.state.isSubmitting || markAsSentForm.state.isValidating;
 
+  // TODO: rename to markedAsReceivedForm
+  // Showed when status is sent or delivered
+  // If user includes the thank you message -> mark as thanked; if not just mark as received;
   const confirmReceiptForm = useForm({
     defaultValues: {
       message: "",
@@ -117,7 +137,7 @@ export function GiftActionModal({
   const handleConfirm = () => {
     if (!post.id) return;
 
-    switch (modalType) {
+    switch (modalKind) {
       case "reserve":
         reserveGift(
           { postId: post.id, post },
@@ -169,7 +189,7 @@ export function GiftActionModal({
   };
 
   const getModalContent = () => {
-    switch (modalType) {
+    switch (modalKind) {
       case "reserve":
         return {
           icon: <IconGift className="text-primary size-8" />,
@@ -262,7 +282,7 @@ export function GiftActionModal({
                 <markAsSentForm.Subscribe
                   selector={(state) => state.values.deliveryMethod}
                   children={(deliveryMethod) =>
-                    deliveryMethod === "delivery" ? (
+                    deliveryMethod === "ship_label" ? (
                       <markAsSentForm.Field
                         name="trackingInfo"
                         children={(field) => {

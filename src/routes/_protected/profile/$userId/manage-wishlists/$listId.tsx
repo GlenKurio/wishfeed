@@ -5,6 +5,7 @@ import { useCreateWishlist } from "@/hooks/use-create-wishlist";
 import { useDeleteWishlist } from "@/hooks/use-delete-wishlist";
 import { userPostsQueryOptions, userWishlistsQueryOptions } from "@/lib/api";
 import { createWishlistSchema } from "@/lib/types";
+import WishCard from "@/routes/_protected/-components/wish-card";
 import {
   IconArrowLeft,
   IconCheck,
@@ -441,37 +442,13 @@ function RouteComponent() {
                 {selectedPosts.length > 0 ? (
                   <div className="mb-4 max-h-80 space-y-2 overflow-y-auto pr-2">
                     {selectedPosts.map((post) => {
-                      const hasValidImage =
-                        post.image && post.image !== "" && !imageError;
-
                       return (
-                        <div
+                        <WishCard
                           key={post.id}
-                          className="border-primary/20 bg-base-200 hover:bg-base-300 flex items-center gap-3 rounded-3xl border p-3 transition-colors"
-                        >
-                          {hasValidImage ? (
-                            <img
-                              src={post.image}
-                              alt={post.title}
-                              className="size-12 rounded-2xl object-cover"
-                              onError={() => setImageError(true)}
-                            />
-                          ) : (
-                            <div className="from-base-300 to-primary/30 flex size-12 items-center justify-center rounded-2xl bg-linear-to-br">
-                              <IconPhoto className="text-primary size-6" />
-                            </div>
-                          )}
-
-                          <span className="flex-1 text-sm">{post.title}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemovePost(post.id!)}
-                            className="btn btn-ghost btn-sm btn-circle btn-error"
-                            disabled={disabled}
-                          >
-                            <IconX className="h-4 w-4" />
-                          </button>
-                        </div>
+                          onRemove={handleRemovePost}
+                          kind="removable"
+                          post={post}
+                        />
                       );
                     })}
                   </div>
@@ -514,47 +491,15 @@ function RouteComponent() {
                       {filteredPosts.length > 0 ? (
                         filteredPosts.map((post) => {
                           const isSelected = tempSelectedIds.includes(post.id!);
-                          const hasValidImage =
-                            post.image && post.image !== "" && !imageError;
 
                           return (
-                            <button
+                            <WishCard
                               key={post.id}
-                              type="button"
-                              onClick={() => handleTogglePost(post.id!)}
-                              className={`flex w-full items-center gap-3 rounded-3xl border p-3 text-left transition-all ${
-                                isSelected
-                                  ? "border-primary bg-primary/10"
-                                  : "border-primary/20 bg-base-200 hover:bg-base-300"
-                              }`}
-                            >
-                              {hasValidImage ? (
-                                <img
-                                  src={post.image}
-                                  alt={post.title}
-                                  className="size-12 rounded-2xl object-cover"
-                                  onError={() => setImageError(true)}
-                                />
-                              ) : (
-                                <div className="from-base-300 to-primary/30 flex size-12 items-center justify-center rounded-2xl bg-linear-to-br">
-                                  <IconPhoto className="text-primary size-6" />
-                                </div>
-                              )}
-                              <span className="flex-1 text-sm">
-                                {post.title}
-                              </span>
-                              <div
-                                className={`flex h-5 w-5 items-center justify-center rounded-lg border-2 transition-colors ${
-                                  isSelected
-                                    ? "bg-primary border-primary"
-                                    : "border-primary/20"
-                                }`}
-                              >
-                                {isSelected && (
-                                  <IconCheck className="text-primary-content h-3 w-3" />
-                                )}
-                              </div>
-                            </button>
+                              onToggle={handleTogglePost}
+                              kind="selectable"
+                              post={post}
+                              isSelected={isSelected}
+                            />
                           );
                         })
                       ) : (

@@ -65,7 +65,7 @@ export type PostType = {
     handle: string;
   };
 
-  giftStatus: "available" | "reserved" | "sent" | "gifted";
+  giftStatus: GiftStatus;
   // TODO: update gifter data on user profile update
   gifter?: {
     uid: string;
@@ -96,74 +96,6 @@ export type DbPostType = Omit<
   createdAt: FieldValue;
   updatedAt: FieldValue;
   publishedAt: FieldValue | null;
-};
-
-export const deliveryMethods = [
-  "delivery",
-  "digital",
-  "in-person",
-  "other",
-] as const;
-
-export type DeliveryMethod = (typeof deliveryMethods)[number];
-// /gifts/{giftId}
-export type GiftType = {
-  id?: string;
-
-  // References
-  postId: string; // Reference to the wish/post
-  gifterId: string; // Who's giving the gift
-  recipientId: string; // Who's receiving (post author)
-  // TODO: update wish on post update in db
-  wish: {
-    title: string;
-    image: string;
-    brand: string;
-    price: number;
-  };
-  // TODO: update gifter on userProfile update in db
-  gifter: {
-    uid: string;
-    photoUrl?: string;
-    displayName: string;
-    handle: string;
-  };
-  // TODO: update recipient on userProfile update in db
-  recipient: {
-    uid: string;
-    photoUrl?: string;
-    displayName: string;
-    handle: string;
-  };
-
-  // Status tracking
-  status: "reserved" | "sent" | "confirmed" | "cancelled" | "expired";
-
-  // Timestamps
-  reservedAt: Timestamp;
-  expiresAt: Timestamp; // Auto-calculated: reservedAt + 30 days
-  sentAt?: Timestamp; // When gifter marks as sent
-  confirmedAt?: Timestamp; // When recipient confirms receipt
-  cancelledAt?: Timestamp; // If gifter cancels
-
-  // Notes
-  gifterNotes?: string; // Private notes for gifter (e.g., tracking number)
-  recipientNotes?: string; // Private notes from recipient (e.g., thank you message)
-
-  // Optional: Delivery details
-  deliveryMethod?: DeliveryMethod;
-  trackingInfo?: string;
-
-  // Metadata
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-
-  // Reminder tracking
-  reminderSentAt?: Timestamp; // When we reminded gifter to send
-  confirmationReminderSentAt?: Timestamp; // When we reminded recipient to confirm
-
-  // Privacy
-  revealIdentityAfterConfirmation: boolean; // Default true, but could be anonymous gift
 };
 
 export const newWishSchema = z.object({
@@ -318,40 +250,6 @@ export type DbWishlist = Omit<Wishlist, "createdAt" | "updatedAt"> & {
 
 export type CreateWishlist = z.infer<typeof createWishlistSchema>;
 
-export type GiftModalType =
-  | "reserve"
-  | "markAsSent"
-  | "confirmReceipt"
-  | "cancel"
-  | "revertToReserved"
-  | "revertToSent";
-
-export type GiftActionModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  modalType: GiftModalType;
-  post: PostType;
-};
-
-// Zod schemas for validation
-export const markAsSentSchema = z.object({
-  deliveryMethod: z.enum(deliveryMethods, {
-    message: "Delivery method must one of the known ones.",
-  }),
-  trackingInfo: z.string().max(100, {
-    message: "Tracking info cannot be longet than 100 characters.",
-  }),
-  message: z
-    .string()
-    .max(500, { message: "Message must be 500 characters or less" }),
-});
-
-export const confirmReceiptSchema = z.object({
-  message: z
-    .string()
-    .max(500, { message: "Message must be 500 characters or less" }),
-});
-
 export const notificationKinds = [
   "follow",
   "follow_request",
@@ -402,3 +300,235 @@ export const NotificationSchema = z.object({
   commentId: z.string().optional(),
 });
 export type NotificationSchemaType = z.infer<typeof NotificationSchema>;
+
+// =============================================================================
+// GIFT
+// =============================================================================
+
+export const DELIVERY_METHODS = {
+  SHIP_LABEL: "ship_label",
+  E_GIFT: "e_gift",
+  IN_PERSON: "in_person",
+} as const;
+
+export const deliveryMethods = [
+  DELIVERY_METHODS.SHIP_LABEL,
+  DELIVERY_METHODS.E_GIFT,
+  DELIVERY_METHODS.IN_PERSON,
+] as const;
+
+export type DeliveryMethod = (typeof deliveryMethods)[number];
+
+export const GIFT_STATUS = {
+  // Initial state
+  AVAILABLE: "available",
+
+  // Active states
+  RESERVED: "reserved",
+  LABEL_CREATED: "label_created", // For ship_label: label generated, not yet shipped
+  SHIPPED: "shipped", // For ship_label: in transit
+  SENT: "sent", // For e_gift/in_person: gifter marked as sent
+
+  // Completion states
+  DELIVERED: "delivered", // Carrier confirmed delivery (ship_label only)
+  RECEIVED: "received", // Recipient confirmed receipt
+  THANKED: "thanked", // Recipient sent thank you (optional final state)
+} as const;
+
+export const giftStatuses = Object.values(GIFT_STATUS);
+export type GiftStatus = (typeof giftStatuses)[number];
+
+export const CANCELLATION_REASONS = {
+  GIFTER_CHANGED_MIND: "gifter_changed_mind",
+  ITEM_UNAVAILABLE: "item_unavailable",
+  RECIPIENT_REQUESTED: "recipient_requested",
+  PAYMENT_FAILED: "payment_failed",
+  SHIPPING_ISSUE: "shipping_issue",
+  OTHER: "other",
+} as const;
+
+export const cancellationReasons = Object.values(CANCELLATION_REASONS);
+export type CancellationReason = (typeof cancellationReasons)[number];
+
+/**
+ * Embedded wish data - denormalized from the post
+ * Updated via Cloud Function when post changes
+ */
+export interface EmbeddedWish {
+  title: string;
+  image?: string | null;
+  brand?: string | null;
+  price?: number | null;
+  url?: string | null;
+}
+
+/**
+ * Embedded user data - denormalized from user profile
+ * Updated via Cloud Function when profile changes
+ */
+export interface EmbeddedUser {
+  uid: string;
+  displayName: string;
+  handle: string;
+  photoUrl?: string | null;
+}
+
+// =============================================================================
+// Shipping & Tracking Types
+// =============================================================================
+
+export interface ShippingLabel {
+  shipstationShipmentId: string;
+  carrier: string;
+  service: string;
+  labelUrl: string;
+  trackingNumber: string;
+  trackingUrl?: string;
+  createdAt: Timestamp;
+  cost: number;
+  estimatedDelivery?: Timestamp | null;
+}
+
+export interface TrackingEvent {
+  status: string;
+  description: string;
+  location?: string;
+  timestamp: Timestamp;
+}
+
+export interface ShippingInfo {
+  label?: ShippingLabel | null;
+  trackingEvents?: TrackingEvent[];
+  lastTrackingUpdate?: Timestamp | null;
+}
+
+// =============================================================================
+// E-Gift Types
+// =============================================================================
+
+export interface EGiftDelivery {
+  /** How the e-gift will be delivered */
+  deliveryType: "email" | "in_app";
+  /** Recipient email (if email delivery) */
+  recipientEmail?: string | null;
+  /** Gift code/voucher (if applicable) */
+  giftCode?: string | null;
+  /** URL to redeem (if applicable) */
+  redeemUrl?: string | null;
+  /** When the e-gift was delivered */
+  deliveredAt?: Timestamp | null;
+  /** Whether recipient has viewed/opened */
+  viewedAt?: Timestamp | null;
+}
+
+// /gifts/{giftId}
+// =============================================================================
+// Main Gift Type
+// =============================================================================
+
+export interface GiftType {
+  id?: string;
+
+  // === References ===
+  postId: string;
+  gifterId: string;
+  recipientId: string;
+
+  // === Denormalized Data ===
+  wish: EmbeddedWish;
+  gifter: EmbeddedUser;
+  recipient: EmbeddedUser;
+
+  // === Core Status ===
+  status: GiftStatus;
+  deliveryMethod: DeliveryMethod;
+
+  // === Lifecycle Timestamps ===
+  reservedAt: Timestamp;
+  expiresAt: Timestamp; // Auto-calculated: reservedAt + 30 days
+
+  // Status transition timestamps (set when status changes)
+  pendingShipmentAt?: Timestamp | null;
+  labelCreatedAt?: Timestamp | null;
+  shippedAt?: Timestamp | null;
+  sentAt?: Timestamp | null;
+  deliveredAt?: Timestamp | null;
+  receivedAt?: Timestamp | null;
+  thankedAt?: Timestamp | null;
+  cancelledAt?: Timestamp | null;
+  expiredAt?: Timestamp | null;
+
+  // === Delivery Details ===
+  shipping?: ShippingInfo | null;
+  eGift?: EGiftDelivery | null;
+
+  // === Messages & Notes ===
+  /** Message from gifter to recipient (shown on delivery) */
+  giftMessage?: string | null;
+  /** Private notes for gifter (e.g., order confirmation, manual tracking) */
+  gifterNotes?: string | null;
+  /** Thank you message from recipient */
+  thankYouMessage?: string | null;
+
+  // === Cancellation ===
+  cancellationReason?: CancellationReason | null;
+  cancellationNote?: string | null;
+  cancelledBy?: "gifter" | "recipient" | "system" | null;
+
+  // === Privacy & Settings ===
+  /** If false, gifter identity hidden until confirmation */
+  revealIdentityImmediately: boolean;
+  /** If true, this was marked as anonymous by gifter */
+  isAnonymous: boolean;
+
+  // === Reminder Tracking ===
+  reminders: {
+    /** Reminder to gifter to send the gift */
+    sendReminderAt?: Timestamp | null;
+    sendReminderSentAt?: Timestamp | null;
+    /** Reminder to recipient to confirm receipt */
+    confirmReminderAt?: Timestamp | null;
+    confirmReminderSentAt?: Timestamp | null;
+    /** Reminder before expiration */
+    expirationWarningAt?: Timestamp | null;
+    expirationWarningSentAt?: Timestamp | null;
+  };
+
+  // === Metadata ===
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+export type GiftModalKind =
+  | "reserve"
+  | "markAsSent"
+  | "confirmReceipt"
+  | "cancel"
+  | "revertToReserved"
+  | "revertToSent";
+
+export type GiftActionModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  modalKind: GiftModalKind;
+  post: PostType;
+};
+
+// Zod schemas for validation
+export const markAsSentSchema = z.object({
+  deliveryMethod: z.enum(deliveryMethods, {
+    message: "Delivery method must be one of the known ones.",
+  }),
+  trackingInfo: z.string().max(100, {
+    message: "Tracking info cannot be longet than 100 characters.",
+  }),
+  message: z
+    .string()
+    .max(500, { message: "Message must be 500 characters or less" }),
+});
+
+export const confirmReceiptSchema = z.object({
+  message: z
+    .string()
+    .max(500, { message: "Message must be 500 characters or less" }),
+});
