@@ -4,22 +4,36 @@ import {
   markAsReservedSchema,
   type PostType,
 } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 import {
-  IconGift,
-  IconLoader,
-  IconTruck,
-  IconMail,
-  IconHandStop,
   IconCheck,
-  IconInfoCircle,
+  IconGift,
+  IconHandStop,
+  IconLoader,
+  IconMail,
+  IconTruck,
 } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
 import { useRef } from "react";
+import ShipLabelDialog, { type DialogHandle } from "./ship-label";
+import EGiftDialog from "./e-gift";
 
-export default function ReserveModal({ post }: { post: PostType }) {
+export default function ReserveDialog({
+  post,
+  sizeConfig,
+}: {
+  post: PostType;
+  sizeConfig: {
+    btn: string;
+    icon: string;
+    gap: string;
+  };
+}) {
   const { reserveGift, isLoading } = useWishGiftActions();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const shipLabelDialogRef = useRef<DialogHandle>(null);
+  const eGiftDialogRef = useRef<DialogHandle>(null);
 
   const reserveWishForm = useForm({
     defaultValues: {
@@ -33,16 +47,20 @@ export default function ReserveModal({ post }: { post: PostType }) {
     onSubmit: async ({ value }) => {
       if (!post.id) return;
 
-      await reserveGift({
-        giftId: `${post.id}_${post.gifter?.uid}`,
-        postId: post.id,
-        postAuthorId: post.author.uid,
-        options: {
-          deliveryMethod: value.deliveryMethod,
-        },
-      });
-
+      // await reserveGift({
+      //   giftId: `${post.id}_${post.gifter?.uid}`,
+      //   postId: post.id,
+      //   postAuthorId: post.author.uid,
+      //   options: {
+      //     deliveryMethod: value.deliveryMethod,
+      //   },
+      // });
       dialogRef.current?.close();
+      if (value.deliveryMethod === DELIVERY_METHODS.SHIP_LABEL) {
+        shipLabelDialogRef.current?.open();
+      } else if (value.deliveryMethod === DELIVERY_METHODS.E_GIFT) {
+        eGiftDialogRef.current?.open();
+      }
     },
   });
 
@@ -81,8 +99,11 @@ export default function ReserveModal({ post }: { post: PostType }) {
 
   return (
     <>
-      <button onClick={handleOpen} className="btn btn-sm btn-primary">
-        <IconGift className="size-4" />
+      <button
+        onClick={handleOpen}
+        className={cn("btn btn-primary", sizeConfig?.btn)}
+      >
+        <IconGift className={sizeConfig?.icon} />
         <span>Gift This</span>
       </button>
       <dialog ref={dialogRef} className="modal">
@@ -118,7 +139,7 @@ export default function ReserveModal({ post }: { post: PostType }) {
                       return (
                         <label
                           key={method.value}
-                          className={`relative flex cursor-pointer rounded-3xl border-2 p-4 transition-all ${
+                          className={`relative flex cursor-pointer rounded-3xl border-2 p-2 transition-all md:p-3 lg:p-4 ${
                             isSelected
                               ? "border-primary bg-primary/5 shadow-md"
                               : "border-base-300 bg-base-100 hover:border-base-content/20 hover:bg-base-200/50"
@@ -169,7 +190,7 @@ export default function ReserveModal({ post }: { post: PostType }) {
                               {method.bestFor.map((item) => (
                                 <span
                                   key={item}
-                                  className={`badge badge-xs border-1 ${isSelected ? "badge-primary badge-outline" : "badge-ghost"}`}
+                                  className={`badge badge-xs border ${isSelected ? "badge-primary badge-outline" : "badge-ghost"}`}
                                 >
                                   {item}
                                 </span>
@@ -185,9 +206,8 @@ export default function ReserveModal({ post }: { post: PostType }) {
             </reserveWishForm.Field>
 
             {/* Info */}
-            <div className="bg-primary/10 rounded-xl px-4 py-4">
+            <div className="bg-primary/10 rounded-3xl p-4">
               <div className="flex gap-3">
-                <IconInfoCircle className="text-primary mt-0.5 size-5 shrink-0" />
                 <div>
                   <p className="mb-2 text-sm font-semibold">
                     Before you reserve:
@@ -234,7 +254,7 @@ export default function ReserveModal({ post }: { post: PostType }) {
                 <div className="mt-6 flex w-full flex-col gap-2">
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn btn-primary btn-sm"
                     disabled={isLoading}
                     onClick={(e) => {
                       e.preventDefault();
@@ -253,7 +273,7 @@ export default function ReserveModal({ post }: { post: PostType }) {
 
                   <button
                     type="button"
-                    className="btn btn-ghost w-full"
+                    className="btn btn-sm btn-ghost w-full"
                     disabled={isLoading}
                     onClick={() => dialogRef.current?.close()}
                   >
@@ -270,6 +290,9 @@ export default function ReserveModal({ post }: { post: PostType }) {
           <button>close</button>
         </form>
       </dialog>
+
+      <ShipLabelDialog ref={shipLabelDialogRef} />
+      <EGiftDialog ref={eGiftDialogRef} />
     </>
   );
 }

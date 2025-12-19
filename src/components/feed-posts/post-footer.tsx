@@ -5,6 +5,7 @@ import type { PostType } from "../../lib/types";
 import GiftButton from "./btn-gift";
 import LikeButton from "./btn-like";
 import RepostButton from "./btn-repost";
+import GiftActionButton from "../gift/gift-action";
 
 export default function PostFooter(post: PostType) {
   return (
@@ -24,11 +25,14 @@ export default function PostFooter(post: PostType) {
             >
               <IconExternalLink className="size-3 lg:size-4" />
               <span className="text-[11px] leading-0 font-medium">
+                {/* TODO: improve the display of the price to be mroe readable */}
                 ${post.price}
               </span>
             </Link>
           )}
-          <GiftButton post={post} />
+          {/* <GiftButton post={post} />
+           */}
+          <GiftActionButton post={post} />
         </div>
       </div>
       {/* <p className="text-neutral/60 text-[9px]">
