@@ -10,6 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { useState, type MouseEvent } from "react";
 import { GiftActionModal } from "./btn-gift-modal";
+import ReserveModal from "../gift/modals/reserve";
 
 // =============================================================================
 // Types
@@ -23,18 +24,6 @@ export const GIFT_BUTTON_SIZE = {
 
 export type GiftButtonSize =
   (typeof GIFT_BUTTON_SIZE)[keyof typeof GIFT_BUTTON_SIZE];
-
-export interface GiftButtonProps {
-  post: PostType;
-  /** Button size variant */
-  size?: GiftButtonSize;
-  /** If true, stops click propagation (useful inside clickable cards) */
-  stopPropagation?: boolean;
-  /** Called when any action is triggered (optional, for analytics/tracking) */
-  onAction?: (action: GiftModalKind) => void;
-  /** Additional class names */
-  className?: string;
-}
 
 const SIZE_CONFIG: Record<
   GiftButtonSize,
@@ -61,6 +50,16 @@ const SIZE_CONFIG: Record<
   },
 };
 
+export interface GiftButtonProps {
+  post: PostType;
+  /** Button size variant */
+  size?: GiftButtonSize;
+  /** If true, stops click propagation (useful inside clickable cards) */
+  stopPropagation?: boolean;
+  /** Additional class names */
+  className?: string;
+}
+
 // =============================================================================
 // Component
 // =============================================================================
@@ -69,7 +68,6 @@ export default function GiftButton({
   post,
   size = "sm",
   stopPropagation = false,
-  onAction,
   className = "",
 }: GiftButtonProps) {
   const user = useAuth();
@@ -88,7 +86,6 @@ export default function GiftButton({
     }
     if (isModalOpen) return;
 
-    onAction?.(kind);
     setModalKind(kind);
     setIsModalOpen(true);
   };
@@ -297,24 +294,7 @@ export default function GiftButton({
 
   switch (post.giftStatus) {
     case "available":
-      return (
-        <>
-          <button
-            onClick={(e) => handleClick(e, "reserve")}
-            className={`${btnBase} btn-primary`}
-          >
-            <IconGift className={sizeConfig.icon} />
-            <span>Gift This</span>
-          </button>
-
-          <GiftActionModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            modalKind={modalKind}
-            post={post}
-          />
-        </>
-      );
+      return <ReserveModal post={post} />;
 
     case "reserved":
     case "label_created":

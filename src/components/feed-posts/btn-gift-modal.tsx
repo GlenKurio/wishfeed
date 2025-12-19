@@ -2,6 +2,9 @@
 import { useWishGiftActions } from "@/hooks/use-wish-gift-actions";
 import {
   confirmReceiptSchema,
+  DELIVERY_METHODS,
+  deliveryMethods,
+  markAsReservedSchema,
   markAsSentSchema,
   type DeliveryMethod,
   type GiftActionModalProps,
@@ -40,7 +43,40 @@ export function GiftActionModal({
   //=====================================================================
 
   // This from allows gifter to choose th gifting method and creates the gift entry with 'reserved' status and "gifting method" in db on confirm. Also redirects gifter to the next form based on the gifting method;
-  const reserveWishForm = useForm({});
+  const reserveWishForm = useForm({
+    defaultValues: {
+      deliveryMethod: "ship_label",
+    },
+
+    validators: {
+      onChange: markAsReservedSchema,
+    },
+
+    onSubmit: async ({ value }) => {
+      // create an initial gift object in db with reserverd status;
+      if (!post.id) return;
+
+      // markAsReserved(
+      //   {
+      //     giftId: `${post.id}_${post.gifter?.uid}`,
+      //     postId: post.id,
+      //     postAuthorId: post.author.uid,
+      //     options: {
+      //       trackingInfo: value.trackingInfo,
+      //       messageToRecipient: value.message,
+      //       deliveryMethod: value.deliveryMethod,
+      //     },
+      //   },
+      //   {
+      //     onSuccess: () => {
+      //       markAsSentForm.reset();
+      //       onClose();
+      //     },
+      //   },
+      // );
+      // redirect user to the next dialog?
+    },
+  });
 
   // This form is used to provide all the required info to create the label for the gift; Confirm sets the gift into 'label created' status;
   const createLabelForm = useForm({});

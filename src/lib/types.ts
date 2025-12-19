@@ -514,7 +514,14 @@ export type GiftActionModalProps = {
   post: PostType;
 };
 
-// Zod schemas for validation
+// Zod schemas for froms validation
+
+export const markAsReservedSchema = z.object({
+  deliveryMethod: z.enum(deliveryMethods, {
+    message: "Delivery method must be one of the known ones.",
+  }),
+});
+
 export const markAsSentSchema = z.object({
   deliveryMethod: z.enum(deliveryMethods, {
     message: "Delivery method must be one of the known ones.",
