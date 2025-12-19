@@ -1,4 +1,20 @@
-- Finish notifications feture with dropdown and realitme updates:
+- Gifting:
+
+  -- create form to create/add/delete adresses
+
+  -- Create a separate shipping adress collection for users in db;
+  -- Create a form to create a shipping on the client on Gift action click;
+  -- Make it a stepper? Step 1: select from address (save to DB), Step 2: Provide package info (save the shipment in db), Step 3: Pay and get the label(trigger a function after successfull payment, get all the details from DB and return the label);
+
+  -- How 'gifting' will work?
+  -- SHould I implement gift cards? for the price of the wish? User reserves, buys our (through partner platform) gift card, we send gift card to recepients profile + email? Is there a universal giftcards that can be used as cash in any store like apple, etc?
+  -- Or allow Anonymous Shipping Labels - so user A shraes their address with it, and user B by gifting, gets a label, buys product themselves and sends using this lable without nowing the address?
+  -- In app wallet? Give an option to send the money to user A, for a specific gift in the app?
+  -- Just use conditional address reveal - when gifter reserves the gift - recepient gets notification and has to allow access to their address, if not allowed, reservation is being cancelled; In notification show ttrast indicators: Show how long users have known each other
+  Display mutual followers count
+  Add verified badge for users who've completed gifts successfully
+  Rating system for gifters (did the gift arrive as promised?)
+  -- Just allow prepaid visa/mastercard cards using 3rd party api for gifts under $1000; Over - use anonymous shipping?
 
 - Post gift actions:
   --- improve dialog forms: show info on how to send the gift and add a link to gifts page where all info about the gift will be shown;  
@@ -17,22 +33,6 @@
   In post actions for owner allow to select wishlists to add post to;
 
 -- Get Feed posts for user from people user follows;
-
-- Gifting:
-
-  -- Create a separate shipping adress collection for users in db;
-  -- Create a form to create a shipping on the client on Gift action click;
-  -- Make it a stepper? Step 1: select from address (save to DB), Step 2: Provide package info (save the shipment in db), Step 3: Pay and get the label(trigger a function after successfull payment, get all the details from DB and return the label);
-
-  -- How 'gifting' will work?
-  -- SHould I implement gift cards? for the price of the wish? User reserves, buys our (through partner platform) gift card, we send gift card to recepients profile + email? Is there a universal giftcards that can be used as cash in any store like apple, etc?
-  -- Or allow Anonymous Shipping Labels - so user A shraes their address with it, and user B by gifting, gets a label, buys product themselves and sends using this lable without nowing the address?
-  -- In app wallet? Give an option to send the money to user A, for a specific gift in the app?
-  -- Just use conditional address reveal - when gifter reserves the gift - recepient gets notification and has to allow access to their address, if not allowed, reservation is being cancelled; In notification show ttrast indicators: Show how long users have known each other
-  Display mutual followers count
-  Add verified badge for users who've completed gifts successfully
-  Rating system for gifters (did the gift arrive as promised?)
-  -- Just allow prepaid visa/mastercard cards using 3rd party api for gifts under $1000; Over - use anonymous shipping?
 
 - Search:
   -- Search feature
