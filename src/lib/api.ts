@@ -153,6 +153,7 @@ export const searchFollowingQueryOptions = ({
     enabled: !!userId && !!searchTerm && searchTerm !== "",
   });
 
+// TODO: finish
 export const getExistingGiftQueryOptions = () =>
   queryOptions({
     queryKey: ["gift", postId, user?.uid],
