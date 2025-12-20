@@ -11,6 +11,7 @@ import {
 } from "./firebase/firestore/users";
 import { getUserPostsPaginated } from "./firebase/firestore/posts";
 import { getUserWishlists } from "./firebase/firestore/wishlists";
+import { getGiftById } from "./firebase/firestore/gifts";
 
 export const profileQueryOptions = (userProfileId: string) =>
   queryOptions<UserProfile | null>({
@@ -153,21 +154,19 @@ export const searchFollowingQueryOptions = ({
     enabled: !!userId && !!searchTerm && searchTerm !== "",
   });
 
-// TODO: finish
-export const getExistingGiftQueryOptions = () =>
+export const getExistingGiftQueryOptions = ({
+  postId,
+  userId,
+  isGifter,
+}: {
+  postId?: string;
+  userId?: string;
+  isGifter: boolean;
+}) =>
   queryOptions({
-    queryKey: ["gift", postId, user?.uid],
-    queryFn: async (): Promise<GiftType | null> => {
-      if (!postId || !user?.uid) return null;
+    queryKey: ["gift", postId, userId],
+    queryFn: () => getGiftById({ postId, userId }),
 
-      const giftId = `${postId}_${user.uid}`;
-      const giftRef = doc(db, "gifts", giftId);
-      const giftSnap = await getDoc(giftRef);
-
-      if (!giftSnap.exists()) return null;
-
-      return { id: giftSnap.id, ...giftSnap.data() } as GiftType;
-    },
-    enabled: !!postId && !!user?.uid && isGifter,
+    enabled: !!postId && !!userId && isGifter,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

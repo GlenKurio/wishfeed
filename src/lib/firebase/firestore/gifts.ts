@@ -5,18 +5,34 @@ import {
   Timestamp,
   writeBatch,
 } from "firebase/firestore";
-import { type DeliveryMethod, type GiftType, type PostType } from "../../types";
+import {
+  type DeliveryMethod,
+  type GiftType,
+  type GiftTypeWrite,
+  type PostType,
+} from "../../types";
 
 import { db } from "..";
 import { auth } from "../auth";
+
+export interface ReserveGiftOptions {
+  deliveryMethod: DeliveryMethod;
+  giftMessage?: string;
+  isAnonymous?: boolean;
+}
 
 /**
  * Reserve a gift for a post
  * @param postId - The ID of the post to gift
  * @param post - The full post object (for denormalization)
+ * @param options - Reservation options including delivery method
  * @returns The created gift document
  */
-export async function reserveGift(postId: string, post: PostType) {
+export async function reserveGift(
+  postId: string,
+  post: PostType,
+  options: ReserveGiftOptions,
+) {
   const user = auth.currentUser;
   if (!user) {
     throw new Error("Must be logged in to reserve a gift");
@@ -26,7 +42,7 @@ export async function reserveGift(postId: string, post: PostType) {
     throw new Error("You cannot gift your own post");
   }
 
-  if (post.giftStatus !== "available") {
+  if (post.gift.giftStatus !== "available") {
     throw new Error("This gift is already reserved or gifted");
   }
 
@@ -53,7 +69,7 @@ export async function reserveGift(postId: string, post: PostType) {
   // Use batch write for atomicity
   const batch = writeBatch(db);
 
-  const newGift: GiftType = {
+  const newGift: GiftTypeWrite = {
     id: giftId,
     postId: postId,
     gifterId: user.uid,
@@ -65,6 +81,7 @@ export async function reserveGift(postId: string, post: PostType) {
       image: post.image,
       brand: post.brand,
       price: post.price,
+      url: post.wishUrlAffiliate,
     },
 
     // Denormalized user info
@@ -82,13 +99,33 @@ export async function reserveGift(postId: string, post: PostType) {
       handle: post.author.handle,
     },
 
+    // Core status
     status: "reserved",
+    deliveryMethod: options.deliveryMethod,
+
+    // Timestamps
     reservedAt: serverTimestamp(),
     expiresAt: Timestamp.fromDate(
       new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
     ),
-    revealIdentityAfterConfirmation: true,
 
+    // Optional message
+    giftMessage: options.giftMessage || null,
+
+    // Privacy settings
+    isAnonymous: options.isAnonymous ?? false,
+
+    // Initialize reminders
+    reminders: {
+      sendReminderAt: Timestamp.fromDate(
+        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      ),
+      expirationWarningAt: Timestamp.fromDate(
+        new Date(Date.now() + 25 * 24 * 60 * 60 * 1000), // 25 days from now (5 days before expiry)
+      ),
+    },
+
+    // Metadata
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
@@ -112,7 +149,6 @@ export async function reserveGift(postId: string, post: PostType) {
 
   return { ...newGift, id: giftId };
 }
-
 /**
  * Mark a gift as sent by the gifter
  * @param giftId - The ID of the gift document
@@ -476,4 +512,32 @@ export async function checkGiftExpiration(giftId: string) {
   }
 
   return { expired: false };
+}
+
+export async function getGiftById({
+  postId,
+  userId,
+}: {
+  postId?: string;
+  userId?: string;
+}) {
+  if (!postId || userId) {
+    throw new Error("postId and UserId requried");
+  }
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to view gift details");
+  }
+
+  if (user.uid !== userId) {
+    throw new Error("Must be logged in to view gift details");
+  }
+
+  const giftId = `${postId}_${user.uid}`;
+  const giftRef = doc(db, "gifts", giftId);
+  const giftSnap = await getDoc(giftRef);
+
+  if (!giftSnap.exists()) return null;
+
+  return { id: giftSnap.id, ...giftSnap.data() } as GiftType;
 }

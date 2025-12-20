@@ -2,10 +2,13 @@ import { useWishGiftActions } from "@/hooks/use-wish-gift-actions";
 import {
   DELIVERY_METHODS,
   markAsReservedSchema,
+  type DeliveryMethod,
   type PostType,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+import { useAuth } from "@/hooks/use-auth";
+import { useExistingGift } from "@/hooks/use-existing-gift";
 import {
   IconCheck,
   IconGift,
@@ -16,9 +19,8 @@ import {
 } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
 import { useRef } from "react";
-import ShipLabelDialog, { type DialogHandle } from "./ship-label";
 import EGiftDialog from "./e-gift";
-import { useQuery } from "@tanstack/react-query";
+import { type DialogHandle, ShipLabelDialog } from "./ship-label";
 
 export default function ReserveDialog({
   post,
@@ -31,18 +33,27 @@ export default function ReserveDialog({
     gap: string;
   };
 }) {
+  const user = useAuth();
+  const { reserveGift, reserveGiftAsync, isLoading } = useWishGiftActions();
 
-  const {data: giftData} = useQuery({
-    queryFn: get
-  })
-  const { reserveGift, isLoading } = useWishGiftActions();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const shipLabelDialogRef = useRef<DialogHandle>(null);
   const eGiftDialogRef = useRef<DialogHandle>(null);
 
+  const isGifter = user?.uid === post.gift?.gifter?.uid;
+  const isReserved = post?.gift?.giftStatus === "reserved";
+  const isResuming = isGifter && isReserved;
+
+  const {
+    data: existingGift,
+    isLoading: isLoadingGift,
+    refetch: refetchGift,
+  } = useExistingGift(post.id, isResuming);
+
   const reserveWishForm = useForm({
     defaultValues: {
-      deliveryMethod: post.giftStatus === 'reserved' ? post.,
+      deliveryMethod: (existingGift?.deliveryMethod ||
+        DELIVERY_METHODS.SHIP_LABEL) as DeliveryMethod,
     },
 
     validators: {
@@ -52,13 +63,26 @@ export default function ReserveDialog({
     onSubmit: async ({ value }) => {
       if (!post.id) return;
 
-      // await reserveGift({
-      //   giftId: `${post.id}_${post.gifter?.uid}`,
+      // If resuming and delivery method unchanged, just continue to next step
+      if (isResuming && existingGift?.deliveryMethod === value.deliveryMethod) {
+        dialogRef.current?.close();
+        openNextDialog(value.deliveryMethod);
+        return;
+      }
+
+      // If resuming but changing delivery method, update the gift
+      if (isResuming && existingGift) {
+        // TODO: Add updateGiftDeliveryMethod mutation if you want to allow changing
+        // For now, just continue with the existing method
+        dialogRef.current?.close();
+        openNextDialog(existingGift.deliveryMethod || value.deliveryMethod);
+        return;
+      }
+      // New reservation
+      // await reserveGiftAsync({
       //   postId: post.id,
-      //   postAuthorId: post.author.uid,
-      //   options: {
-      //     deliveryMethod: value.deliveryMethod,
-      //   },
+      //   post: post,
+      //   deliveryMethod: value.deliveryMethod,
       // });
       dialogRef.current?.close();
       if (value.deliveryMethod === DELIVERY_METHODS.SHIP_LABEL) {
@@ -69,8 +93,23 @@ export default function ReserveDialog({
     },
   });
 
+  const openNextDialog = (method: DeliveryMethod) => {
+    switch (method) {
+      case DELIVERY_METHODS.SHIP_LABEL:
+        shipLabelDialogRef.current?.open();
+        break;
+      case DELIVERY_METHODS.E_GIFT:
+        eGiftDialogRef.current?.open();
+        break;
+    }
+  };
+
   const handleOpen = () => {
     dialogRef.current?.showModal();
+  };
+
+  const handleGoBackToReserve = () => {
+    dialogRef.current?.showModal(); // Re-open this dialog
   };
 
   const deliveryMethods = [
@@ -296,7 +335,15 @@ export default function ReserveDialog({
         </form>
       </dialog>
 
-      <ShipLabelDialog ref={shipLabelDialogRef} />
+      {/* <ShipLabelDialog ref={shipLabelDialogRef} /> */}
+
+      <ShipLabelDialog
+        ref={shipLabelDialogRef}
+        sizeConfig={sizeConfig}
+        post={post}
+        hideTrigger // No visible button
+        onGoBack={handleGoBackToReserve} // Opens reserve dialog again
+      />
       <EGiftDialog ref={eGiftDialogRef} />
     </>
   );

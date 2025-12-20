@@ -71,8 +71,9 @@ export async function saveWishPostToDb(wishData: NewWishType) {
     likesCount: 0,
     repostsCount: 0,
     wishlists: [],
-
-    giftStatus: "available",
+    gift: {
+      giftStatus: "available",
+    },
 
     isPublished: validatedData.isPublished,
     ...(validatedData.isPublished

@@ -44,9 +44,27 @@ export type ScrapeWishInput = {
   url: string;
 };
 
+/**
+ * Gift-related fields that should be added to PostType
+ * when a post is reserved/gifted
+ */
+export interface PostGiftFields {
+  /** Current gift status */
+  giftStatus: GiftStatus | "available";
+
+  /** The gifter's info (when reserved) */
+  gifter?: EmbeddedUser;
+
+  /** Delivery method chosen by gifter */
+  deliveryMethod?: DeliveryMethod;
+
+  /** Reference to the gift document ID */
+  giftId?: string | null;
+}
+
 // /post/{postId}
 export type PostType = {
-  id?: string;
+  id: string;
   image: string;
   title: string;
   brand: string;
@@ -65,14 +83,8 @@ export type PostType = {
     handle: string;
   };
 
-  giftStatus: GiftStatus;
   // TODO: update gifter data on user profile update
-  gifter?: {
-    uid: string;
-    photoUrl?: string;
-    displayName: string;
-    handle: string;
-  };
+  gift: PostGiftFields;
 
   isPublished: boolean;
 
@@ -342,7 +354,7 @@ export type GiftStatus = (typeof giftStatuses)[number];
  * Embedded wish data - denormalized from the post
  * Updated via Cloud Function when post changes
  */
-export interface EmbeddedWish {
+export interface EmbeddedPost {
   title: string;
   image?: string | null;
   brand?: string | null;
@@ -421,7 +433,7 @@ export interface GiftType {
   recipientId: string;
 
   // === Denormalized Data ===
-  wish: EmbeddedWish;
+  post: EmbeddedPost;
   gifter: EmbeddedUser;
   recipient: EmbeddedUser;
 
@@ -457,8 +469,7 @@ export interface GiftType {
   thankYouMessage?: string | null;
 
   // === Privacy & Settings ===
-  /** If false, gifter identity hidden until confirmation */
-  revealIdentityImmediately: boolean;
+
   /** If true, this was marked as anonymous by gifter */
   isAnonymous: boolean;
 
@@ -478,6 +489,56 @@ export interface GiftType {
   // === Metadata ===
   createdAt: Timestamp;
   updatedAt: Timestamp;
+}
+
+/**
+ * Gift type for writing to Firestore
+ * Allows FieldValue (serverTimestamp) for timestamp fields
+ */
+export interface GiftTypeWrite
+  extends Omit<
+    GiftType,
+    | "reservedAt"
+    | "expiresAt"
+    | "pendingShipmentAt"
+    | "labelCreatedAt"
+    | "shippedAt"
+    | "sentAt"
+    | "deliveredAt"
+    | "receivedAt"
+    | "thankedAt"
+    | "cancelledAt"
+    | "expiredAt"
+    | "createdAt"
+    | "updatedAt"
+    | "reminders"
+  > {
+  // Required timestamps that can use serverTimestamp()
+  reservedAt: FieldValue;
+  expiresAt: Timestamp; // This is calculated, so always a real Timestamp
+  createdAt: FieldValue;
+  updatedAt: FieldValue;
+
+  // Optional timestamps
+  pendingShipmentAt?: FieldValue | null;
+  labelCreatedAt?: FieldValue | null;
+  shippedAt?: FieldValue | null;
+  sentAt?: FieldValue | null;
+  deliveredAt?: FieldValue | null;
+  receivedAt?: FieldValue | null;
+  thankedAt?: FieldValue | null;
+  cancelledAt?: FieldValue | null;
+  expiredAt?: FieldValue | null;
+
+  // Reminders with writable timestamps
+  reminders: {
+    sendReminderAt?: Timestamp | null;
+    sendReminderSentAt?: FieldValue | null;
+    confirmReminderAt?: Timestamp | null;
+    confirmReminderSentAt?: FieldValue | null;
+    expirationWarningAt?: Timestamp | null;
+    expirationWarningSentAt?: FieldValue | null;
+  };
 }
 
 export type GiftModalKind =

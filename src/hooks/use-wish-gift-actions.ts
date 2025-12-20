@@ -32,8 +32,18 @@ export function useWishGiftActions() {
   // Reserve Gift Mutation
   // ==========================================
   const reserveGiftMutation = useMutation({
-    mutationFn: ({ postId, post }: { postId: string; post: PostType }) =>
-      reserveGift(postId, post),
+    mutationFn: ({
+      postId,
+      post,
+      deliveryMethod,
+    }: {
+      postId: string;
+      post: PostType;
+      deliveryMethod: DeliveryMethod;
+    }) =>
+      reserveGift(postId, post, {
+        deliveryMethod,
+      }),
 
     onMutate: async ({ postId, post }) => {
       if (!user || !authUser) return;
