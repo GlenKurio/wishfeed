@@ -1,6 +1,6 @@
 - Gifting:
   Continue with gift button design and dialogs;
-  -- Finish dealogs logic and navigation patterns
+
   -- Finish reserve dialog: create db function to get gift, finish query options, use them in hook and in dialog;
 
   -- Create gift card design;
