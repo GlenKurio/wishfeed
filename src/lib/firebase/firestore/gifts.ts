@@ -52,9 +52,9 @@ export async function reserveGift(
 
   // Check if gift already exists
   const existingGift = await getDoc(giftRef);
-  if (existingGift.exists() && existingGift.data().status === "reserved") {
-    throw new Error("You have already reserved this gift");
-  }
+  // if (existingGift.exists() && existingGift.data().status === "reserved") {
+  //   throw new Error("You have already reserved this gift");
+  // }
 
   // Get current user's profile for denormalization
   const userProfileRef = doc(db, "users", user.uid);
@@ -135,13 +135,18 @@ export async function reserveGift(
 
   // Update post with reservation
   batch.update(postRef, {
-    giftStatus: "reserved",
-    gifter: {
-      uid: user.uid,
-      photoUrl: userData.photoURL || undefined,
-      displayName: userData.displayName || "Anonymous",
-      handle: userData.handle || user.uid,
+    gift: {
+      giftStatus: "reserved",
+      deliveryMethod: options.deliveryMethod,
+      gifter: {
+        uid: user.uid,
+        photoUrl: userData.photoURL || undefined,
+        displayName: userData.displayName || "Anonymous",
+        handle: userData.handle || user.uid,
+      },
+      giftId,
     },
+
     updatedAt: serverTimestamp(),
   });
 
@@ -521,7 +526,7 @@ export async function getGiftById({
   postId?: string;
   userId?: string;
 }) {
-  if (!postId || userId) {
+  if (!postId || !userId) {
     throw new Error("postId and UserId requried");
   }
   const user = auth.currentUser;

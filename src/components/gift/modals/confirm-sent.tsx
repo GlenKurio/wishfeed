@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { IconArrowLeft, IconTruck } from "@tabler/icons-react";
+import { IconArrowLeft, IconCheck, IconTruck } from "@tabler/icons-react";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import {
   SIZE_CONFIG,
@@ -7,7 +7,7 @@ import {
   type DialogHandle,
 } from "../dialog-types";
 
-export const ShipLabelDialog = forwardRef<DialogHandle, BaseDialogProps>(
+export const ConfirmSentDialog = forwardRef<DialogHandle, BaseDialogProps>(
   (
     {
       post,
@@ -57,8 +57,8 @@ export const ShipLabelDialog = forwardRef<DialogHandle, BaseDialogProps>(
         onClick={handleOpen}
         className={cn("btn btn-primary", sizeConfig?.btn)}
       >
-        <IconTruck className={sizeConfig?.icon} />
-        <span>Create Shipping Label</span>
+        <IconCheck className={sizeConfig?.icon} />
+        <span>Confirm Sent</span>
       </button>
     );
 
@@ -137,5 +137,5 @@ export const ShipLabelDialog = forwardRef<DialogHandle, BaseDialogProps>(
   },
 );
 
-ShipLabelDialog.displayName = "ShipLabelDialog";
-export default ShipLabelDialog;
+ConfirmSentDialog.displayName = "ConfirmSentDialog";
+export default ConfirmSentDialog;

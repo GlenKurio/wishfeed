@@ -45,7 +45,7 @@ export function useWishGiftActions() {
         deliveryMethod,
       }),
 
-    onMutate: async ({ postId, post }) => {
+    onMutate: async ({ postId, post, deliveryMethod }) => {
       if (!user || !authUser) return;
 
       const authorQueryKey = ["posts", "user", post.author.uid, "all"] as const;
@@ -68,7 +68,10 @@ export function useWishGiftActions() {
                 p.id === postId
                   ? {
                       ...p,
-                      giftStatus: "reserved" as const,
+                      gift: {
+                        giftStatus: "reserved",
+                        deliveryMethod: deliveryMethod,
+                      },
                       gifter: {
                         uid: user.uid,
                         photoUrl: user.photoURL || undefined,

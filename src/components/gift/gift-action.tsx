@@ -1,56 +1,30 @@
 import { useAuth } from "@/hooks/use-auth";
-import { type DeliveryMethod, type PostType } from "@/lib/types";
+import { type PostType } from "@/lib/types";
+import { useRef } from "react";
+
+// Author dialogs
 import AvailableDialogAuthor from "./modals/author/available";
 import ReceivedDialogAuthor from "./modals/author/received";
 import ReservedDialogAuthor from "./modals/author/reserved";
 import SentDeliveredDialogAuthor from "./modals/author/sent-delivered";
 import ShippedDialogAuthor from "./modals/author/shipped";
-import EGiftDialog from "./modals/e-gift";
-import GiftedDialogOthers from "./modals/gifted";
+
+// Gifter dialogs
 import DeliveredDialog from "./modals/gifter/delivered";
 import LabelCreatedDialog from "./modals/gifter/label-created";
 import ReceivedDialog from "./modals/gifter/received";
 import SentDialog from "./modals/gifter/sent";
 import ShippedDialog from "./modals/gifter/shipped";
+
+// Shared dialogs
+import EGiftDialog from "./modals/e-gift";
+
+import GiftedDialogOthers from "./modals/gifted";
 import ReserveDialog from "./modals/reserve";
 import ReservedDialogOthers from "./modals/reserved";
 import ShipLabelDialog from "./modals/ship-label";
-
-export const GIFT_BUTTON_SIZE = {
-  XS: "xs",
-  SM: "sm",
-} as const;
-
-export type GiftButtonSize =
-  (typeof GIFT_BUTTON_SIZE)[keyof typeof GIFT_BUTTON_SIZE];
-
-const SIZE_CONFIG: Record<
-  GiftButtonSize,
-  {
-    btn: string;
-    icon: string;
-    gap: string;
-  }
-> = {
-  xs: {
-    btn: "btn-xs",
-    icon: "size-3",
-    gap: "gap-1",
-  },
-  sm: {
-    btn: "btn-sm",
-    icon: "size-4",
-    gap: "gap-1.5",
-  },
-};
-
-export interface GiftButtonProps {
-  post: PostType;
-  /** Button size variant */
-  size?: GiftButtonSize;
-  /** Additional class names */
-  className?: string;
-}
+import type { DialogHandle, GiftButtonProps } from "./dialog-types";
+import ConfirmSentDialog from "./modals/confirm-sent";
 
 export default function GiftActionButton({
   post,
@@ -58,23 +32,65 @@ export default function GiftActionButton({
 }: GiftButtonProps) {
   const user = useAuth();
 
+  // Dialog refs for navigation
+  const reserveDialogRef = useRef<DialogHandle>(null);
+  const shipLabelDialogRef = useRef<DialogHandle>(null);
+  const eGiftDialogRef = useRef<DialogHandle>(null);
+  const confirmSentDialogRef = useRef<DialogHandle>(null);
+
   const isGifter = user?.uid === post?.gift?.gifter?.uid;
   const isAuthor = user?.uid === post.author.uid;
   const deliveryMethod = post?.gift?.deliveryMethod;
+  const status = post?.gift?.giftStatus;
 
-  const sizeConfig = SIZE_CONFIG[size];
+  // ================================================================
+  // Navigation Handlers
+  // ================================================================
+
+  const handleGoBackToReserve = () => {
+    reserveDialogRef.current?.open();
+  };
+
+  const handleNavigateToShipLabel = () => {
+    shipLabelDialogRef.current?.open();
+  };
+
+  const handleNavigateToEGift = () => {
+    eGiftDialogRef.current?.open();
+  };
 
   // ================================================================
   // Author's View (Recipient)
   // ================================================================
   if (isAuthor) {
-    return (
-      <AuthorView
-        post={post}
-        sizeConfig={sizeConfig}
-        deliveryMethod={deliveryMethod}
-      />
-    );
+    switch (status) {
+      case "available":
+        return <AvailableDialogAuthor size={size} />;
+
+      case "reserved":
+      case "label_created":
+        return <ReservedDialogAuthor size={size} />;
+
+      case "shipped":
+        return <ShippedDialogAuthor size={size} />;
+
+      case "sent":
+      case "delivered":
+        return (
+          <SentDeliveredDialogAuthor
+            post={post}
+            size={size}
+            deliveryMethod={deliveryMethod}
+          />
+        );
+
+      case "received":
+      case "thanked":
+        return <ReceivedDialogAuthor post={post} size={size} />;
+
+      default:
+        return null;
+    }
   }
 
   // ================================================================
@@ -82,10 +98,18 @@ export default function GiftActionButton({
   // ================================================================
   if (isGifter) {
     return (
-      <GifterView
+      <GifterDialogs
         post={post}
-        sizeConfig={sizeConfig}
+        size={size}
+        status={status}
         deliveryMethod={deliveryMethod}
+        reserveDialogRef={reserveDialogRef}
+        shipLabelDialogRef={shipLabelDialogRef}
+        eGiftDialogRef={eGiftDialogRef}
+        confirmSentDialogRef={confirmSentDialogRef}
+        onGoBackToReserve={handleGoBackToReserve}
+        onNavigateToShipLabel={handleNavigateToShipLabel}
+        onNavigateToEGift={handleNavigateToEGift}
       />
     );
   }
@@ -93,180 +117,133 @@ export default function GiftActionButton({
   // ================================================================
   // Other Users' View (not author, not gifter)
   // ================================================================
-  return <OthersView post={post} sizeConfig={sizeConfig} />;
+  switch (status) {
+    case "available":
+      return <ReserveDialog ref={reserveDialogRef} post={post} size={size} />;
+
+    case "reserved":
+    case "label_created":
+    case "shipped":
+    case "sent":
+      return <ReservedDialogOthers size={size} />;
+
+    case "delivered":
+    case "received":
+    case "thanked":
+      return <GiftedDialogOthers size={size} />;
+
+    default:
+      return null;
+  }
 }
 
-// =============================================================================
-// Author View Component
-// =============================================================================
+// ================================================================
+// Gifter Dialogs Component
+// ================================================================
+// Renders all dialogs the gifter might need, shows the appropriate trigger
 
-interface ViewProps {
+interface GifterDialogsProps {
   post: PostType;
-  sizeConfig: (typeof SIZE_CONFIG)[GiftButtonSize];
-  deliveryMethod?: DeliveryMethod;
+  size: "xs" | "sm";
+  status: string | undefined;
+  deliveryMethod: string | undefined;
+  reserveDialogRef: React.RefObject<DialogHandle | null>;
+  shipLabelDialogRef: React.RefObject<DialogHandle | null>;
+  eGiftDialogRef: React.RefObject<DialogHandle | null>;
+  confirmSentDialogRef: React.RefObject<DialogHandle | null>;
+  onGoBackToReserve: () => void;
+  onNavigateToShipLabel: () => void;
+  onNavigateToEGift: () => void;
 }
 
-function AuthorView({ post, sizeConfig, deliveryMethod }: ViewProps) {
-  const status = post?.gift?.giftStatus;
+function GifterDialogs({
+  post,
+  size,
+  status,
+  deliveryMethod,
+  reserveDialogRef,
+  shipLabelDialogRef,
+  eGiftDialogRef,
+  confirmSentDialogRef,
+  onGoBackToReserve,
+  onNavigateToShipLabel,
+  onNavigateToEGift,
+}: GifterDialogsProps) {
+  // Determine which dialog should show its trigger button
+  const getVisibleDialog = ():
+    | "reserve"
+    | "ship_label"
+    | "e_gift"
+    | "in_person"
+    | "other" => {
+    if (status === "reserved") {
+      if (!deliveryMethod) return "reserve";
+      return deliveryMethod as "ship_label" | "e_gift" | "in_person";
+    }
+    return "other";
+  };
 
-  switch (status) {
-    case "available":
-      // Show "Available" badge - no action needed
-      return <AvailableDialogAuthor sizeConfig={sizeConfig} />;
+  const visibleDialog = getVisibleDialog();
 
-    case "reserved":
-    case "label_created":
-      // Someone reserved it - show teaser without revealing who
-      return <ReservedDialogAuthor sizeConfig={sizeConfig} />;
-
-    case "shipped":
-      // Package is on the way
-      return <ShippedDialogAuthor sizeConfig={sizeConfig} />;
-
-    case "sent":
-    case "delivered":
-      // Gift arrived - author can confirm receipt
-      return (
-        <SentDeliveredDialogAuthor
-          post={post}
-          sizeConfig={sizeConfig}
-          deliveryMethod={deliveryMethod}
-        />
-      );
-
-    case "received":
-    case "thanked":
-      // Author confirmed receipt
-      //   showed whenever author confirms that they received the gift;
-      // Show general info
-      //   Mark as Your Gift
-      return <ReceivedDialogAuthor post={post} sizeConfig={sizeConfig} />;
-
-    default:
-      return null;
-  }
-}
-
-// =============================================================================
-// Gifter View Component
-// =============================================================================
-
-function GifterView({ post, sizeConfig, deliveryMethod }: ViewProps) {
-  const status = post?.gift?.giftStatus;
-
-  switch (status) {
-    // ----- RESERVED STATE -----
-    case "reserved":
-      // Gifter needs to proceed with their chosen delivery method
-      // Or they can change/cancel from the ReserveDialog
-      return (
-        <ReservedGifterView
-          post={post}
-          sizeConfig={sizeConfig}
-          deliveryMethod={deliveryMethod}
-        />
-      );
-
-    // ----- SHIP_LABEL SPECIFIC STATES -----
-    case "label_created":
-      // Label ready, waiting to ship
-      // show the details, allow to void the label or change it. cancel and reselect the delivery method, or confirm shipped
-      return <LabelCreatedDialog post={post} sizeConfig={sizeConfig} />;
-
-    case "shipped":
-      // Package in transit
-      // just show the package info and traking number (tracking rpogress?), allow to cancel the shipped status;
-      return <ShippedDialog post={post} sizeConfig={sizeConfig} />;
-
-    case "delivered":
-      // Carrier confirmed delivery, waiting for recipient confirmation
-      // Only if delivery method was ship_label
-      // Show info from carrier and message, that awaiting confirmation from receiver (let them know we sent a reminder)
-      return <DeliveredDialog post={post} sizeConfig={sizeConfig} />;
-
-    // ----- SENT STATE (e_gift or in_person) -----
-    //   Showed if delivery method was e-gift or in person
-    // if in person - confirms that was sent and can cancel (back to reserve)
-    // if was sent as e-gift - just show the info
-    case "sent":
-      return (
-        <SentDialog
-          post={post}
-          sizeConfig={sizeConfig}
-          deliveryMethod={deliveryMethod}
-        />
-      );
-
-    // ----- COMPLETED STATES -----\
-
-    case "received":
-    case "thanked":
-      return <ReceivedDialog post={post} sizeConfig={sizeConfig} />;
-
-    default:
-      return null;
-  }
-}
-
-/**
- * Sub-component for gifter's reserved state
- * Shows different dialogs based on delivery method
- */
-function ReservedGifterView({ post, sizeConfig, deliveryMethod }: ViewProps) {
-  // If no delivery method set yet, show the reserve dialog to select one
-  if (!deliveryMethod) {
-    return <ReserveDialog post={post} sizeConfig={sizeConfig} />;
+  // For non-reserved states, render the appropriate single dialog
+  if (status !== "reserved") {
+    switch (status) {
+      case "label_created":
+        return <LabelCreatedDialog post={post} size={size} />;
+      case "shipped":
+        return <ShippedDialog post={post} size={size} />;
+      case "delivered":
+        return <DeliveredDialog post={post} size={size} />;
+      case "sent":
+        return (
+          <SentDialog post={post} size={size} deliveryMethod={deliveryMethod} />
+        );
+      case "received":
+      case "thanked":
+        return <ReceivedDialog post={post} size={size} />;
+      default:
+        return null;
+    }
   }
 
-  // Based on delivery method, show the appropriate next step
-  switch (deliveryMethod) {
-    case "ship_label":
-      // Show shipping label creation flow
-      // This dialog should allow: create label, change method, cancel
-      return <ShipLabelDialog post={post} sizeConfig={sizeConfig} />;
+  // For reserved state, render all navigation-related dialogs
+  // Only one shows its trigger, others are hidden but accessible via refs
+  return (
+    <>
+      {/* Reserve Dialog */}
+      <ReserveDialog
+        ref={reserveDialogRef}
+        post={post}
+        size={size}
+        hideTrigger={visibleDialog !== "reserve"}
+        onNavigateToShipLabel={onNavigateToShipLabel}
+        onNavigateToEGift={onNavigateToEGift}
+      />
 
-    case "e_gift":
-      // Show e-gift sending flow
-      // This dialog should allow: send e-gift, change method, cancel
-      return <EGiftDialog post={post} sizeConfig={sizeConfig} />;
+      {/* Ship Label Dialog */}
+      <ShipLabelDialog
+        ref={shipLabelDialogRef}
+        post={post}
+        size={size}
+        hideTrigger={visibleDialog !== "ship_label"}
+        onGoBack={onGoBackToReserve}
+      />
 
-    case "in_person":
-      // Show in-person delivery flow
-      // This dialog should allow: mark as sent, change method, cancel reservation
-      return <InPersonDialog post={post} sizeConfig={sizeConfig} />;
+      {/* E-Gift Dialog */}
+      <EGiftDialog
+        ref={eGiftDialogRef}
+        post={post}
+        size={size}
+        hideTrigger={visibleDialog !== "e_gift"}
+        onGoBack={onGoBackToReserve}
+      />
 
-    default:
-      // Fallback to reserve dialog if something unexpected
-      return <ReserveDialog post={post} sizeConfig={sizeConfig} />;
-  }
-}
-
-// =============================================================================
-// Others View Component (not author, not gifter)
-// =============================================================================
-
-function OthersView({ post, sizeConfig }: Omit<ViewProps, "deliveryMethod">) {
-  const status = post?.gift?.giftStatus || "available";
-
-  switch (status) {
-    case "available":
-      // Can reserve this gift
-      return <ReserveDialog post={post} sizeConfig={sizeConfig} />;
-
-    case "reserved":
-    case "label_created":
-    case "shipped":
-    case "sent":
-      // Someone else reserved it
-      return <ReservedDialogOthers sizeConfig={sizeConfig} />;
-
-    case "delivered":
-    case "received":
-    case "thanked":
-      // Already gifted
-      return <GiftedDialogOthers sizeConfig={sizeConfig} />;
-
-    default:
-      return null;
-  }
+      <ConfirmSentDialog
+        ref={confirmSentDialogRef}
+        onGoBack={onGoBackToReserve}
+        hideTrigger={visibleDialog !== "in_person"}
+        post={post}
+      />
+    </>
+  );
 }
