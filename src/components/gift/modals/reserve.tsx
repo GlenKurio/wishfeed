@@ -25,6 +25,7 @@ import {
   type DialogHandle,
   type GiftButtonSize,
 } from "../dialog-types";
+import { toast } from "sonner";
 
 const deliveryMethods = [
   {
@@ -74,15 +75,13 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
     ref,
   ) => {
     const user = useAuth();
-    const { reserveGiftAsync, cancelReservationAsync, isLoading } =
-      useWishGiftActions();
+    const { reserveGift, cancelReservation, isLoading } = useWishGiftActions();
     const dialogRef = useRef<HTMLDialogElement>(null);
 
     const sizeConfig = SIZE_CONFIG[size];
 
     const isGifter = user?.uid === post.gift?.gifter?.uid;
     const isReserved = post?.gift?.giftStatus === "reserved";
-    const isResuming = isGifter && isReserved;
 
     const {
       data: existingGift,
@@ -90,10 +89,12 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
       refetch: refetchGift,
     } = useExistingGift(post.id, isGifter);
 
+    const isResuming = isGifter && isReserved && existingGift;
+
     console.log("DELIVERY METHOD:  ", existingGift?.deliveryMethod);
 
-    const handleCancelReservation = async () => {
-      await cancelReservationAsync({
+    const handleCancelReservation = () => {
+      cancelReservation({
         giftId: existingGift?.id,
         postId: post.id,
         postAuthorId: post.author.uid,
@@ -112,32 +113,38 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
 
       onSubmit: async ({ value }) => {
         if (!post.id) return;
-        // TODO: finish submit logic
-        // If in Person is selected just update the gift (if delivery method changed) and close the dialog
-        // If resuming and delivery method unchanged, just continue to next step
-        if (isResuming) {
+
+        // If there is a gift delivery method unchanged, just continue to next step
+        if (
+          isResuming &&
+          value.deliveryMethod === existingGift.deliveryMethod
+        ) {
           handleClose();
           navigateToDeliveryDialog(value.deliveryMethod);
-          return;
+          return toast.info("We are resuming");
         }
 
         // If resuming but changing delivery method, update the gift
-        if (isResuming && existingGift) {
+        if (
+          isResuming &&
+          value.deliveryMethod !== existingGift.deliveryMethod
+        ) {
           // TODO: Add updateGiftDeliveryMethod mutation if you want to allow changing
           // For now, just continue with the existing method
           handleClose();
           navigateToDeliveryDialog(value.deliveryMethod);
-          return;
+          return toast.info("We are chenging the delivery method!");
         }
+
         // New reservation
-        await reserveGiftAsync({
+        reserveGift({
           postId: post.id,
           post: post,
           deliveryMethod: value.deliveryMethod,
         });
-
-        handleClose();
+        // TODO: why its not navigating to the next dialog?
         navigateToDeliveryDialog(value.deliveryMethod);
+        handleClose();
       },
     });
 

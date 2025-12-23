@@ -42,7 +42,7 @@ export default function GiftActionButton({
   const isAuthor = user?.uid === post.author.uid;
   const deliveryMethod = post?.gift?.deliveryMethod;
   const status = post?.gift?.giftStatus;
-
+  console.log("IS GIFTER: ", isGifter);
   // ================================================================
   // Navigation Handlers
   // ================================================================
@@ -184,6 +184,9 @@ function GifterDialogs({
   };
 
   const visibleDialog = getVisibleDialog();
+
+  console.log("VISIBLE DIALOG: ", visibleDialog);
+  console.log("STATUS: ", status);
 
   // For non-reserved states, render the appropriate single dialog
   if (status !== "reserved") {

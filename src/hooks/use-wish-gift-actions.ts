@@ -299,6 +299,7 @@ export function useWishGiftActions() {
                       ...p,
                       gift: {
                         giftStatus: "available" as const,
+                        deliveryMethod: "ship_label",
                         gifter: undefined,
                       },
                     }

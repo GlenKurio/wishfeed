@@ -2,10 +2,9 @@ import { IconExternalLink } from "@tabler/icons-react";
 
 import { Link } from "@tanstack/react-router";
 import type { PostType } from "../../lib/types";
-import GiftButton from "./btn-gift";
+import GiftActionButton from "../gift/gift-action";
 import LikeButton from "./btn-like";
 import RepostButton from "./btn-repost";
-import GiftActionButton from "../gift/gift-action";
 
 export default function PostFooter(post: PostType) {
   return (
