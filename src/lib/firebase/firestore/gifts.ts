@@ -316,15 +316,14 @@ export async function cancelGiftReservation(giftId: string) {
 
   // Return post to available status
   batch.update(postRef, {
-    giftStatus: "available",
-    gifter: null, // Remove gifter info
+    gift: {
+      giftStatus: "available",
+      gifter: null, // Remove gifter info
+    },
     updatedAt: serverTimestamp(),
   });
 
   await batch.commit();
-
-  // Alternatively, you could delete the gift document entirely:
-  // await deleteDoc(giftRef);
 
   return { success: true };
 }

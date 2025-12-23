@@ -74,7 +74,8 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
     ref,
   ) => {
     const user = useAuth();
-    const { reserveGiftAsync, isLoading } = useWishGiftActions();
+    const { reserveGiftAsync, cancelReservationAsync, isLoading } =
+      useWishGiftActions();
     const dialogRef = useRef<HTMLDialogElement>(null);
 
     const sizeConfig = SIZE_CONFIG[size];
@@ -90,6 +91,14 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
     } = useExistingGift(post.id, isGifter);
 
     console.log("DELIVERY METHOD:  ", existingGift?.deliveryMethod);
+
+    const handleCancelReservation = async () => {
+      await cancelReservationAsync({
+        giftId: existingGift?.id,
+        postId: post.id,
+        postAuthorId: post.author.uid,
+      });
+    };
 
     const reserveWishForm = useForm({
       defaultValues: {
@@ -377,6 +386,12 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
                 )}
               </reserveWishForm.Subscribe>
             </div>
+            <button
+              onClick={handleCancelReservation}
+              className="btn btn-ghost flex-1"
+            >
+              Cancel reservation
+            </button>
           </div>
 
           {/* Click outside to close */}

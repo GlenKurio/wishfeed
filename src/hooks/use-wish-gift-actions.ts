@@ -297,8 +297,10 @@ export function useWishGiftActions() {
                 p.id === postId
                   ? {
                       ...p,
-                      giftStatus: "available" as const,
-                      gifter: undefined,
+                      gift: {
+                        giftStatus: "available" as const,
+                        gifter: undefined,
+                      },
                     }
                   : p,
               ),

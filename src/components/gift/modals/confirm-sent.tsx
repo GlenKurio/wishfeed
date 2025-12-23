@@ -6,6 +6,7 @@ import {
   type BaseDialogProps,
   type DialogHandle,
 } from "../dialog-types";
+import { useWishGiftActions } from "@/hooks/use-wish-gift-actions";
 
 export const ConfirmSentDialog = forwardRef<DialogHandle, BaseDialogProps>(
   (
@@ -23,6 +24,10 @@ export const ConfirmSentDialog = forwardRef<DialogHandle, BaseDialogProps>(
     const dialogRef = useRef<HTMLDialogElement>(null);
 
     const sizeConfig = SIZE_CONFIG[size];
+
+    const { reserveGiftAsync, cancelReservationAsync, isLoading } =
+      useWishGiftActions();
+
     // Expose open/close methods via ref
     useImperativeHandle(ref, () => ({
       open: () => {
@@ -124,6 +129,7 @@ export const ConfirmSentDialog = forwardRef<DialogHandle, BaseDialogProps>(
                 <button onClick={handleCancel} className="btn btn-ghost flex-1">
                   Cancel
                 </button>
+             
               </div>
             </div>
           </div>
