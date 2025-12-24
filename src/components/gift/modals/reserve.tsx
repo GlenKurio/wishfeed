@@ -111,7 +111,7 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
         onChange: markAsReservedSchema,
       },
 
-      onSubmit: async ({ value }) => {
+      onSubmit: ({ value }) => {
         if (!post.id) return;
 
         // If there is a gift delivery method unchanged, just continue to next step
@@ -142,9 +142,15 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
           post: post,
           deliveryMethod: value.deliveryMethod,
         });
-        // TODO: why its not navigating to the next dialog?
-        navigateToDeliveryDialog(value.deliveryMethod);
         handleClose();
+        navigateToDeliveryDialog(value.deliveryMethod);
+
+        return toast.success("Gift reserved successfully!", {
+          action: {
+            label: "View Details",
+            onClick: () => navigateToDeliveryDialog(value.deliveryMethod),
+          },
+        });
       },
     });
 
@@ -159,7 +165,7 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
 
     const navigateToDeliveryDialog = (method: DeliveryMethod) => {
       switch (method) {
-        case DELIVERY_METHODS.SHIP_LABEL:
+        case "ship_label":
           onNavigateToShipLabel?.();
           break;
         case DELIVERY_METHODS.E_GIFT:
