@@ -18,13 +18,12 @@ import ShippedDialog from "./modals/gifter/shipped";
 
 // Shared dialogs
 import EGiftDialog from "./modals/e-gift";
-
 import GiftedDialogOthers from "./modals/gifted";
 import ReserveDialog from "./modals/reserve";
 import ReservedDialogOthers from "./modals/reserved";
 import ShipLabelDialog from "./modals/ship-label";
-import type { DialogHandle, GiftButtonProps } from "./dialog-types";
 import ConfirmSentDialog from "./modals/confirm-sent";
+import type { DialogHandle, GiftButtonProps } from "./dialog-types";
 
 export default function GiftActionButton({
   post,
@@ -42,7 +41,7 @@ export default function GiftActionButton({
   const isAuthor = user?.uid === post.author.uid;
   const deliveryMethod = post?.gift?.deliveryMethod;
   const status = post?.gift?.giftStatus;
-  console.log("IS GIFTER: ", isGifter);
+
   // ================================================================
   // Navigation Handlers
   // ================================================================
@@ -119,7 +118,19 @@ export default function GiftActionButton({
   // ================================================================
   switch (status) {
     case "available":
-      return <ReserveDialog ref={reserveDialogRef} post={post} size={size} />;
+      // Use GifterDialogs to render all dialogs needed for the gift flow
+      return (
+        <>
+          <ReserveDialog
+            ref={reserveDialogRef}
+            post={post}
+            size={size}
+            hideTrigger={false}
+            onNavigateToShipLabel={handleNavigateToShipLabel} // ← Now passed!
+            onNavigateToEGift={handleNavigateToEGift}
+          />
+        </>
+      );
 
     case "reserved":
     case "label_created":
@@ -174,22 +185,26 @@ function GifterDialogs({
     | "reserve"
     | "ship_label"
     | "e_gift"
-    | "in_person"
-    | "other" => {
+    | "in_person" => {
+    // For "available" status, always show reserve dialog
+    if (status === "available") {
+      return "reserve";
+    }
+
+    // For "reserved" status, show based on delivery method
     if (status === "reserved") {
       if (!deliveryMethod) return "reserve";
       return deliveryMethod as "ship_label" | "e_gift" | "in_person";
     }
-    return "other";
+
+    // Default to reserve
+    return "reserve";
   };
 
   const visibleDialog = getVisibleDialog();
 
-  console.log("VISIBLE DIALOG: ", visibleDialog);
-  console.log("STATUS: ", status);
-
-  // For non-reserved states, render the appropriate single dialog
-  if (status !== "reserved") {
+  // For states other than "available" and "reserved", render single dialog
+  if (status !== "reserved" && status !== "available") {
     switch (status) {
       case "label_created":
         return <LabelCreatedDialog post={post} size={size} />;
@@ -209,7 +224,7 @@ function GifterDialogs({
     }
   }
 
-  // For reserved state, render all navigation-related dialogs
+  // For "available" and "reserved" states, render all navigation-related dialogs
   // Only one shows its trigger, others are hidden but accessible via refs
   return (
     <>
@@ -241,11 +256,12 @@ function GifterDialogs({
         onGoBack={onGoBackToReserve}
       />
 
+      {/* In-Person / Confirm Sent Dialog */}
       <ConfirmSentDialog
         ref={confirmSentDialogRef}
-        onGoBack={onGoBackToReserve}
-        hideTrigger={visibleDialog !== "in_person"}
         post={post}
+        hideTrigger={visibleDialog !== "in_person"}
+        onGoBack={onGoBackToReserve}
       />
     </>
   );

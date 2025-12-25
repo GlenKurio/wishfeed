@@ -71,12 +71,12 @@ export function useWishGiftActions() {
                       gift: {
                         giftStatus: "reserved",
                         deliveryMethod: deliveryMethod,
-                      },
-                      gifter: {
-                        uid: user.uid,
-                        photoUrl: user.photoURL || undefined,
-                        displayName: user.displayName || "Anonymous",
-                        handle: user.handle || user.uid,
+                        gifter: {
+                          uid: user.uid,
+                          photoUrl: user.photoURL || undefined,
+                          displayName: user.displayName || "Anonymous",
+                          handle: user.handle || user.uid,
+                        },
                       },
                     }
                   : p,
