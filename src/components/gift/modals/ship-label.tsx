@@ -1,28 +1,66 @@
+import { useAuth } from "@/hooks/use-auth";
+import { useExistingGift } from "@/hooks/use-existing-gift";
+import type { PostType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { IconArrowLeft, IconTruck } from "@tabler/icons-react";
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useImperativeHandle, useRef, type ReactNode } from "react";
 import {
   SIZE_CONFIG,
-  type BaseDialogProps,
   type DialogHandle,
+  type GiftButtonSize,
 } from "../dialog-types";
+import CancelReservationBanner from "./cancel-reservation-banner";
 
-export const ShipLabelDialog = forwardRef<DialogHandle, BaseDialogProps>(
+export interface ShipLabelDialogProps {
+  post: PostType;
+  size: GiftButtonSize;
+
+  /** Called when user wants to go back to previous step */
+  onGoBack?: () => void;
+  /** Called when dialog flow is complete */
+  onComplete?: () => void;
+  /** Called when user cancels */
+  onCancel?: () => void;
+  /** Custom trigger button (if not provided, uses default) */
+  trigger?: ReactNode;
+  /** Hide the trigger button entirely (for programmatic opening only) */
+  hideTrigger?: boolean;
+  /** Navigation callback to in-person dialog */
+  onNavigateToCancelReservation?: () => void;
+  /** Navigation callback to open cancel reservation dialog */
+  onOpenCancelDialog: () => void;
+}
+
+export const ShipLabelDialog = forwardRef<DialogHandle, ShipLabelDialogProps>(
   (
     {
       post,
-      gift,
       size = "sm",
       onGoBack,
       onCancel,
       trigger,
       hideTrigger = false,
+      onOpenCancelDialog,
     },
     ref,
   ) => {
+    const user = useAuth();
     const dialogRef = useRef<HTMLDialogElement>(null);
 
     const sizeConfig = SIZE_CONFIG[size];
+
+    // Determine if resuming an existing reservation
+    const isGifter = user?.uid === post?.gift?.gifter?.uid;
+    const isReserved = post?.gift?.giftStatus === "reserved";
+    const isResuming = isGifter && isReserved;
+
+    // Fetch existing gift if resuming
+    const {
+      data: existingGift,
+      isLoading: isLoadingGift,
+      refetch: refetchGift,
+    } = useExistingGift(post.id, isResuming);
+
     // Expose open/close methods via ref
     useImperativeHandle(ref, () => ({
       open: () => {
@@ -93,6 +131,14 @@ export const ShipLabelDialog = forwardRef<DialogHandle, BaseDialogProps>(
                 </div>
               </div>
             </div>
+            {/* Resuming Header with Cancel Option */}
+            {isResuming && existingGift && (
+              <CancelReservationBanner
+                giftExpiresAt={existingGift.expiresAt}
+                onOpenCancelDialog={onOpenCancelDialog}
+                handleClose={handleClose}
+              />
+            )}
 
             {/* Content */}
             <div className="py-4">

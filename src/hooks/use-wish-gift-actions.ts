@@ -12,7 +12,11 @@ import type { DeliveryMethod, PostType } from "@/lib/types";
 import { toast } from "sonner";
 import { useGetUserProfile } from "./use-get-user-profile";
 import type { InfiniteData } from "@tanstack/react-query";
-import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
+import {
+  Timestamp,
+  type DocumentData,
+  type QueryDocumentSnapshot,
+} from "firebase/firestore";
 
 // Type for your paginated response
 type UserPostsPage = {
@@ -71,6 +75,9 @@ export function useWishGiftActions() {
                       gift: {
                         giftStatus: "reserved",
                         deliveryMethod: deliveryMethod,
+                        expiresAt: Timestamp.fromDate(
+                          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+                        ),
                         gifter: {
                           uid: user.uid,
                           photoUrl: user.photoURL || undefined,
@@ -298,6 +305,7 @@ export function useWishGiftActions() {
                   ? {
                       ...p,
                       gift: {
+                        expiresAt: null,
                         giftStatus: "available" as const,
                         deliveryMethod: "ship_label",
                         gifter: undefined,
@@ -324,7 +332,7 @@ export function useWishGiftActions() {
     },
 
     onSuccess: (_, { postAuthorId }) => {
-      toast.success("Reservation cancelled. Gift is now available again.");
+      toast.success("Reservation cancelled.");
 
       queryClient.invalidateQueries({
         queryKey: ["posts", "user", postAuthorId, "all"],

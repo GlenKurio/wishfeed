@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/use-auth";
 import { type PostType } from "@/lib/types";
-import { useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 
 // Author dialogs
 import AvailableDialogAuthor from "./modals/author/available";
@@ -23,7 +23,12 @@ import ReserveDialog from "./modals/reserve";
 import ReservedDialogOthers from "./modals/reserved";
 import ShipLabelDialog from "./modals/ship-label";
 import ConfirmSentDialog from "./modals/confirm-sent";
-import type { DialogHandle, GiftButtonProps } from "./dialog-types";
+import type {
+  CancelDialogSource,
+  DialogHandle,
+  GiftButtonProps,
+} from "./dialog-types";
+import CancelReservationDialog from "./modals/gifter/cancel-reservation";
 
 export default function GiftActionButton({
   post,
@@ -36,6 +41,11 @@ export default function GiftActionButton({
   const shipLabelDialogRef = useRef<DialogHandle>(null);
   const eGiftDialogRef = useRef<DialogHandle>(null);
   const confirmSentDialogRef = useRef<DialogHandle>(null);
+  const cancelReservationDialogRef = useRef<DialogHandle>(null);
+
+  // Track which dialog opened the cancel dialog
+  const [cancelDialogSource, setCancelDialogSource] =
+    useState<CancelDialogSource>(null);
 
   const isGifter = user?.uid === post?.gift?.gifter?.uid;
   const isAuthor = user?.uid === post.author.uid;
@@ -57,6 +67,36 @@ export default function GiftActionButton({
   const handleNavigateToEGift = () => {
     eGiftDialogRef.current?.open();
   };
+
+  // Open cancel dialog and track the source
+  const handleOpenCancelDialog = useCallback((source: CancelDialogSource) => {
+    setCancelDialogSource(source);
+    cancelReservationDialogRef.current?.open();
+  }, []);
+
+  // Go back from cancel dialog to the source dialog
+  const handleGoBackFromCancel = useCallback(() => {
+    cancelReservationDialogRef.current?.close();
+
+    // Small delay to ensure cancel dialog is closed first
+    setTimeout(() => {
+      switch (cancelDialogSource) {
+        case "reserve":
+          reserveDialogRef.current?.open();
+          break;
+        case "ship_label":
+          shipLabelDialogRef.current?.open();
+          break;
+        case "e_gift":
+          eGiftDialogRef.current?.open();
+          break;
+        case "confirm_sent":
+          confirmSentDialogRef.current?.open();
+          break;
+      }
+      setCancelDialogSource(null);
+    }, 150);
+  }, [cancelDialogSource]);
 
   // ================================================================
   // Author's View (Recipient)
@@ -109,6 +149,9 @@ export default function GiftActionButton({
         onGoBackToReserve={handleGoBackToReserve}
         onNavigateToShipLabel={handleNavigateToShipLabel}
         onNavigateToEGift={handleNavigateToEGift}
+        cancelReservationDialogRef={cancelReservationDialogRef}
+        onOpenCancelDialog={handleOpenCancelDialog}
+        onGoBackFromCancel={handleGoBackFromCancel}
       />
     );
   }
@@ -128,6 +171,7 @@ export default function GiftActionButton({
             hideTrigger={false}
             onNavigateToShipLabel={handleNavigateToShipLabel} // ← Now passed!
             onNavigateToEGift={handleNavigateToEGift}
+            onOpenCancelDialog={() => onOpenCancelDialog("reserve")}
           />
         </>
       );
@@ -162,9 +206,12 @@ interface GifterDialogsProps {
   shipLabelDialogRef: React.RefObject<DialogHandle | null>;
   eGiftDialogRef: React.RefObject<DialogHandle | null>;
   confirmSentDialogRef: React.RefObject<DialogHandle | null>;
+  cancelReservationDialogRef: React.RefObject<DialogHandle | null>;
   onGoBackToReserve: () => void;
   onNavigateToShipLabel: () => void;
   onNavigateToEGift: () => void;
+  onOpenCancelDialog: (source: CancelDialogSource) => void;
+  onGoBackFromCancel: () => void;
 }
 
 function GifterDialogs({
@@ -176,9 +223,12 @@ function GifterDialogs({
   shipLabelDialogRef,
   eGiftDialogRef,
   confirmSentDialogRef,
+  cancelReservationDialogRef,
   onGoBackToReserve,
   onNavigateToShipLabel,
   onNavigateToEGift,
+  onOpenCancelDialog,
+  onGoBackFromCancel,
 }: GifterDialogsProps) {
   // Determine which dialog should show its trigger button
   const getVisibleDialog = ():
@@ -236,6 +286,7 @@ function GifterDialogs({
         hideTrigger={visibleDialog !== "reserve"}
         onNavigateToShipLabel={onNavigateToShipLabel}
         onNavigateToEGift={onNavigateToEGift}
+        onOpenCancelDialog={() => onOpenCancelDialog("reserve")}
       />
 
       {/* Ship Label Dialog */}
@@ -245,6 +296,7 @@ function GifterDialogs({
         size={size}
         hideTrigger={visibleDialog !== "ship_label"}
         onGoBack={onGoBackToReserve}
+        onOpenCancelDialog={() => onOpenCancelDialog("ship_label")}
       />
 
       {/* E-Gift Dialog */}
@@ -254,6 +306,7 @@ function GifterDialogs({
         size={size}
         hideTrigger={visibleDialog !== "e_gift"}
         onGoBack={onGoBackToReserve}
+        onOpenCancelDialog={() => onOpenCancelDialog("e_gift")}
       />
 
       {/* In-Person / Confirm Sent Dialog */}
@@ -262,6 +315,14 @@ function GifterDialogs({
         post={post}
         hideTrigger={visibleDialog !== "in_person"}
         onGoBack={onGoBackToReserve}
+        onOpenCancelDialog={() => onOpenCancelDialog("confirm_sent")}
+      />
+
+      <CancelReservationDialog
+        ref={cancelReservationDialogRef}
+        post={post}
+        hideTrigger
+        onGoBack={onGoBackFromCancel}
       />
     </>
   );

@@ -8,7 +8,6 @@ import {
 import { cn } from "@/lib/utils";
 
 import { useAuth } from "@/hooks/use-auth";
-import { useExistingGift } from "@/hooks/use-existing-gift";
 import {
   IconCheck,
   IconClock,
@@ -17,23 +16,15 @@ import {
   IconLoader,
   IconMail,
   IconTruck,
-  IconX,
-  IconAlertCircle,
 } from "@tabler/icons-react";
 import { useForm } from "@tanstack/react-form";
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import {
   SIZE_CONFIG,
   type DialogHandle,
   type GiftButtonSize,
 } from "../dialog-types";
-import { toast } from "sonner";
+import CancelReservationBanner from "./cancel-reservation-banner";
 
 // =============================================================================
 // Types
@@ -48,8 +39,8 @@ interface ReserveDialogProps {
   onNavigateToShipLabel?: () => void;
   /** Navigation callback to e-gift dialog */
   onNavigateToEGift?: () => void;
-  /** Navigation callback to in-person dialog */
-  onNavigateToInPerson?: () => void;
+  /** Navigation callback to open cancel reservation dialog */
+  onOpenCancelDialog: () => void;
 }
 
 // =============================================================================
@@ -82,25 +73,6 @@ const DELIVERY_METHOD_OPTIONS = [
 ];
 
 // =============================================================================
-// Helper: Get time remaining
-// =============================================================================
-
-function getTimeRemaining(expiresAt: Date | { toDate: () => Date }): string {
-  const expiry = expiresAt instanceof Date ? expiresAt : expiresAt.toDate();
-  const now = new Date();
-  const diffMs = expiry.getTime() - now.getTime();
-
-  if (diffMs <= 0) return "Expired";
-
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-  if (days > 0) return `${days} day${days > 1 ? "s" : ""} remaining`;
-  if (hours > 0) return `${hours} hour${hours > 1 ? "s" : ""} remaining`;
-  return "Expiring soon";
-}
-
-// =============================================================================
 // Component
 // =============================================================================
 
@@ -112,35 +84,28 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
       hideTrigger = false,
       onNavigateToShipLabel,
       onNavigateToEGift,
-      onNavigateToInPerson,
+      onOpenCancelDialog,
     },
     ref,
   ) => {
     const user = useAuth();
-    const { reserveGiftAsync, cancelReservationAsync, isLoading } =
-      useWishGiftActions();
+    const { reserveGiftAsync, isLoading } = useWishGiftActions();
 
     const dialogRef = useRef<HTMLDialogElement>(null);
     const sizeConfig = SIZE_CONFIG[size];
 
-    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    // const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
     // Determine if resuming an existing reservation
     const isGifter = user?.uid === post?.gift?.gifter?.uid;
     const isReserved = post?.gift?.giftStatus === "reserved";
     const isResuming = isGifter && isReserved;
-
-    // Fetch existing gift if resuming
-    const {
-      data: existingGift,
-      isLoading: isLoadingGift,
-      refetch: refetchGift,
-    } = useExistingGift(post.id, isResuming);
+    const existingGift = post.gift;
 
     // Form setup
     const reserveWishForm = useForm({
       defaultValues: {
-        deliveryMethod: (existingGift?.deliveryMethod ||
+        deliveryMethod: (post.gift.deliveryMethod ||
           DELIVERY_METHODS.SHIP_LABEL) as DeliveryMethod,
       },
       validators: {
@@ -152,23 +117,23 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
         // If there is a gift delivery method unchanged, just continue to next step
         if (
           isResuming &&
-          value.deliveryMethod === existingGift?.deliveryMethod
+          value.deliveryMethod === existingGift.deliveryMethod
         ) {
           handleClose();
           navigateToDeliveryDialog(value.deliveryMethod);
-          return toast.info("We are resuming");
+          return;
         }
 
         // If resuming but changing delivery method, update the gift
         if (
           isResuming &&
-          value.deliveryMethod !== existingGift?.deliveryMethod
+          value.deliveryMethod !== existingGift.deliveryMethod
         ) {
           // TODO: Add updateGiftDeliveryMethod mutation if you want to allow changing
           // For now, just continue with the existing method
           handleClose();
           navigateToDeliveryDialog(value.deliveryMethod);
-          return toast.info("We are chenging the delivery method!");
+          return;
         }
 
         // New reservation
@@ -183,23 +148,9 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
       },
     });
 
-    // Update form when existing gift loads
-    useEffect(() => {
-      if (existingGift?.deliveryMethod) {
-        reserveWishForm.setFieldValue(
-          "deliveryMethod",
-          existingGift.deliveryMethod,
-        );
-      }
-    }, [existingGift?.deliveryMethod, reserveWishForm]);
-
     // Expose open/close methods via ref
     useImperativeHandle(ref, () => ({
       open: () => {
-        setShowCancelConfirm(false);
-        if (isResuming) {
-          refetchGift();
-        }
         dialogRef.current?.showModal();
       },
       close: () => {
@@ -208,10 +159,6 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
     }));
 
     const handleOpen = () => {
-      setShowCancelConfirm(false);
-      if (isResuming) {
-        refetchGift();
-      }
       dialogRef.current?.showModal();
     };
 
@@ -229,7 +176,6 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
       console.log("Callbacks available:", {
         onNavigateToShipLabel: !!onNavigateToShipLabel,
         onNavigateToEGift: !!onNavigateToEGift,
-        onNavigateToInPerson: !!onNavigateToInPerson,
       });
 
       // Longer delay to allow:
@@ -247,26 +193,8 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
             console.log("Calling onNavigateToEGift");
             onNavigateToEGift?.();
             break;
-          case DELIVERY_METHODS.IN_PERSON:
-            console.log("Calling onNavigateToInPerson");
-            onNavigateToInPerson?.();
-            break;
         }
-      }, 400); // 500ms delay to allow full re-render cycle
-    };
-
-    // Handle cancellation
-    const handleCancelReservation = async () => {
-      if (!existingGift?.id || !post.id) return;
-
-      await cancelReservationAsync({
-        giftId: existingGift.id,
-        postId: post.id,
-        postAuthorId: post.author.uid,
-      });
-
-      handleClose();
-      setShowCancelConfirm(false);
+      }, 400); // 400ms delay to allow full re-render cycle
     };
 
     const getMethodTitle = (value: string) => {
@@ -279,18 +207,14 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
     const defaultTrigger = (
       <button
         onClick={handleOpen}
-        className={cn(
-          "btn",
-          isResuming ? "btn-warning" : "btn-primary",
-          sizeConfig.btn,
-        )}
+        className={cn("btn", "btn-primary", sizeConfig.btn)}
       >
         {isResuming ? (
           <IconClock className={sizeConfig.icon} />
         ) : (
           <IconGift className={sizeConfig.icon} />
         )}
-        <span>{isResuming ? "Continue Gift" : "Gift This"}</span>
+        <span>{isResuming ? "Continue With This Gift" : "Gift This"}</span>
       </button>
     );
 
@@ -318,7 +242,7 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
               </div>
               <div>
                 <h3 className="text-lg font-bold">
-                  {isResuming ? "Continue Your Gift" : "Reserve This Gift"}
+                  {isResuming ? "Continue With This Gift" : "Reserve This Gift"}
                 </h3>
                 {isResuming && (
                   <p className="text-base-content/60 text-xs">
@@ -329,282 +253,212 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
             </div>
 
             {/* Loading State */}
-            {isLoadingGift && isResuming ? (
-              <div className="flex items-center justify-center py-12">
-                <IconLoader className="text-primary size-8 animate-spin" />
-              </div>
-            ) : (
-              <div className="py-4">
-                {/* Resuming Header with Cancel Option */}
-                {isResuming && !showCancelConfirm && existingGift && (
-                  <div className="bg-warning/10 mb-4 rounded-2xl p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <IconClock className="text-warning size-4" />
-                        <span className="text-sm font-medium">
-                          {existingGift.expiresAt
-                            ? getTimeRemaining(existingGift.expiresAt)
-                            : "Reservation active"}
+
+            <div className="py-4">
+              {/* Resuming Header with Cancel Option */}
+              {isResuming && existingGift && (
+                <CancelReservationBanner
+                  giftExpiresAt={existingGift.expiresAt}
+                  onOpenCancelDialog={onOpenCancelDialog}
+                  handleClose={handleClose}
+                />
+              )}
+
+              {/* Delivery Method Selection */}
+              <reserveWishForm.Field name="deliveryMethod">
+                {(field) => (
+                  <div className="mb-4">
+                    <div className="mb-2 flex items-center justify-between">
+                      <label className="label">
+                        <span className="label-text font-semibold">
+                          {isResuming
+                            ? "Delivery Method"
+                            : "Choose Delivery Method"}
                         </span>
-                      </div>
-                      <button
-                        onClick={() => setShowCancelConfirm(true)}
-                        className="btn btn-ghost btn-xs text-error"
-                      >
-                        <IconX className="size-3" />
-                        Cancel
-                      </button>
+                      </label>
+                      {!isResuming && (
+                        <span className="text-base-content/50 text-xs">
+                          You can change this later
+                        </span>
+                      )}
                     </div>
-                  </div>
-                )}
 
-                {/* Cancel Confirmation */}
-                {showCancelConfirm ? (
-                  <div className="bg-error/10 border-error/20 rounded-3xl border p-4">
-                    <div className="flex items-start gap-3">
-                      <IconAlertCircle className="text-error mt-0.5 size-5 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold">
-                          Cancel this reservation?
-                        </p>
-                        <p className="text-base-content/70 mt-1 text-xs">
-                          The gift will become available for others to reserve.
-                          This action cannot be undone.
-                        </p>
-                        <div className="mt-3 flex gap-2">
-                          <button
-                            onClick={handleCancelReservation}
-                            className="btn btn-error btn-sm"
-                            disabled={isLoading}
-                          >
-                            {isLoading ? (
-                              <IconLoader className="size-4 animate-spin" />
-                            ) : (
-                              "Yes, Cancel"
+                    <div className="space-y-3">
+                      {DELIVERY_METHOD_OPTIONS.map((method) => {
+                        const isSelected = field.state.value === method.value;
+                        const Icon = method.icon;
+                        const wasOriginalChoice =
+                          isResuming &&
+                          existingGift?.deliveryMethod === method.value;
+
+                        return (
+                          <label
+                            key={method.value}
+                            className={cn(
+                              "relative flex cursor-pointer rounded-3xl border-2 p-2 transition-all md:p-3 lg:p-4",
+                              isSelected
+                                ? "border-primary bg-primary/5 shadow-md"
+                                : "border-base-300 bg-base-100 hover:border-base-content/20 hover:bg-base-200/50",
                             )}
-                          </button>
-                          <button
-                            onClick={() => setShowCancelConfirm(false)}
-                            className="btn btn-ghost btn-sm"
-                            disabled={isLoading}
                           >
-                            Keep Reservation
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    {/* Delivery Method Selection */}
-                    <reserveWishForm.Field name="deliveryMethod">
-                      {(field) => (
-                        <div className="mb-4">
-                          <div className="mb-2 flex items-center justify-between">
-                            <label className="label">
-                              <span className="label-text font-semibold">
-                                {isResuming
-                                  ? "Delivery Method"
-                                  : "Choose Delivery Method"}
-                              </span>
-                            </label>
-                            {!isResuming && (
-                              <span className="text-base-content/50 text-xs">
-                                You can change this later
-                              </span>
-                            )}
-                          </div>
+                            <input
+                              type="radio"
+                              name="delivery-method"
+                              value={method.value}
+                              checked={isSelected}
+                              onChange={() => field.handleChange(method.value)}
+                              className="sr-only"
+                            />
 
-                          <div className="space-y-3">
-                            {DELIVERY_METHOD_OPTIONS.map((method) => {
-                              const isSelected =
-                                field.state.value === method.value;
-                              const Icon = method.icon;
-                              const wasOriginalChoice =
-                                isResuming &&
-                                existingGift?.deliveryMethod === method.value;
+                            {/* Icon */}
+                            <div
+                              className={cn(
+                                "flex size-8 shrink-0 items-center justify-center rounded-xl",
+                                isSelected
+                                  ? "bg-primary text-primary-content"
+                                  : "bg-base-200 text-base-content/70",
+                              )}
+                            >
+                              <Icon className="size-4" />
+                            </div>
 
-                              return (
-                                <label
-                                  key={method.value}
-                                  className={cn(
-                                    "relative flex cursor-pointer rounded-3xl border-2 p-2 transition-all md:p-3 lg:p-4",
-                                    isSelected
-                                      ? "border-primary bg-primary/5 shadow-md"
-                                      : "border-base-300 bg-base-100 hover:border-base-content/20 hover:bg-base-200/50",
-                                  )}
-                                >
-                                  <input
-                                    type="radio"
-                                    name="delivery-method"
-                                    value={method.value}
-                                    checked={isSelected}
-                                    onChange={() =>
-                                      field.handleChange(method.value)
-                                    }
-                                    className="sr-only"
-                                  />
-
-                                  {/* Icon */}
-                                  <div
+                            {/* Content */}
+                            <div className="ml-4 flex-1">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span
                                     className={cn(
-                                      "flex size-8 shrink-0 items-center justify-center rounded-xl",
-                                      isSelected
-                                        ? "bg-primary text-primary-content"
-                                        : "bg-base-200 text-base-content/70",
+                                      "text-sm font-semibold",
+                                      isSelected && "text-primary",
                                     )}
                                   >
-                                    <Icon className="size-4" />
-                                  </div>
+                                    {method.title}
+                                  </span>
+                                  {wasOriginalChoice && (
+                                    <span className="badge badge-warning badge-xs">
+                                      Your choice
+                                    </span>
+                                  )}
+                                </div>
 
-                                  {/* Content */}
-                                  <div className="ml-4 flex-1">
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-2">
-                                        <span
-                                          className={cn(
-                                            "text-sm font-semibold",
-                                            isSelected && "text-primary",
-                                          )}
-                                        >
-                                          {method.title}
-                                        </span>
-                                        {wasOriginalChoice && (
-                                          <span className="badge badge-warning badge-xs">
-                                            Your choice
-                                          </span>
-                                        )}
-                                      </div>
+                                {/* Selection indicator */}
+                                <div
+                                  className={cn(
+                                    "flex size-5 items-center justify-center rounded-full border-2 transition-all",
+                                    isSelected
+                                      ? "border-primary bg-primary text-primary-content"
+                                      : "border-base-300 bg-base-100",
+                                  )}
+                                >
+                                  {isSelected && (
+                                    <IconCheck className="size-3" />
+                                  )}
+                                </div>
+                              </div>
+                              <p className="text-base-content/70 mt-1 text-xs">
+                                {method.description}
+                              </p>
 
-                                      {/* Selection indicator */}
-                                      <div
-                                        className={cn(
-                                          "flex size-5 items-center justify-center rounded-full border-2 transition-all",
-                                          isSelected
-                                            ? "border-primary bg-primary text-primary-content"
-                                            : "border-base-300 bg-base-100",
-                                        )}
-                                      >
-                                        {isSelected && (
-                                          <IconCheck className="size-3" />
-                                        )}
-                                      </div>
-                                    </div>
-                                    <p className="text-base-content/70 mt-1 text-xs">
-                                      {method.description}
-                                    </p>
-
-                                    {/* Best for badges */}
-                                    <div className="mt-2 flex flex-wrap gap-1.5">
-                                      {method.bestFor.map((item) => (
-                                        <span
-                                          key={item}
-                                          className={cn(
-                                            "badge badge-xs border",
-                                            isSelected
-                                              ? "badge-primary badge-outline"
-                                              : "badge-ghost",
-                                          )}
-                                        >
-                                          {item}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </label>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </reserveWishForm.Field>
-
-                    {/* Info Box - Only for new reservations */}
-                    {!isResuming && (
-                      <div className="bg-primary/10 rounded-3xl p-4">
-                        <p className="mb-2 text-sm font-semibold">
-                          Before you reserve:
-                        </p>
-                        <ul className="text-base-content/80 space-y-1.5 text-xs">
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary">•</span>
-                            <span>
-                              <strong>30-day window</strong> before reservation
-                              expires
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary">•</span>
-                            <span>
-                              <strong>You stay anonymous</strong> until the
-                              recipient confirms delivery
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary">•</span>
-                            <span>
-                              <strong>Free cancellation</strong> anytime before
-                              you send
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary">•</span>
-                            <span>
-                              <strong>Recipient address</strong> will not be
-                              shared
-                            </span>
-                          </li>
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Actions */}
-                    <reserveWishForm.Subscribe
-                      selector={(state) => state.values.deliveryMethod}
-                    >
-                      {(deliveryMethod) => (
-                        <div className="mt-6 flex w-full flex-col gap-2">
-                          <button
-                            type="button"
-                            className={cn(
-                              "btn btn-sm",
-                              isResuming ? "btn-warning" : "btn-primary",
-                            )}
-                            disabled={isLoading}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              reserveWishForm.handleSubmit();
-                            }}
-                          >
-                            {isLoading ? (
-                              <>
-                                <IconLoader className="size-4 animate-spin" />
-                                Processing...
-                              </>
-                            ) : isResuming ? (
-                              <>
-                                Continue with {getMethodTitle(deliveryMethod)}
-                              </>
-                            ) : (
-                              <>Reserve & Continue</>
-                            )}
-                          </button>
-
-                          <button
-                            type="button"
-                            className="btn btn-ghost btn-sm w-full"
-                            disabled={isLoading}
-                            onClick={handleClose}
-                          >
-                            {isResuming ? "Close" : "Cancel"}
-                          </button>
-                        </div>
-                      )}
-                    </reserveWishForm.Subscribe>
-                  </>
+                              {/* Best for badges */}
+                              <div className="mt-2 flex flex-wrap gap-1.5">
+                                {method.bestFor.map((item) => (
+                                  <span
+                                    key={item}
+                                    className={cn(
+                                      "badge badge-xs border",
+                                      isSelected
+                                        ? "badge-primary badge-outline"
+                                        : "badge-ghost",
+                                    )}
+                                  >
+                                    {item}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
-              </div>
-            )}
+              </reserveWishForm.Field>
+
+              {/* Info Box - Only for new reservations */}
+              {!isResuming && (
+                <div className="bg-primary/10 rounded-3xl p-4">
+                  <p className="mb-2 text-sm font-semibold">
+                    Before you reserve:
+                  </p>
+                  <ul className="text-base-content/80 space-y-1.5 text-xs">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>
+                        <strong>30-day window</strong> before reservation
+                        expires
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>
+                        <strong>You stay anonymous</strong> until the recipient
+                        confirms delivery
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>
+                        <strong>Free cancellation</strong> anytime before you
+                        send
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>
+                        <strong>Recipient address</strong> will not be shared
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              )}
+
+              {/* Actions */}
+              <reserveWishForm.Subscribe
+                selector={(state) => state.values.deliveryMethod}
+              >
+                {(deliveryMethod) => (
+                  <div className="mt-6 flex w-full flex-col gap-2">
+                    <button
+                      type="button"
+                      className={cn("btn btn-sm", "btn-primary")}
+                      disabled={isLoading}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        reserveWishForm.handleSubmit();
+                      }}
+                    >
+                      {isLoading ? (
+                        <>
+                          <IconLoader className="size-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>Continue with {getMethodTitle(deliveryMethod)}</>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm w-full"
+                      disabled={isLoading}
+                      onClick={handleClose}
+                    >
+                      {isResuming ? "Close" : "Cancel"}
+                    </button>
+                  </div>
+                )}
+              </reserveWishForm.Subscribe>
+            </div>
           </div>
 
           {/* Click outside to close */}

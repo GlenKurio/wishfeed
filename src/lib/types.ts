@@ -54,7 +54,8 @@ export interface PostGiftFields {
 
   /** The gifter's info (when reserved) */
   gifter?: EmbeddedUser;
-
+  /** When reservation for gift expires */
+  expiresAt: Timestamp | null;
   /** Delivery method chosen by gifter */
   deliveryMethod?: DeliveryMethod;
 

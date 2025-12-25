@@ -63,3 +63,10 @@ export interface BaseDialogProps {
   /** Hide the trigger button entirely (for programmatic opening only) */
   hideTrigger?: boolean;
 }
+
+export type CancelDialogSource =
+  | "reserve"
+  | "ship_label"
+  | "e_gift"
+  | "confirm_sent"
+  | null;

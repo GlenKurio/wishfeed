@@ -9,6 +9,7 @@ import {
   type DeliveryMethod,
   type GiftType,
   type GiftTypeWrite,
+  type PostGiftFields,
   type PostType,
 } from "../../types";
 
@@ -136,16 +137,20 @@ export async function reserveGift(
   // Update post with reservation
   batch.update(postRef, {
     gift: {
+      giftId,
       giftStatus: "reserved",
       deliveryMethod: options.deliveryMethod,
+      expiresAt: Timestamp.fromDate(
+        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      ),
+
       gifter: {
         uid: user.uid,
         photoUrl: userData.photoURL || undefined,
         displayName: userData.displayName || "Anonymous",
-        handle: userData.handle || user.uid,
+        handle: userData.handle,
       },
-      giftId,
-    },
+    } as PostGiftFields,
 
     updatedAt: serverTimestamp(),
   });

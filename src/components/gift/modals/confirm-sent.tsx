@@ -1,32 +1,66 @@
+import { useAuth } from "@/hooks/use-auth";
+import { useExistingGift } from "@/hooks/use-existing-gift";
+import type { PostType } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { IconArrowLeft, IconCheck, IconTruck } from "@tabler/icons-react";
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { IconArrowLeft, IconTruck } from "@tabler/icons-react";
+import { forwardRef, useImperativeHandle, useRef, type ReactNode } from "react";
 import {
   SIZE_CONFIG,
-  type BaseDialogProps,
   type DialogHandle,
+  type GiftButtonSize,
 } from "../dialog-types";
-import { useWishGiftActions } from "@/hooks/use-wish-gift-actions";
+import CancelReservationBanner from "./cancel-reservation-banner";
+export interface ConfirmSentDialogProps {
+  post: PostType;
+  size: GiftButtonSize;
 
-export const ConfirmSentDialog = forwardRef<DialogHandle, BaseDialogProps>(
+  /** Called when user wants to go back to previous step */
+  onGoBack?: () => void;
+  /** Called when dialog flow is complete */
+  onComplete?: () => void;
+  /** Called when user cancels */
+  onCancel?: () => void;
+  /** Custom trigger button (if not provided, uses default) */
+  trigger?: ReactNode;
+  /** Hide the trigger button entirely (for programmatic opening only) */
+  hideTrigger?: boolean;
+  /** Navigation callback to in-person dialog */
+  onNavigateToCancelReservation?: () => void;
+  /** Navigation callback to open cancel reservation dialog */
+  onOpenCancelDialog: () => void;
+}
+export const ConfirmSentDialog = forwardRef<
+  DialogHandle,
+  ConfirmSentDialogProps
+>(
   (
     {
       post,
-      gift,
       size = "sm",
       onGoBack,
       onCancel,
       trigger,
+      onOpenCancelDialog,
       hideTrigger = false,
     },
     ref,
   ) => {
+    const user = useAuth();
     const dialogRef = useRef<HTMLDialogElement>(null);
 
     const sizeConfig = SIZE_CONFIG[size];
 
-    const { reserveGiftAsync, cancelReservationAsync, isLoading } =
-      useWishGiftActions();
+    // Determine if resuming an existing reservation
+    const isGifter = user?.uid === post?.gift?.gifter?.uid;
+    const isReserved = post?.gift?.giftStatus === "reserved";
+    const isResuming = isGifter && isReserved;
+
+    // Fetch existing gift if resuming
+    const {
+      data: existingGift,
+      isLoading: isLoadingGift,
+      refetch: refetchGift,
+    } = useExistingGift(post.id, isResuming);
 
     // Expose open/close methods via ref
     useImperativeHandle(ref, () => ({
@@ -62,8 +96,8 @@ export const ConfirmSentDialog = forwardRef<DialogHandle, BaseDialogProps>(
         onClick={handleOpen}
         className={cn("btn btn-primary", sizeConfig?.btn)}
       >
-        <IconCheck className={sizeConfig?.icon} />
-        <span>Confirm Sent</span>
+        <IconTruck className={sizeConfig?.icon} />
+        <span>Send E-gift</span>
       </button>
     );
 
@@ -91,13 +125,21 @@ export const ConfirmSentDialog = forwardRef<DialogHandle, BaseDialogProps>(
                   <IconTruck className="text-primary size-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold">Create Shipping Label</h3>
+                  <h3 className="text-lg font-bold">E fucking gift dialog</h3>
                   <p className="text-base-content/60 text-xs">
                     Step 1 of 3: Package details
                   </p>
                 </div>
               </div>
             </div>
+
+            {isResuming && existingGift && (
+              <CancelReservationBanner
+                gift={existingGift}
+                onOpenCancelDialog={onOpenCancelDialog}
+                handleClose={handleClose}
+              />
+            )}
 
             {/* Content */}
             <div className="py-4">
@@ -129,7 +171,6 @@ export const ConfirmSentDialog = forwardRef<DialogHandle, BaseDialogProps>(
                 <button onClick={handleCancel} className="btn btn-ghost flex-1">
                   Cancel
                 </button>
-             
               </div>
             </div>
           </div>
