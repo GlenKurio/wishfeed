@@ -1,7 +1,7 @@
 - Gifting:
-  Continue with gift button design and dialogs;
 
   -- Finish reserve dialog with cancel the reservation and optimistic updates;
+  -- Finish all other dialogs starting with ship_label, and e-gift.
 
   -- Create gift card design;
 
