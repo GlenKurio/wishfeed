@@ -17,7 +17,7 @@ import {
   type DialogHandle,
   type GiftButtonSize,
 } from "../../dialogs-utils";
-import PackageDetails from "./package-details";
+import PackageDetailsStep from "./package-details/package-details";
 import Payment from "./payment";
 import Review from "./review";
 
@@ -186,7 +186,7 @@ export const CreateShipLabelDialog = forwardRef<
 
             {/* Content */}
             {currentStep === "package_info" && (
-              <PackageDetails
+              <PackageDetailsStep
                 onNext={handleStepNext}
                 onGoBack={handleGoBack}
                 onCancel={handleCancel}

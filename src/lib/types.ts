@@ -375,7 +375,24 @@ export interface EmbeddedUser {
 }
 
 // =============================================================================
-// Shipping & Tracking Types
+// E-Gift Types
+// =============================================================================
+
+export interface EGiftDelivery {
+  /** Recipient email (if email delivery) */
+  recipientEmail?: string | null;
+  /** Gift code/voucher (if applicable) */
+  giftCode?: string | null;
+  /** URL to redeem (if applicable) */
+  redeemUrl?: string | null;
+  /** When the e-gift was delivered */
+  deliveredAt?: Timestamp | null;
+  /** Whether recipient has viewed/opened */
+  viewedAt?: Timestamp | null;
+}
+
+// =============================================================================
+// Shipping
 // =============================================================================
 
 export interface TrackingEvent {
@@ -384,30 +401,121 @@ export interface TrackingEvent {
   location?: string;
   timestamp: Timestamp;
 }
+export const packageDetailsSchema = z
+  .object({
+    // Weight
+    weight: z
+      .number({ message: "Weight must be a number" })
+      .positive({ message: "Weight must be greater than 0" })
+      .max(150, { message: "Weight cannot exceed 150 lbs" }),
+
+    weightUnit: z.enum(["oz", "lb"], { message: "Weight unit is required" }),
+
+    // Dimensions
+    length: z
+      .number({ message: "Length must be a number" })
+      .positive({ message: "Length must be greater than 0" })
+      .max(108, { message: "Length cannot exceed 108 inches" }),
+
+    width: z
+      .number({ message: "Width must be a number" })
+      .positive({ message: "Width must be greater than 0" })
+      .max(108, { message: "Width cannot exceed 108 inches" }),
+
+    height: z
+      .number({ message: "Height must be a number" })
+      .positive({ message: "Height must be greater than 0" })
+      .max(108, { message: "Height cannot exceed 108 inches" }),
+
+    dimensionUnit: z.enum(["in", "cm"], {
+      message: "Dimension unit is required",
+    }),
+
+    // Package type
+    packageType: z.enum(
+      [
+        "custom",
+        "usps_small",
+        "usps_medium",
+        "usps_large",
+        "flat_rate_envelope",
+      ],
+      { message: "Package type is required" },
+    ),
+
+    // Shipping options
+    requireSignature: z.boolean().default(false),
+
+    insurance: z.boolean().default(false),
+
+    insuranceValue: z
+      .number()
+      .positive({ message: "Insurance value must be greater than 0" })
+      .max(10000, { message: "Insurance value cannot exceed $10,000" })
+      .optional(),
+  })
+  .refine(
+    (data) => {
+      // If insurance is enabled, insuranceValue must be provided
+      if (data.insurance && !data.insuranceValue) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Insurance value is required when insurance is enabled",
+      path: ["insuranceValue"],
+    },
+  )
+  .refine(
+    (data) => {
+      // Validate combined dimensions don't exceed carrier limits
+      // Most carriers: Length + Girth (2×Width + 2×Height) ≤ 165 inches
+      const lengthInInches =
+        data.dimensionUnit === "cm" ? data.length / 2.54 : data.length;
+      const widthInInches =
+        data.dimensionUnit === "cm" ? data.width / 2.54 : data.width;
+      const heightInInches =
+        data.dimensionUnit === "cm" ? data.height / 2.54 : data.height;
+
+      const girth = 2 * widthInInches + 2 * heightInInches;
+      const combinedSize = lengthInInches + girth;
+
+      return combinedSize <= 165;
+    },
+    {
+      message:
+        "Package exceeds maximum size (Length + Girth must be ≤ 165 inches)",
+      path: ["length"],
+    },
+  );
+
+export type PackageDetails = z.infer<typeof packageDetailsSchema>;
+
+export type PackageType = PackageDetails["packageType"];
+export type WeightUnit = PackageDetails["weightUnit"];
+export type DimensionUnit = PackageDetails["dimensionUnit"];
+
+export const shippingRateSchema = z.object({
+  rateId: z.string(),
+  carrier: z.string(),
+  carrierCode: z.string(),
+  service: z.string(),
+  serviceCode: z.string(),
+  rate: z.number().positive(),
+  retailRate: z.number().positive().optional(),
+  estimatedDays: z.number().int().positive(),
+  deliveryDate: z.string().optional(),
+  isGuaranteed: z.boolean(),
+});
+
+export type ShippingRate = z.infer<typeof shippingRateSchema>;
 
 export interface ShippingInfo {
-  packageInfo?: {
-    weight: number;
-    weightUnit: "oz" | "lb";
-    length: number;
-    width: number;
-    height: number;
-    dimensionUnit: "in" | "cm";
-    packageType: "package" | "envelope" | "tube" | "custom";
-    shippingSpeed: "economy" | "standard" | "express" | "overnight";
-    requireSignature: boolean;
-    insurance: boolean;
-    insuranceValue?: number;
-  };
+  packageDetails?: PackageDetails;
 
   // Selected rate (from ShipStation)
-  selectedRate?: {
-    rateId: string;
-    carrier: string;
-    service: string;
-    rate: number;
-    estimatedDays: number;
-  };
+  selectedRate?: ShippingRate;
 
   // Payment info
   payment?: {
@@ -431,23 +539,6 @@ export interface ShippingInfo {
   trackingHistory?: TrackingEvent[];
 
   lastTrackingUpdate?: Timestamp | null;
-}
-
-// =============================================================================
-// E-Gift Types
-// =============================================================================
-
-export interface EGiftDelivery {
-  /** Recipient email (if email delivery) */
-  recipientEmail?: string | null;
-  /** Gift code/voucher (if applicable) */
-  giftCode?: string | null;
-  /** URL to redeem (if applicable) */
-  redeemUrl?: string | null;
-  /** When the e-gift was delivered */
-  deliveredAt?: Timestamp | null;
-  /** Whether recipient has viewed/opened */
-  viewedAt?: Timestamp | null;
 }
 
 // /gifts/{giftId}
