@@ -77,3 +77,43 @@ export async function searchFollowing(
 ): Promise<SearchUsersResult> {
   return searchUsers({ searchTerm, collection: "following" });
 }
+
+// =============================================================================
+// Shipping / Carriers
+// =============================================================================
+
+export interface CarrierPackage {
+  packageCode: string;
+  name: string;
+  description?: string;
+}
+
+export interface Carrier {
+  carrierId: string;
+  carrierCode: string;
+  name: string;
+  nickname?: string;
+  balance: number;
+  isPrimary: boolean;
+  packages: CarrierPackage[];
+}
+
+export interface ListCarriersResult {
+  carriers: Carrier[];
+}
+
+/**
+ * Fetches all connected carriers with their packages and services.
+ * The result is typically cached for 1 hour on the client since carriers rarely change.
+ */
+export async function listCarriers(): Promise<ListCarriersResult> {
+  const listCarriersFn = httpsCallable<void, ListCarriersResult>(
+    functions,
+    "listCarriers",
+  );
+
+  const result: HttpsCallableResult<ListCarriersResult> =
+    await listCarriersFn();
+
+  return result.data;
+}

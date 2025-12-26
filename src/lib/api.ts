@@ -3,7 +3,11 @@ import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
 import type { UserProfile } from "./types";
 import { USER_POSTS_PAGE_SIZE } from "./constsnts";
-import { searchFollowers, searchFollowing } from "./firebase/functions";
+import {
+  listCarriers,
+  searchFollowers,
+  searchFollowing,
+} from "./firebase/functions";
 import {
   getUserFollowers,
   getUserFollowing,
@@ -169,4 +173,16 @@ export const getExistingGiftQueryOptions = ({
 
     enabled: !!postId && !!userId && isGifter,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+/**
+ * Query options for fetching all carriers with their packages.
+ * Cached for 1 hour since carriers rarely change.
+ */
+export const listCarriersQueryOptions = () =>
+  queryOptions({
+    queryKey: ["carriers"],
+    queryFn: listCarriers,
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
   });
