@@ -14,21 +14,21 @@ import DeliveredDialog from "./dialogs/gifter/delivered";
 import LabelCreatedDialog from "./dialogs/gifter/label-created";
 import ReceivedDialog from "./dialogs/gifter/received";
 import SentDialog from "./dialogs/gifter/sent";
-import ShippedDialog from "./dialogs/gifter/shipped";
 
 // Shared dialogs
-import EGiftDialog from "./dialogs/gifter/send-e-gift";
-import GiftedDialogOthers from "./dialogs/others-gifted";
-import ReserveDialog from "./dialogs/reserve";
-import ReservedDialogOthers from "./dialogs/others-reserved";
-import ShipLabelDialog from "./dialogs/gifter/create-ship-label";
-import ConfirmSentDialog from "./dialogs/gifter/confirm-sent";
 import type {
   CancelDialogSource,
   DialogHandle,
   GiftButtonProps,
 } from "./dialogs/dialogs-utils";
 import CancelReservationDialog from "./dialogs/gifter/cancel-reservation";
+import ConfirmSentDialog from "./dialogs/gifter/confirm-sent";
+import ShipLabelDialog from "./dialogs/gifter/create-ship-label/create-ship-label";
+import MarkShippedDialog from "./dialogs/gifter/mark-shipped";
+import EGiftDialog from "./dialogs/gifter/send-e-gift";
+import GiftedDialogOthers from "./dialogs/others-gifted";
+import ReservedDialogOthers from "./dialogs/others-reserved";
+import ReserveDialog from "./dialogs/reserve";
 
 export default function GiftActionButton({
   post,
@@ -259,7 +259,7 @@ function GifterDialogs({
       case "label_created":
         return <LabelCreatedDialog post={post} size={size} />;
       case "shipped":
-        return <ShippedDialog post={post} size={size} />;
+        return <MarkShippedDialog post={post} size={size} />;
       case "delivered":
         return <DeliveredDialog post={post} size={size} />;
       case "sent":

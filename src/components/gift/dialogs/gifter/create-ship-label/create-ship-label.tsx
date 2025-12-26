@@ -3,13 +3,23 @@ import { useExistingGift } from "@/hooks/use-existing-gift";
 import type { PostType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { IconArrowLeft, IconTruck } from "@tabler/icons-react";
-import { forwardRef, useImperativeHandle, useRef, type ReactNode } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import CancelReservationBanner from "../../cancel-reservation-banner";
 import {
   SIZE_CONFIG,
   type DialogHandle,
   type GiftButtonSize,
-} from "../dialogs-utils";
-import CancelReservationBanner from "../cancel-reservation-banner";
+} from "../../dialogs-utils";
+import PackageDetails from "./package-details";
+import Payment from "./payment";
+import Review from "./review";
 
 export interface ShipLabelDialogProps {
   post: PostType;
@@ -31,6 +41,8 @@ export interface ShipLabelDialogProps {
   onOpenCancelDialog: () => void;
 }
 
+export type ShipLabelStep = "package_info" | "payment" | "review";
+
 export const CreateShipLabelDialog = forwardRef<
   DialogHandle,
   ShipLabelDialogProps
@@ -49,20 +61,21 @@ export const CreateShipLabelDialog = forwardRef<
   ) => {
     const user = useAuth();
     const dialogRef = useRef<HTMLDialogElement>(null);
-
     const sizeConfig = SIZE_CONFIG[size];
+
+    const [currentStep, setCurrentStep] =
+      useState<ShipLabelStep>("package_info");
+    const [completedSteps, setCompletedSteps] = useState<ShipLabelStep[]>([]);
 
     // Determine if resuming an existing reservation
     const isGifter = user?.uid === post?.gift?.gifter?.uid;
-    const isReserved = post?.gift?.giftStatus === "reserved";
-    const isResuming = isGifter && isReserved;
 
     // Fetch existing gift if resuming
     const {
       data: existingGift,
       isLoading: isLoadingGift,
       refetch: refetchGift,
-    } = useExistingGift(post.id, isResuming);
+    } = useExistingGift(post.id, isGifter);
 
     // Expose open/close methods via ref
     useImperativeHandle(ref, () => ({
@@ -92,6 +105,42 @@ export const CreateShipLabelDialog = forwardRef<
       onCancel?.();
     };
 
+    // Handlers
+    const handleStepNext = useCallback(async () => {
+      if (currentStep === "package_info") {
+        // Save package info and move to payment
+
+        setCompletedSteps((prev) => [...prev, "package_info"]);
+
+        // Fetch rates for the package
+        // const values = packageInfoForm.getFieldValue("weight")
+        //   ? packageInfoForm.state.values
+        //   : DEFAULT_PACKAGE_INFO;
+        // fetchRatesMutation.mutate(values);
+
+        // Create payment intent
+        // if (selectedRate) {
+        //   createPaymentIntentMutation.mutate(selectedRate.rate);
+        // }
+
+        setCurrentStep("payment");
+      } else if (currentStep === "payment") {
+        setCompletedSteps((prev) => [...prev, "payment"]);
+        setCurrentStep("review");
+      }
+    }, [currentStep]);
+
+    const handleStepBack = useCallback(() => {
+      if (currentStep === "payment") {
+        setCurrentStep("package_info");
+      } else if (currentStep === "review") {
+        setCurrentStep("payment");
+      }
+    }, [currentStep]);
+
+    if (isLoadingGift) return <>Loading...</>;
+    if (!existingGift) return <>Cannot get gift</>;
+
     // Default trigger button
     const defaultTrigger = (
       <button
@@ -113,15 +162,6 @@ export const CreateShipLabelDialog = forwardRef<
           <div className="modal-box max-w-lg">
             {/* Header with Back Button */}
             <div className="mb-4 flex items-center gap-3">
-              {onGoBack && (
-                <button
-                  onClick={handleGoBack}
-                  className="btn btn-ghost btn-sm btn-circle"
-                  aria-label="Go back"
-                >
-                  <IconArrowLeft className="size-4" />
-                </button>
-              )}
               <div className="flex items-center gap-3">
                 <div className="bg-primary/20 flex size-10 items-center justify-center rounded-2xl">
                   <IconTruck className="text-primary size-5" />
@@ -129,52 +169,45 @@ export const CreateShipLabelDialog = forwardRef<
                 <div>
                   <h3 className="text-lg font-bold">Create Shipping Label</h3>
                   <p className="text-base-content/60 text-xs">
-                    Step 1 of 3: Package details
+                    {currentStep === "package_info" &&
+                      "Step 1 of 3: Package details"}
+                    {currentStep === "payment" && "Step 2 of 3: Make a payment"}
+                    {currentStep === "review" && "Step 3 of 3: Save your label"}
                   </p>
                 </div>
               </div>
             </div>
             {/* Resuming Header with Cancel Option */}
-            {isResuming && existingGift && (
-              <CancelReservationBanner
-                giftExpiresAt={existingGift.expiresAt}
-                onOpenCancelDialog={onOpenCancelDialog}
-                handleClose={handleClose}
-              />
-            )}
+            <CancelReservationBanner
+              giftExpiresAt={existingGift?.expiresAt || post.gift.expiresAt}
+              onOpenCancelDialog={onOpenCancelDialog}
+              handleClose={handleClose}
+            />
 
             {/* Content */}
-            <div className="py-4">
-              <p className="text-base-content/70 text-sm">
-                Configure your shipping label for "{post.title}"
-              </p>
-
-              {/* Your form fields would go here */}
-              <div className="bg-base-200 mt-4 rounded-xl p-4">
-                <p className="text-sm">Package details form...</p>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="modal-action flex-col gap-2">
-              <button className="btn btn-primary w-full">
-                Continue to Payment
-              </button>
-
-              <div className="flex w-full gap-2">
-                {onGoBack && (
-                  <button
-                    onClick={handleGoBack}
-                    className="btn btn-ghost flex-1"
-                  >
-                    Change Delivery Method
-                  </button>
-                )}
-                <button onClick={handleCancel} className="btn btn-ghost flex-1">
-                  Cancel
-                </button>
-              </div>
-            </div>
+            {currentStep === "package_info" && (
+              <PackageDetails
+                onNext={handleStepNext}
+                onGoBack={handleGoBack}
+                onCancel={handleCancel}
+                gift={existingGift}
+              />
+            )}
+            {currentStep === "payment" && (
+              <Payment
+                onNext={handleStepNext}
+                onGoBack={handleStepBack}
+                onCancel={handleCancel}
+                gift={existingGift}
+              />
+            )}
+            {currentStep === "review" && (
+              <Review
+                onGoBack={handleStepBack}
+                onCancel={handleCancel}
+                gift={existingGift}
+              />
+            )}
           </div>
 
           <form method="dialog" className="modal-backdrop">

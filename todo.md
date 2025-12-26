@@ -1,7 +1,8 @@
 - Gifting:
 
-  -- Finish reserve dialog with cancel the reservation and optimistic updates;
-  -- Finish all other dialogs starting with ship_label, and e-gift.
+  -- Start with ship_label flow and dialog:
+
+  ***
 
   -- Create gift card design;
 
@@ -11,9 +12,6 @@
   --- create forms to create/update/delete adresses, set address as main;
   --- Include info about when and where addresses are being shared;
   -- Create a separate shipping adress subcollection for users in db;
-
-  -- Create a form to create a shipping on the client on Gift action click;
-  -- Make it a stepper? Step 1: select from address (save to DB), Step 2: Provide package info (save the shipment in db), Step 3: Pay and get the label(trigger a function after successfull payment, get all the details from DB and return the label);
 
 - Post gift actions:
   --- improve dialog forms: show info on how to send the gift and add a link to gifts page where all info about the gift will be shown;  

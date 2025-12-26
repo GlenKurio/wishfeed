@@ -378,18 +378,6 @@ export interface EmbeddedUser {
 // Shipping & Tracking Types
 // =============================================================================
 
-export interface ShippingLabel {
-  shipstationShipmentId: string;
-  carrier: string;
-  service: string;
-  labelUrl: string;
-  trackingNumber: string;
-  trackingUrl?: string;
-  createdAt: Timestamp;
-  cost: number;
-  estimatedDelivery?: Timestamp | null;
-}
-
 export interface TrackingEvent {
   status: string;
   description: string;
@@ -398,8 +386,50 @@ export interface TrackingEvent {
 }
 
 export interface ShippingInfo {
-  label?: ShippingLabel | null;
-  trackingEvents?: TrackingEvent[];
+  packageInfo?: {
+    weight: number;
+    weightUnit: "oz" | "lb";
+    length: number;
+    width: number;
+    height: number;
+    dimensionUnit: "in" | "cm";
+    packageType: "package" | "envelope" | "tube" | "custom";
+    shippingSpeed: "economy" | "standard" | "express" | "overnight";
+    requireSignature: boolean;
+    insurance: boolean;
+    insuranceValue?: number;
+  };
+
+  // Selected rate (from ShipStation)
+  selectedRate?: {
+    rateId: string;
+    carrier: string;
+    service: string;
+    rate: number;
+    estimatedDays: number;
+  };
+
+  // Payment info
+  payment?: {
+    stripePaymentIntentId: string;
+    amount: number;
+    currency: string;
+    status: "pending" | "succeeded" | "failed";
+    paidAt?: Timestamp;
+  };
+
+  // Label info (after creation)
+  label?: {
+    shipStationShipmentId: string;
+    trackingNumber: string;
+    carrier: string;
+    labelUrl: string;
+    createdAt: Timestamp;
+  };
+
+  // Tracking updates
+  trackingHistory?: TrackingEvent[];
+
   lastTrackingUpdate?: Timestamp | null;
 }
 

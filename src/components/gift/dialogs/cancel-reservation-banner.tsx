@@ -27,10 +27,10 @@ export default function CancelReservationBanner({
             handleClose();
             setTimeout(() => onOpenCancelDialog?.(), 150);
           }}
-          className="btn btn-ghost btn-xs text-error"
+          className="btn btn-ghost btn-xs text-error flex items-center"
         >
           <IconX className="size-3" />
-          Cancel reservation
+          <span className="m-0 p-0 leading-0">Cancel reservation</span>
         </button>
       </div>
     </div>
