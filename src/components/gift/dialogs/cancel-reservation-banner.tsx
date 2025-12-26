@@ -1,6 +1,6 @@
 import { IconClock, IconX } from "@tabler/icons-react";
 import type { Timestamp } from "firebase/firestore";
-import { getTimeRemaining } from "./dialog-utils";
+import { getTimeRemaining } from "./dialogs-utils";
 
 export default function CancelReservationBanner({
   giftExpiresAt,

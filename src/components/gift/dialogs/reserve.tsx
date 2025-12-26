@@ -23,7 +23,7 @@ import {
   SIZE_CONFIG,
   type DialogHandle,
   type GiftButtonSize,
-} from "../dialog-types";
+} from "./dialogs-utils";
 import CancelReservationBanner from "./cancel-reservation-banner";
 
 // =============================================================================

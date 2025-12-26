@@ -3,32 +3,32 @@ import { type PostType } from "@/lib/types";
 import { useCallback, useRef, useState } from "react";
 
 // Author dialogs
-import AvailableDialogAuthor from "./modals/author/available";
-import ReceivedDialogAuthor from "./modals/author/received";
-import ReservedDialogAuthor from "./modals/author/reserved";
-import SentDeliveredDialogAuthor from "./modals/author/sent-delivered";
-import ShippedDialogAuthor from "./modals/author/shipped";
+import AvailableDialogAuthor from "./dialogs/author/available";
+import ReceivedDialogAuthor from "./dialogs/author/received";
+import ReservedDialogAuthor from "./dialogs/author/reserved";
+import SentDeliveredDialogAuthor from "./dialogs/author/sent-delivered";
+import ShippedDialogAuthor from "./dialogs/author/shipped";
 
 // Gifter dialogs
-import DeliveredDialog from "./modals/gifter/delivered";
-import LabelCreatedDialog from "./modals/gifter/label-created";
-import ReceivedDialog from "./modals/gifter/received";
-import SentDialog from "./modals/gifter/sent";
-import ShippedDialog from "./modals/gifter/shipped";
+import DeliveredDialog from "./dialogs/gifter/delivered";
+import LabelCreatedDialog from "./dialogs/gifter/label-created";
+import ReceivedDialog from "./dialogs/gifter/received";
+import SentDialog from "./dialogs/gifter/sent";
+import ShippedDialog from "./dialogs/gifter/shipped";
 
 // Shared dialogs
-import EGiftDialog from "./modals/e-gift";
-import GiftedDialogOthers from "./modals/gifted";
-import ReserveDialog from "./modals/reserve";
-import ReservedDialogOthers from "./modals/reserved";
-import ShipLabelDialog from "./modals/ship-label";
-import ConfirmSentDialog from "./modals/confirm-sent";
+import EGiftDialog from "./dialogs/gifter/send-e-gift";
+import GiftedDialogOthers from "./dialogs/others-gifted";
+import ReserveDialog from "./dialogs/reserve";
+import ReservedDialogOthers from "./dialogs/others-reserved";
+import ShipLabelDialog from "./dialogs/gifter/create-ship-label";
+import ConfirmSentDialog from "./dialogs/gifter/confirm-sent";
 import type {
   CancelDialogSource,
   DialogHandle,
   GiftButtonProps,
-} from "./dialog-types";
-import CancelReservationDialog from "./modals/gifter/cancel-reservation";
+} from "./dialogs/dialogs-utils";
+import CancelReservationDialog from "./dialogs/gifter/cancel-reservation";
 
 export default function GiftActionButton({
   post,

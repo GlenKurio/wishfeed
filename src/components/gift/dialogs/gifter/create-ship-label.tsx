@@ -8,8 +8,8 @@ import {
   SIZE_CONFIG,
   type DialogHandle,
   type GiftButtonSize,
-} from "../dialog-types";
-import CancelReservationBanner from "./cancel-reservation-banner";
+} from "../dialogs-utils";
+import CancelReservationBanner from "../cancel-reservation-banner";
 
 export interface ShipLabelDialogProps {
   post: PostType;
@@ -31,7 +31,10 @@ export interface ShipLabelDialogProps {
   onOpenCancelDialog: () => void;
 }
 
-export const ShipLabelDialog = forwardRef<DialogHandle, ShipLabelDialogProps>(
+export const CreateShipLabelDialog = forwardRef<
+  DialogHandle,
+  ShipLabelDialogProps
+>(
   (
     {
       post,
@@ -183,5 +186,5 @@ export const ShipLabelDialog = forwardRef<DialogHandle, ShipLabelDialogProps>(
   },
 );
 
-ShipLabelDialog.displayName = "ShipLabelDialog";
-export default ShipLabelDialog;
+CreateShipLabelDialog.displayName = "CreateShipLabelDialog";
+export default CreateShipLabelDialog;

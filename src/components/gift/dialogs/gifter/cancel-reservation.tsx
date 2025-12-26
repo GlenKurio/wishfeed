@@ -12,7 +12,7 @@ import {
   SIZE_CONFIG,
   type DialogHandle,
   type GiftButtonSize,
-} from "../../dialog-types";
+} from "../dialogs-utils";
 
 interface CancelReservationDialogProps {
   post: PostType;

@@ -8,9 +8,9 @@ import {
   SIZE_CONFIG,
   type DialogHandle,
   type GiftButtonSize,
-} from "../dialog-types";
-import CancelReservationBanner from "./cancel-reservation-banner";
-export interface ConfirmSentDialogProps {
+} from "../dialogs-utils";
+import CancelReservationBanner from "../cancel-reservation-banner";
+export interface SendEGiftDialogDialogProps {
   post: PostType;
   size: GiftButtonSize;
 
@@ -29,9 +29,9 @@ export interface ConfirmSentDialogProps {
   /** Navigation callback to open cancel reservation dialog */
   onOpenCancelDialog: () => void;
 }
-export const ConfirmSentDialog = forwardRef<
+export const SendEGiftDialog = forwardRef<
   DialogHandle,
-  ConfirmSentDialogProps
+  SendEGiftDialogDialogProps
 >(
   (
     {
@@ -184,5 +184,5 @@ export const ConfirmSentDialog = forwardRef<
   },
 );
 
-ConfirmSentDialog.displayName = "ConfirmSentDialog";
-export default ConfirmSentDialog;
+SendEGiftDialog.displayName = "SendEGiftDialog";
+export default SendEGiftDialog;
