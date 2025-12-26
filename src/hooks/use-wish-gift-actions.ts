@@ -7,6 +7,7 @@ import {
   cancelGiftReservation,
   revertGiftToReserved,
   revertGiftToSent,
+  updateGiftDeliveryMethod,
 } from "@/lib/firebase/firestore/gifts";
 import type { DeliveryMethod, PostType } from "@/lib/types";
 import { toast } from "sonner";
@@ -113,6 +114,86 @@ export function useWishGiftActions() {
 
       queryClient.invalidateQueries({
         queryKey: ["posts", "user", post.author.uid, "all"],
+      });
+    },
+  });
+
+  // ==========================================
+  // Update Delivery Method Mutation
+  // ==========================================
+  const updateDeliveryMethodMutation = useMutation({
+    mutationFn: ({
+      giftId,
+      deliveryMethod,
+      postId,
+    }: {
+      giftId: string;
+      deliveryMethod: DeliveryMethod;
+      postId: string;
+      postAuthorId: string;
+    }) => updateGiftDeliveryMethod(giftId, deliveryMethod, postId),
+
+    onMutate: async ({ postId, postAuthorId, deliveryMethod }) => {
+      if (!user || !authUser) return;
+
+      const authorQueryKey = ["posts", "user", postAuthorId, "all"] as const;
+
+      await queryClient.cancelQueries({ queryKey: authorQueryKey });
+
+      const previousData =
+        queryClient.getQueryData<InfiniteData<UserPostsPage>>(authorQueryKey);
+
+      // Optimistically update the delivery method
+      queryClient.setQueryData<InfiniteData<UserPostsPage>>(
+        authorQueryKey,
+        (old) => {
+          if (!old) return old;
+
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              posts: page.posts.map((p) =>
+                p.id === postId
+                  ? {
+                      ...p,
+                      gift: {
+                        ...p.gift,
+                        deliveryMethod: deliveryMethod,
+                      },
+                    }
+                  : p,
+              ),
+            })),
+          };
+        },
+      );
+
+      return { previousData, authorQueryKey };
+    },
+
+    onError: (error, _, context) => {
+      if (context?.previousData && context?.authorQueryKey) {
+        queryClient.setQueryData(context.authorQueryKey, context.previousData);
+      }
+
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to update delivery method",
+      );
+    },
+
+    onSuccess: (_, { postId, postAuthorId }) => {
+      toast.success("Delivery method updated");
+
+      // Invalidate queries to ensure data is fresh
+      queryClient.invalidateQueries({
+        queryKey: ["posts", "user", postAuthorId, "all"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["gift", postId, user?.uid],
       });
     },
   });
@@ -479,6 +560,11 @@ export function useWishGiftActions() {
     reserveGift: reserveGiftMutation.mutate,
     reserveGiftAsync: reserveGiftMutation.mutateAsync,
     isReservingGift: reserveGiftMutation.isPending,
+
+    // Update delivery method
+    updateDeliveryMethod: updateDeliveryMethodMutation.mutate,
+    updateDeliveryMethodAsync: updateDeliveryMethodMutation.mutateAsync,
+    isUpdatingDeliveryMethod: updateDeliveryMethodMutation.isPending,
 
     // Mark as Sent
     markAsSent: markAsSentMutation.mutate,

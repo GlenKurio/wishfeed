@@ -89,7 +89,8 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
     ref,
   ) => {
     const user = useAuth();
-    const { reserveGiftAsync, isLoading } = useWishGiftActions();
+    const { reserveGiftAsync, updateDeliveryMethod, isLoading } =
+      useWishGiftActions();
 
     const dialogRef = useRef<HTMLDialogElement>(null);
     const sizeConfig = SIZE_CONFIG[size];
@@ -99,8 +100,8 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
     // Determine if resuming an existing reservation
     const isGifter = user?.uid === post?.gift?.gifter?.uid;
     const isReserved = post?.gift?.giftStatus === "reserved";
-    const isResuming = isGifter && isReserved;
     const existingGift = post.gift;
+    const isResuming = isGifter && isReserved && existingGift;
 
     // Form setup
     const reserveWishForm = useForm({
@@ -127,10 +128,15 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
         // If resuming but changing delivery method, update the gift
         if (
           isResuming &&
+          existingGift.giftId &&
           value.deliveryMethod !== existingGift.deliveryMethod
         ) {
-          // TODO: Add updateGiftDeliveryMethod mutation if you want to allow changing
-          // For now, just continue with the existing method
+          updateDeliveryMethod({
+            giftId: existingGift.giftId,
+            deliveryMethod: value.deliveryMethod,
+            postId: post.id,
+            postAuthorId: post.author.uid,
+          });
           handleClose();
           navigateToDeliveryDialog(value.deliveryMethod);
           return;

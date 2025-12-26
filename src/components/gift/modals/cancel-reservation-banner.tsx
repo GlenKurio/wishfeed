@@ -7,7 +7,7 @@ export default function CancelReservationBanner({
   handleClose,
   onOpenCancelDialog,
 }: {
-  giftExpiresAt: Timestamp | null;
+  giftExpiresAt?: Timestamp | null;
   handleClose: () => void;
   onOpenCancelDialog: () => void;
 }) {

@@ -51,12 +51,6 @@ export async function reserveGift(
   const giftRef = doc(db, "gifts", giftId);
   const postRef = doc(db, "posts", postId);
 
-  // Check if gift already exists
-  const existingGift = await getDoc(giftRef);
-  // if (existingGift.exists() && existingGift.data().status === "reserved") {
-  //   throw new Error("You have already reserved this gift");
-  // }
-
   // Get current user's profile for denormalization
   const userProfileRef = doc(db, "users", user.uid);
   const userProfileSnap = await getDoc(userProfileRef);
@@ -159,6 +153,59 @@ export async function reserveGift(
 
   return { ...newGift, id: giftId };
 }
+
+/**
+ * Update the delivery method for an existing gift reservation
+ * @param giftId - The ID of the gift document
+ * @param deliveryMethod - The new delivery method
+ * @param postId - The ID of the associated post (for updating post.gift.deliveryMethod)
+ */
+export async function updateGiftDeliveryMethod(
+  giftId: string,
+  deliveryMethod: DeliveryMethod,
+  postId: string,
+) {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("Must be logged in to update gift");
+  }
+
+  const giftRef = doc(db, "gifts", giftId);
+  const giftSnap = await getDoc(giftRef);
+
+  if (!giftSnap.exists()) {
+    throw new Error("Gift not found");
+  }
+
+  const giftData = giftSnap.data();
+
+  if (giftData.gifterId !== user.uid) {
+    throw new Error("Only the gifter can update the reservation");
+  }
+
+  // Only allow updating if still in reserved status
+  if (giftData.status !== "reserved") {
+    throw new Error("Cannot change delivery method after gift has been sent");
+  }
+
+  const postRef = doc(db, "posts", postId);
+  const batch = writeBatch(db);
+
+  batch.update(giftRef, {
+    deliveryMethod,
+    updatedAt: serverTimestamp(),
+  });
+
+  batch.update(postRef, {
+    "gift.deliveryMethod": deliveryMethod,
+    updatedAt: serverTimestamp(),
+  });
+
+  await batch.commit();
+
+  return { success: true, deliveryMethod };
+}
+
 /**
  * Mark a gift as sent by the gifter
  * @param giftId - The ID of the gift document
