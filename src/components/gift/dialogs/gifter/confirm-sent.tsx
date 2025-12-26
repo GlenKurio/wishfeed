@@ -97,7 +97,7 @@ export const ConfirmSentDialog = forwardRef<
         className={cn("btn btn-primary", sizeConfig?.btn)}
       >
         <IconTruck className={sizeConfig?.icon} />
-        <span>Send E-gift</span>
+        <span>Confirm Sent</span>
       </button>
     );
 
