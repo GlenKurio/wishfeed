@@ -1,6 +1,6 @@
 - Gifting:
 
-  -- Start with ship_label flow and dialog:
+  -- Implement e-gifting to send gifts to emails through our app.
 
   ***
 
