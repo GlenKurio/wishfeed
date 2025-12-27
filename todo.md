@@ -1,6 +1,6 @@
 - Gifting:
 
-  -- Implement e-gifting to send gifts to emails through our app.
+  -- Finsih send e-gift from design; Create a mutation in gift actions hook(separate mutationOptions and firebase function)
 
   ***
 
