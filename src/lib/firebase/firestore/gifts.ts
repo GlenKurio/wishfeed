@@ -107,9 +107,6 @@ export async function reserveGift(
     // Optional message
     giftMessage: options.giftMessage || null,
 
-    // Privacy settings
-    isAnonymous: options.isAnonymous ?? false,
-
     // Initialize reminders
     reminders: {
       sendReminderAt: Timestamp.fromDate(

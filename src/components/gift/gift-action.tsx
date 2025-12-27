@@ -9,8 +9,7 @@ import ReservedDialogAuthor from "./dialogs/author/reserved";
 import SentDeliveredDialogAuthor from "./dialogs/author/sent-delivered";
 
 // Gifter dialogs
-import DeliveredDialog from "./dialogs/gifter/delivered";
-import LabelCreatedDialog from "./dialogs/gifter/label-created";
+
 import ReceivedDialog from "./dialogs/gifter/received";
 import SentDialog from "./dialogs/gifter/sent";
 
@@ -22,7 +21,6 @@ import type {
 } from "./dialogs/dialogs-utils";
 import CancelReservationDialog from "./dialogs/gifter/cancel-reservation";
 import ConfirmSentDialog from "./dialogs/gifter/confirm-sent";
-import MarkShippedDialog from "./dialogs/gifter/mark-shipped";
 import EGiftDialog from "./dialogs/gifter/send-e-gift";
 import GiftedDialogOthers from "./dialogs/others-gifted";
 import ReservedDialogOthers from "./dialogs/others-reserved";
@@ -228,12 +226,6 @@ function GifterDialogs({
   // For states other than "available" and "reserved", render single dialog
   if (status !== "reserved" && status !== "available") {
     switch (status) {
-      case "label_created":
-        return <LabelCreatedDialog post={post} size={size} />;
-      case "shipped":
-        return <MarkShippedDialog post={post} size={size} />;
-      case "delivered":
-        return <DeliveredDialog post={post} size={size} />;
       case "sent":
         return (
           <SentDialog post={post} size={size} deliveryMethod={deliveryMethod} />

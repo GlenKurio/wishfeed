@@ -1,15 +1,44 @@
-import { useAuth } from "@/hooks/use-auth";
-import { useExistingGift } from "@/hooks/use-existing-gift";
-import type { PostType } from "@/lib/types";
+import {
+  eGiftFormSchema,
+  type DeliveryType,
+  type GiftKindType,
+  type PostType,
+} from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { IconArrowLeft, IconTruck } from "@tabler/icons-react";
-import { forwardRef, useImperativeHandle, useRef, type ReactNode } from "react";
+import {
+  IconArrowLeft,
+  IconEye,
+  IconEyeOff,
+  IconGiftCard,
+  IconTruck,
+  IconUpload,
+  IconX,
+} from "@tabler/icons-react";
+import { useForm } from "@tanstack/react-form";
+import {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import CancelReservationBanner from "../cancel-reservation-banner";
 import {
   SIZE_CONFIG,
   type DialogHandle,
   type GiftButtonSize,
 } from "../dialogs-utils";
-import CancelReservationBanner from "../cancel-reservation-banner";
+
+const GIFT_TYPE_OPTIONS = [
+  { value: "gift_card", label: "Gift Card" },
+  { value: "experience_booking", label: "Experience/Booking" },
+  { value: "digital_subscription", label: "Digital Subscription" },
+  { value: "travel_tickets", label: "Travel Tickets" },
+  { value: "voucher_coupon", label: "Voucher/Coupon" },
+  { value: "monetary_contribution", label: "Monetary Contribution" },
+  { value: "other", label: "Other" },
+] as const;
+
 export interface SendEGiftDialogDialogProps {
   post: PostType;
   size: GiftButtonSize;
@@ -45,24 +74,87 @@ export const SendEGiftDialog = forwardRef<
     },
     ref,
   ) => {
-    const user = useAuth();
     const dialogRef = useRef<HTMLDialogElement>(null);
+    const [showCode, setShowCode] = useState(false);
 
     const sizeConfig = SIZE_CONFIG[size];
 
-    // Determine if resuming an existing reservation
-    const isGifter = user?.uid === post?.gift?.gifter?.uid;
-    const isReserved = post?.gift?.giftStatus === "reserved";
-    const isResuming = isGifter && isReserved;
+    const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+    const [fileError, setFileError] = useState<string | null>(null);
 
-    // Fetch existing gift if resuming
-    const {
-      data: existingGift,
-      isLoading: isLoadingGift,
-      refetch: refetchGift,
-    } = useExistingGift(post.id, isResuming);
+    const form = useForm({
+      defaultValues: {
+        giftType: "gift_card" as GiftKindType,
+        provider: "",
+        giftDetails: {
+          code: "",
+          amount: "",
+          expiryDate: "",
+        },
+        redemptionInstructions: "",
+        personalMessage: "",
+        deliveryType: "now" as DeliveryType,
+        scheduledDateTime: "",
+      },
+      validators: {
+        onChange: eGiftFormSchema,
+      },
+      onSubmit: async ({ value }) => {
+        // Validate file separately before submit
+        if (uploadedFile) {
+          if (uploadedFile.size > 10 * 1024 * 1024) {
+            setFileError("File size must be less than 10MB");
+            return;
+          }
+          const allowedTypes = [
+            "application/pdf",
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/webp",
+          ];
+          if (!allowedTypes.includes(uploadedFile.type)) {
+            setFileError("File must be a PDF or image (JPEG, PNG, WebP)");
+            return;
+          }
+        }
 
-    // Expose open/close methods via ref
+        console.log("Form submitted:", {
+          ...value,
+          attachedFile: uploadedFile,
+        });
+      },
+    });
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      setFileError(null);
+      if (file) {
+        // Validate immediately
+        if (file.size > 10 * 1024 * 1024) {
+          setFileError("File size must be less than 10MB");
+          return;
+        }
+        const allowedTypes = [
+          "application/pdf",
+          "image/jpeg",
+          "image/jpg",
+          "image/png",
+          "image/webp",
+        ];
+        if (!allowedTypes.includes(file.type)) {
+          setFileError("File must be a PDF or image (JPEG, PNG, WebP)");
+          return;
+        }
+        setUploadedFile(file);
+      }
+    };
+
+    const removeFile = () => {
+      setUploadedFile(null);
+      setFileError(null);
+    };
+
     useImperativeHandle(ref, () => ({
       open: () => {
         dialogRef.current?.showModal();
@@ -78,6 +170,8 @@ export const SendEGiftDialog = forwardRef<
 
     const handleClose = () => {
       dialogRef.current?.close();
+      form.reset();
+      setUploadedFile(null);
     };
 
     const handleGoBack = () => {
@@ -90,7 +184,6 @@ export const SendEGiftDialog = forwardRef<
       onCancel?.();
     };
 
-    // Default trigger button
     const defaultTrigger = (
       <button
         onClick={handleOpen}
@@ -103,13 +196,11 @@ export const SendEGiftDialog = forwardRef<
 
     return (
       <>
-        {/* Trigger Button */}
         {!hideTrigger && (trigger || defaultTrigger)}
 
-        {/* Dialog */}
         <dialog ref={dialogRef} className="modal">
-          <div className="modal-box max-w-lg">
-            {/* Header with Back Button */}
+          <div className="modal-box max-h-[90vh] max-w-2xl overflow-y-auto">
+            {/* Header */}
             <div className="mb-4 flex items-center gap-3">
               {onGoBack && (
                 <button
@@ -122,61 +213,363 @@ export const SendEGiftDialog = forwardRef<
               )}
               <div className="flex items-center gap-3">
                 <div className="bg-primary/20 flex size-10 items-center justify-center rounded-2xl">
-                  <IconTruck className="text-primary size-5" />
+                  <IconGiftCard className="text-primary size-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold">E fucking gift dialog</h3>
+                  <h3 className="text-lg font-bold">
+                    Send E-Gift for: "{post.title}"
+                  </h3>
                   <p className="text-base-content/60 text-xs">
-                    Step 1 of 3: Package details
+                    {post.author.displayName}'s wish
                   </p>
                 </div>
               </div>
             </div>
 
-            {isResuming && existingGift && (
-              <CancelReservationBanner
-                gift={existingGift}
-                onOpenCancelDialog={onOpenCancelDialog}
-                handleClose={handleClose}
-              />
-            )}
+            <CancelReservationBanner
+              giftExpiresAt={post.gift.expiresAt}
+              onOpenCancelDialog={onOpenCancelDialog}
+              handleClose={handleClose}
+            />
 
-            {/* Content */}
-            <div className="py-4">
-              <p className="text-base-content/70 text-sm">
-                Configure your shipping label for "{post.title}"
-              </p>
-
-              {/* Your form fields would go here */}
-              <div className="bg-base-200 mt-4 rounded-xl p-4">
-                <p className="text-sm">Package details form...</p>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="modal-action flex-col gap-2">
-              <button className="btn btn-primary w-full">
-                Continue to Payment
-              </button>
-
-              <div className="flex w-full gap-2">
-                {onGoBack && (
-                  <button
-                    onClick={handleGoBack}
-                    className="btn btn-ghost flex-1"
-                  >
-                    Change Delivery Method
-                  </button>
+            {/* Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                form.handleSubmit();
+              }}
+              className="space-y-6 py-4"
+            >
+              {/* Gift Type */}
+              <form.Field name="giftType">
+                {(field) => (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">Gift Type</span>
+                    </label>
+                    <select
+                      className="select select-bordered"
+                      value={field.state.value}
+                      onChange={(e) =>
+                        field.handleChange(e.target.value as any)
+                      }
+                    >
+                      {GIFT_TYPE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    {field.state.meta.errors && (
+                      <label className="label">
+                        <span className="label-text-alt text-error">
+                          {field.state.meta.errors.join(", ")}
+                        </span>
+                      </label>
+                    )}
+                  </div>
                 )}
-                <button onClick={handleCancel} className="btn btn-ghost flex-1">
-                  Cancel
-                </button>
+              </form.Field>
+
+              {/* Provider/Brand */}
+              <form.Field name="provider">
+                {(field) => (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Provider/Brand
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., Amazon, Airbnb, Custom..."
+                      className="input input-bordered"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    {field.state.meta.errors && (
+                      <label className="label">
+                        <span className="label-text-alt text-error">
+                          {field.state.meta.errors.join(", ")}
+                        </span>
+                      </label>
+                    )}
+                  </div>
+                )}
+              </form.Field>
+
+              <div className="divider">Gift Details</div>
+
+              {/* Gift Code */}
+              <form.Field name="giftDetails.code">
+                {(field) => (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">Code/Key</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showCode ? "text" : "password"}
+                        placeholder="Enter gift code or voucher key"
+                        className="input input-bordered w-full pr-10"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm btn-circle absolute top-1/2 right-2 -translate-y-1/2"
+                        onClick={() => setShowCode(!showCode)}
+                      >
+                        {showCode ? (
+                          <IconEyeOff className="size-4" />
+                        ) : (
+                          <IconEye className="size-4" />
+                        )}
+                      </button>
+                    </div>
+                    {field.state.meta.errors && (
+                      <label className="label">
+                        <span className="label-text-alt text-error">
+                          {field.state.meta.errors.join(", ")}
+                        </span>
+                      </label>
+                    )}
+                  </div>
+                )}
+              </form.Field>
+
+              {/* Amount/Value */}
+              <form.Field name="giftDetails.amount">
+                {(field) => (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Amount/Value{" "}
+                        <span className="text-base-content/60">(optional)</span>
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g., $50, €100"
+                      className="input input-bordered"
+                      value={field.state.value || ""}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  </div>
+                )}
+              </form.Field>
+
+              {/* Expiry Date */}
+              <form.Field name="giftDetails.expiryDate">
+                {(field) => (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Expiry Date{" "}
+                        <span className="text-base-content/60">(optional)</span>
+                      </span>
+                    </label>
+                    <input
+                      type="datetime-local"
+                      className="input input-bordered"
+                      value={field.state.value || ""}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  </div>
+                )}
+              </form.Field>
+
+              {/* Redemption Instructions */}
+              <form.Field name="redemptionInstructions">
+                {(field) => (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Redemption Instructions
+                      </span>
+                    </label>
+                    <textarea
+                      placeholder="How to use this gift..."
+                      className="textarea textarea-bordered h-24"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    {field.state.meta.errors && (
+                      <label className="label">
+                        <span className="label-text-alt text-error">
+                          {field.state.meta.errors.join(", ")}
+                        </span>
+                      </label>
+                    )}
+                  </div>
+                )}
+              </form.Field>
+
+              {/* File Upload */}
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-medium">
+                    Attach File{" "}
+                    <span className="text-base-content/60">(optional)</span>
+                  </span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <label className="btn btn-outline btn-sm flex-1">
+                    <IconUpload className="size-4" />
+                    Upload PDF/Image
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.jpg,.jpeg,.png,.webp"
+                      onChange={handleFileChange}
+                    />
+                  </label>
+                </div>
+                {uploadedFile && (
+                  <div className="bg-base-200 mt-2 flex items-center gap-2 rounded-lg p-2">
+                    <span className="flex-1 truncate text-sm">
+                      {uploadedFile.name}
+                    </span>
+                    <span className="text-base-content/60 text-xs">
+                      {(uploadedFile.size / 1024).toFixed(1)} KB
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-xs btn-circle"
+                      onClick={removeFile}
+                    >
+                      <IconX className="size-3" />
+                    </button>
+                  </div>
+                )}
+                <label className="label">
+                  <span className="label-text-alt text-base-content/60">
+                    Tickets, vouchers, confirmations - max 10MB
+                  </span>
+                </label>
               </div>
-            </div>
+
+              <div className="divider"></div>
+
+              {/* Personal Message */}
+              <form.Field name="personalMessage">
+                {(field) => (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">
+                        Personal Message
+                      </span>
+                    </label>
+                    <textarea
+                      placeholder="Happy birthday! I know you've been dreaming..."
+                      className="textarea textarea-bordered h-24"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                    {field.state.meta.errors && (
+                      <label className="label">
+                        <span className="label-text-alt text-error">
+                          {field.state.meta.errors.join(", ")}
+                        </span>
+                      </label>
+                    )}
+                  </div>
+                )}
+              </form.Field>
+
+              {/* Delivery Options */}
+              <form.Field name="deliveryType">
+                {(field) => (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-medium">Delivery</span>
+                    </label>
+                    <div className="flex gap-4">
+                      <label className="label cursor-pointer gap-2">
+                        <input
+                          type="radio"
+                          className="radio"
+                          checked={field.state.value === "now"}
+                          onChange={() => {
+                            field.handleChange("now");
+                            form.setFieldValue("scheduledDateTime", "");
+                          }}
+                        />
+                        <span className="label-text">Send now</span>
+                      </label>
+                      <label className="label cursor-pointer gap-2">
+                        <input
+                          type="radio"
+                          className="radio"
+                          checked={field.state.value === "scheduled"}
+                          onChange={() => field.handleChange("scheduled")}
+                        />
+                        <span className="label-text">Schedule for</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </form.Field>
+
+              {/* Scheduled DateTime */}
+              <form.Field name="scheduledDateTime">
+                {(field) => {
+                  const deliveryType = form.getFieldValue("deliveryType");
+                  if (deliveryType !== "scheduled") return null;
+
+                  return (
+                    <div className="form-control">
+                      <input
+                        type="datetime-local"
+                        className="input input-bordered"
+                        value={field.state.value || ""}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                      />
+                      {field.state.meta.errors && (
+                        <label className="label">
+                          <span className="label-text-alt text-error">
+                            {field.state.meta.errors.join(", ")}
+                          </span>
+                        </label>
+                      )}
+                    </div>
+                  );
+                }}
+              </form.Field>
+
+              {/* Actions */}
+              <div className="modal-action mt-6 flex-col gap-2">
+                <button type="submit" className="btn btn-primary w-full">
+                  <IconGiftCard className="size-4" />
+                  Send Gift 🎁
+                </button>
+
+                <div className="flex w-full gap-2">
+                  {onGoBack && (
+                    <button
+                      type="button"
+                      onClick={handleGoBack}
+                      className="btn btn-sm btn-ghost flex-1"
+                    >
+                      <IconArrowLeft className="size-3" />
+                      Change Delivery Method
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="btn btn-sm btn-ghost flex-1"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
 
           <form method="dialog" className="modal-backdrop">
-            <button>close</button>
+            <button onClick={handleClose}>close</button>
           </form>
         </dialog>
       </>

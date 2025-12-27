@@ -369,23 +369,6 @@ export interface EmbeddedUser {
   photoUrl?: string | null;
 }
 
-// =============================================================================
-// E-Gift Types
-// =============================================================================
-
-export interface EGiftDelivery {
-  /** Recipient email (if email delivery) */
-  recipientEmail?: string | null;
-  /** Gift code/voucher (if applicable) */
-  giftCode?: string | null;
-  /** URL to redeem (if applicable) */
-  redeemUrl?: string | null;
-  /** When the e-gift was delivered */
-  deliveredAt?: Timestamp | null;
-  /** Whether recipient has viewed/opened */
-  viewedAt?: Timestamp | null;
-}
-
 // /gifts/{giftId}
 // =============================================================================
 // Main Gift Type
@@ -422,20 +405,15 @@ export interface GiftType {
 
   // === Delivery Details ===
 
-  eGift?: EGiftDelivery | null;
+  eGift?: EGiftType | null;
 
   // === Messages & Notes ===
   /** Message from gifter to recipient (shown on delivery) */
   giftMessage?: string | null;
-  /** Private notes for gifter (e.g., order confirmation, manual tracking) */
-  gifterNotes?: string | null;
   /** Thank you message from recipient */
   thankYouMessage?: string | null;
 
   // === Privacy & Settings ===
-
-  /** If true, this was marked as anonymous by gifter */
-  isAnonymous: boolean;
 
   // === Reminder Tracking ===
   reminders: {
@@ -538,3 +516,86 @@ export const confirmReceiptSchema = z.object({
     .string()
     .max(500, { message: "Message must be 500 characters or less" }),
 });
+
+export const giftTypeEnum = z.enum([
+  "gift_card",
+  "experience_booking",
+  "digital_subscription",
+  "travel_tickets",
+  "voucher_coupon",
+  "monetary_contribution",
+  "other",
+]);
+
+export const deliveryTypeEnum = z.enum(["now", "scheduled"]);
+export type GiftKindType = z.infer<typeof giftTypeEnum>;
+export type DeliveryType = z.infer<typeof deliveryTypeEnum>;
+export const eGiftFormSchema = z
+  .object({
+    // Gift Type
+    giftType: giftTypeEnum,
+
+    // Provider/Brand
+    provider: z.string().min(1, "Provider/brand is required").max(100),
+
+    // Gift Details
+    giftDetails: z.object({
+      code: z.string().min(1, "Gift code/key is required").max(500),
+      amount: z.string(), // Keep as required string, empty string is valid
+      expiryDate: z.string(), // Keep as required string, empty string is valid
+    }),
+
+    // Redemption Instructions
+    redemptionInstructions: z
+      .string()
+      .min(
+        10,
+        "Please provide redemption instructions (at least 10 characters)",
+      )
+      .max(2000, "Redemption instructions must be under 2000 characters"),
+
+    // Attached File - Removed from schema, handle separately
+    // (TanStack Form doesn't play nice with File + Zod)
+
+    // Personal Message
+    personalMessage: z
+      .string()
+      .min(1, "Personal message is required")
+      .max(1000, "Personal message must be under 1000 characters"),
+
+    // Delivery
+    deliveryType: deliveryTypeEnum,
+    scheduledDateTime: z.string(), // Keep as required string, empty string is valid
+  })
+  .refine(
+    (data) => {
+      if (data.deliveryType === "scheduled") {
+        return !!data.scheduledDateTime;
+      }
+      return true;
+    },
+    {
+      message: "Scheduled date/time is required when delivery is scheduled",
+      path: ["scheduledDateTime"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.scheduledDateTime) {
+        return new Date(data.scheduledDateTime) > new Date();
+      }
+      return true;
+    },
+    {
+      message: "Scheduled date/time must be in the future",
+      path: ["scheduledDateTime"],
+    },
+  );
+export type EGiftFormData = z.infer<typeof eGiftFormSchema>;
+
+export type EGiftType = EGiftFormData & {
+  /** When the e-gift was delivered */
+  deliveredAt?: Timestamp | null;
+  /** Whether recipient has viewed/opened */
+  viewedAt?: Timestamp | null;
+};
