@@ -319,13 +319,11 @@ export type NotificationSchemaType = z.infer<typeof NotificationSchema>;
 // =============================================================================
 
 export const DELIVERY_METHODS = {
-  SHIP_LABEL: "ship_label",
   E_GIFT: "e_gift",
   IN_PERSON: "in_person",
 } as const;
 
 export const deliveryMethods = [
-  DELIVERY_METHODS.SHIP_LABEL,
   DELIVERY_METHODS.E_GIFT,
   DELIVERY_METHODS.IN_PERSON,
 ] as const;
@@ -338,12 +336,9 @@ export const GIFT_STATUS = {
 
   // Active states
   RESERVED: "reserved",
-  LABEL_CREATED: "label_created", // For ship_label: label generated, not yet shipped
-  SHIPPED: "shipped", // For ship_label: in transit
+
   SENT: "sent", // For e_gift/in_person: gifter marked as sent
 
-  // Completion states
-  DELIVERED: "delivered", // Carrier confirmed delivery (ship_label only)
   RECEIVED: "received", // Recipient confirmed receipt
   THANKED: "thanked", // Recipient sent thank you (optional final state)
 } as const;
@@ -391,156 +386,6 @@ export interface EGiftDelivery {
   viewedAt?: Timestamp | null;
 }
 
-// =============================================================================
-// Shipping
-// =============================================================================
-
-export interface TrackingEvent {
-  status: string;
-  description: string;
-  location?: string;
-  timestamp: Timestamp;
-}
-export const packageDetailsSchema = z
-  .object({
-    // Weight
-    weight: z
-      .number({ message: "Weight must be a number" })
-      .positive({ message: "Weight must be greater than 0" })
-      .max(150, { message: "Weight cannot exceed 150 lbs" }),
-
-    weightUnit: z.enum(["oz", "lb"], { message: "Weight unit is required" }),
-
-    // Dimensions
-    length: z
-      .number({ message: "Length must be a number" })
-      .positive({ message: "Length must be greater than 0" })
-      .max(108, { message: "Length cannot exceed 108 inches" }),
-
-    width: z
-      .number({ message: "Width must be a number" })
-      .positive({ message: "Width must be greater than 0" })
-      .max(108, { message: "Width cannot exceed 108 inches" }),
-
-    height: z
-      .number({ message: "Height must be a number" })
-      .positive({ message: "Height must be greater than 0" })
-      .max(108, { message: "Height cannot exceed 108 inches" }),
-
-    dimensionUnit: z.enum(["in", "cm"], {
-      message: "Dimension unit is required",
-    }),
-
-    // Package type
-    packageType: z.enum(
-      [
-        "custom",
-        "usps_small",
-        "usps_medium",
-        "usps_large",
-        "flat_rate_envelope",
-      ],
-      { message: "Package type is required" },
-    ),
-
-    // Shipping options
-    requireSignature: z.boolean().default(false),
-
-    insurance: z.boolean().default(false),
-
-    insuranceValue: z
-      .number()
-      .positive({ message: "Insurance value must be greater than 0" })
-      .max(10000, { message: "Insurance value cannot exceed $10,000" })
-      .optional(),
-  })
-  .refine(
-    (data) => {
-      // If insurance is enabled, insuranceValue must be provided
-      if (data.insurance && !data.insuranceValue) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "Insurance value is required when insurance is enabled",
-      path: ["insuranceValue"],
-    },
-  )
-  .refine(
-    (data) => {
-      // Validate combined dimensions don't exceed carrier limits
-      // Most carriers: Length + Girth (2×Width + 2×Height) ≤ 165 inches
-      const lengthInInches =
-        data.dimensionUnit === "cm" ? data.length / 2.54 : data.length;
-      const widthInInches =
-        data.dimensionUnit === "cm" ? data.width / 2.54 : data.width;
-      const heightInInches =
-        data.dimensionUnit === "cm" ? data.height / 2.54 : data.height;
-
-      const girth = 2 * widthInInches + 2 * heightInInches;
-      const combinedSize = lengthInInches + girth;
-
-      return combinedSize <= 165;
-    },
-    {
-      message:
-        "Package exceeds maximum size (Length + Girth must be ≤ 165 inches)",
-      path: ["length"],
-    },
-  );
-
-export type PackageDetails = z.infer<typeof packageDetailsSchema>;
-
-export type PackageType = PackageDetails["packageType"];
-export type WeightUnit = PackageDetails["weightUnit"];
-export type DimensionUnit = PackageDetails["dimensionUnit"];
-
-export const shippingRateSchema = z.object({
-  rateId: z.string(),
-  carrier: z.string(),
-  carrierCode: z.string(),
-  service: z.string(),
-  serviceCode: z.string(),
-  rate: z.number().positive(),
-  retailRate: z.number().positive().optional(),
-  estimatedDays: z.number().int().positive(),
-  deliveryDate: z.string().optional(),
-  isGuaranteed: z.boolean(),
-});
-
-export type ShippingRate = z.infer<typeof shippingRateSchema>;
-
-export interface ShippingInfo {
-  packageDetails?: PackageDetails;
-
-  // Selected rate (from ShipStation)
-  selectedRate?: ShippingRate;
-
-  // Payment info
-  payment?: {
-    stripePaymentIntentId: string;
-    amount: number;
-    currency: string;
-    status: "pending" | "succeeded" | "failed";
-    paidAt?: Timestamp;
-  };
-
-  // Label info (after creation)
-  label?: {
-    shipStationShipmentId: string;
-    trackingNumber: string;
-    carrier: string;
-    labelUrl: string;
-    createdAt: Timestamp;
-  };
-
-  // Tracking updates
-  trackingHistory?: TrackingEvent[];
-
-  lastTrackingUpdate?: Timestamp | null;
-}
-
 // /gifts/{giftId}
 // =============================================================================
 // Main Gift Type
@@ -568,18 +413,15 @@ export interface GiftType {
   expiresAt: Timestamp; // Auto-calculated: reservedAt + 30 days
 
   // Status transition timestamps (set when status changes)
-  pendingShipmentAt?: Timestamp | null;
-  labelCreatedAt?: Timestamp | null;
-  shippedAt?: Timestamp | null;
+
   sentAt?: Timestamp | null;
-  deliveredAt?: Timestamp | null;
   receivedAt?: Timestamp | null;
   thankedAt?: Timestamp | null;
 
   expiredAt?: Timestamp | null;
 
   // === Delivery Details ===
-  shipping?: ShippingInfo | null;
+
   eGift?: EGiftDelivery | null;
 
   // === Messages & Notes ===
@@ -622,11 +464,7 @@ export interface GiftTypeWrite
     GiftType,
     | "reservedAt"
     | "expiresAt"
-    | "pendingShipmentAt"
-    | "labelCreatedAt"
-    | "shippedAt"
     | "sentAt"
-    | "deliveredAt"
     | "receivedAt"
     | "thankedAt"
     | "cancelledAt"
@@ -642,11 +480,8 @@ export interface GiftTypeWrite
   updatedAt: FieldValue;
 
   // Optional timestamps
-  pendingShipmentAt?: FieldValue | null;
-  labelCreatedAt?: FieldValue | null;
-  shippedAt?: FieldValue | null;
+
   sentAt?: FieldValue | null;
-  deliveredAt?: FieldValue | null;
   receivedAt?: FieldValue | null;
   thankedAt?: FieldValue | null;
   cancelledAt?: FieldValue | null;

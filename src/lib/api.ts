@@ -1,21 +1,17 @@
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
-import type { UserProfile } from "./types";
 import { USER_POSTS_PAGE_SIZE } from "./constsnts";
-import {
-  listCarriers,
-  searchFollowers,
-  searchFollowing,
-} from "./firebase/functions";
+import { getGiftById } from "./firebase/firestore/gifts";
+import { getUserPostsPaginated } from "./firebase/firestore/posts";
 import {
   getUserFollowers,
   getUserFollowing,
   getUserProfileById,
 } from "./firebase/firestore/users";
-import { getUserPostsPaginated } from "./firebase/firestore/posts";
 import { getUserWishlists } from "./firebase/firestore/wishlists";
-import { getGiftById } from "./firebase/firestore/gifts";
+import { searchFollowers, searchFollowing } from "./firebase/functions";
+import type { UserProfile } from "./types";
 
 export const profileQueryOptions = (userProfileId: string) =>
   queryOptions<UserProfile | null>({
@@ -173,16 +169,4 @@ export const getExistingGiftQueryOptions = ({
 
     enabled: !!postId && !!userId && isGifter,
     staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-/**
- * Query options for fetching all carriers with their packages.
- * Cached for 1 hour since carriers rarely change.
- */
-export const listCarriersQueryOptions = () =>
-  queryOptions({
-    queryKey: ["carriers"],
-    queryFn: listCarriers,
-    staleTime: 1000 * 60 * 60, // Cache for 1 hour
-    gcTime: 1000 * 60 * 60 * 24, // Keep in cache for 24 hours
   });

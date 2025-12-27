@@ -388,7 +388,7 @@ export function useWishGiftActions() {
                       gift: {
                         expiresAt: null,
                         giftStatus: "available" as const,
-                        deliveryMethod: "ship_label",
+                        deliveryMethod: "e_gift",
                         gifter: undefined,
                       },
                     }

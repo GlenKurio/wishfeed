@@ -49,14 +49,6 @@ interface ReserveDialogProps {
 
 const DELIVERY_METHOD_OPTIONS = [
   {
-    value: DELIVERY_METHODS.SHIP_LABEL,
-    title: "Ship with Label",
-    description:
-      "We'll provide a prepaid shipping label for you to send the item.",
-    icon: IconTruck,
-    bestFor: ["Physical items", "Handmade gifts", "Large packages"],
-  },
-  {
     value: DELIVERY_METHODS.E_GIFT,
     title: "Send as E-Gift",
     description: "Purchase online and send directly to recipient's email.",
@@ -107,7 +99,7 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
     const reserveWishForm = useForm({
       defaultValues: {
         deliveryMethod: (post.gift.deliveryMethod ||
-          DELIVERY_METHODS.SHIP_LABEL) as DeliveryMethod,
+          DELIVERY_METHODS.E_GIFT) as DeliveryMethod,
       },
       validators: {
         onChange: markAsReservedSchema,
@@ -191,7 +183,7 @@ const ReserveDialog = forwardRef<DialogHandle, ReserveDialogProps>(
       setTimeout(() => {
         console.log("Executing navigation to:", method);
         switch (method) {
-          case DELIVERY_METHODS.SHIP_LABEL:
+          case DELIVERY_METHODS.IN_PERSON:
             console.log("Calling onNavigateToShipLabel");
             onNavigateToShipLabel?.();
             break;

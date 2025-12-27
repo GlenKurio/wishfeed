@@ -7,7 +7,6 @@ import AvailableDialogAuthor from "./dialogs/author/available";
 import ReceivedDialogAuthor from "./dialogs/author/received";
 import ReservedDialogAuthor from "./dialogs/author/reserved";
 import SentDeliveredDialogAuthor from "./dialogs/author/sent-delivered";
-import ShippedDialogAuthor from "./dialogs/author/shipped";
 
 // Gifter dialogs
 import DeliveredDialog from "./dialogs/gifter/delivered";
@@ -23,7 +22,6 @@ import type {
 } from "./dialogs/dialogs-utils";
 import CancelReservationDialog from "./dialogs/gifter/cancel-reservation";
 import ConfirmSentDialog from "./dialogs/gifter/confirm-sent";
-import ShipLabelDialog from "./dialogs/gifter/create-ship-label/create-ship-label";
 import MarkShippedDialog from "./dialogs/gifter/mark-shipped";
 import EGiftDialog from "./dialogs/gifter/send-e-gift";
 import GiftedDialogOthers from "./dialogs/others-gifted";
@@ -38,7 +36,6 @@ export default function GiftActionButton({
 
   // Dialog refs for navigation
   const reserveDialogRef = useRef<DialogHandle>(null);
-  const shipLabelDialogRef = useRef<DialogHandle>(null);
   const eGiftDialogRef = useRef<DialogHandle>(null);
   const confirmSentDialogRef = useRef<DialogHandle>(null);
   const cancelReservationDialogRef = useRef<DialogHandle>(null);
@@ -58,10 +55,6 @@ export default function GiftActionButton({
 
   const handleGoBackToReserve = () => {
     reserveDialogRef.current?.open();
-  };
-
-  const handleNavigateToShipLabel = () => {
-    shipLabelDialogRef.current?.open();
   };
 
   const handleNavigateToEGift = () => {
@@ -84,9 +77,7 @@ export default function GiftActionButton({
         case "reserve":
           reserveDialogRef.current?.open();
           break;
-        case "ship_label":
-          shipLabelDialogRef.current?.open();
-          break;
+
         case "e_gift":
           eGiftDialogRef.current?.open();
           break;
@@ -107,14 +98,9 @@ export default function GiftActionButton({
         return <AvailableDialogAuthor size={size} />;
 
       case "reserved":
-      case "label_created":
         return <ReservedDialogAuthor size={size} />;
 
-      case "shipped":
-        return <ShippedDialogAuthor size={size} />;
-
       case "sent":
-      case "delivered":
         return (
           <SentDeliveredDialogAuthor
             post={post}
@@ -143,11 +129,9 @@ export default function GiftActionButton({
         status={status}
         deliveryMethod={deliveryMethod}
         reserveDialogRef={reserveDialogRef}
-        shipLabelDialogRef={shipLabelDialogRef}
         eGiftDialogRef={eGiftDialogRef}
         confirmSentDialogRef={confirmSentDialogRef}
         onGoBackToReserve={handleGoBackToReserve}
-        onNavigateToShipLabel={handleNavigateToShipLabel}
         onNavigateToEGift={handleNavigateToEGift}
         cancelReservationDialogRef={cancelReservationDialogRef}
         onOpenCancelDialog={handleOpenCancelDialog}
@@ -169,20 +153,16 @@ export default function GiftActionButton({
             post={post}
             size={size}
             hideTrigger={false}
-            onNavigateToShipLabel={handleNavigateToShipLabel} // ← Now passed!
             onNavigateToEGift={handleNavigateToEGift}
-            onOpenCancelDialog={() => onOpenCancelDialog("reserve")}
+            onOpenCancelDialog={() => handleOpenCancelDialog("reserve")}
           />
         </>
       );
 
     case "reserved":
-    case "label_created":
-    case "shipped":
     case "sent":
       return <ReservedDialogOthers size={size} />;
 
-    case "delivered":
     case "received":
     case "thanked":
       return <GiftedDialogOthers size={size} />;
@@ -203,12 +183,10 @@ interface GifterDialogsProps {
   status: string | undefined;
   deliveryMethod: string | undefined;
   reserveDialogRef: React.RefObject<DialogHandle | null>;
-  shipLabelDialogRef: React.RefObject<DialogHandle | null>;
   eGiftDialogRef: React.RefObject<DialogHandle | null>;
   confirmSentDialogRef: React.RefObject<DialogHandle | null>;
   cancelReservationDialogRef: React.RefObject<DialogHandle | null>;
   onGoBackToReserve: () => void;
-  onNavigateToShipLabel: () => void;
   onNavigateToEGift: () => void;
   onOpenCancelDialog: (source: CancelDialogSource) => void;
   onGoBackFromCancel: () => void;
@@ -220,22 +198,16 @@ function GifterDialogs({
   status,
   deliveryMethod,
   reserveDialogRef,
-  shipLabelDialogRef,
   eGiftDialogRef,
   confirmSentDialogRef,
   cancelReservationDialogRef,
   onGoBackToReserve,
-  onNavigateToShipLabel,
   onNavigateToEGift,
   onOpenCancelDialog,
   onGoBackFromCancel,
 }: GifterDialogsProps) {
   // Determine which dialog should show its trigger button
-  const getVisibleDialog = ():
-    | "reserve"
-    | "ship_label"
-    | "e_gift"
-    | "in_person" => {
+  const getVisibleDialog = (): "reserve" | "e_gift" | "in_person" => {
     // For "available" status, always show reserve dialog
     if (status === "available") {
       return "reserve";
@@ -244,7 +216,7 @@ function GifterDialogs({
     // For "reserved" status, show based on delivery method
     if (status === "reserved") {
       if (!deliveryMethod) return "reserve";
-      return deliveryMethod as "ship_label" | "e_gift" | "in_person";
+      return deliveryMethod as "e_gift" | "in_person";
     }
 
     // Default to reserve
@@ -284,19 +256,8 @@ function GifterDialogs({
         post={post}
         size={size}
         hideTrigger={visibleDialog !== "reserve"}
-        onNavigateToShipLabel={onNavigateToShipLabel}
         onNavigateToEGift={onNavigateToEGift}
         onOpenCancelDialog={() => onOpenCancelDialog("reserve")}
-      />
-
-      {/* Ship Label Dialog */}
-      <ShipLabelDialog
-        ref={shipLabelDialogRef}
-        post={post}
-        size={size}
-        hideTrigger={visibleDialog !== "ship_label"}
-        onGoBack={onGoBackToReserve}
-        onOpenCancelDialog={() => onOpenCancelDialog("ship_label")}
       />
 
       {/* E-Gift Dialog */}
