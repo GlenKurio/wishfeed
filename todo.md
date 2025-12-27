@@ -14,6 +14,7 @@
   -- Create a separate shipping adress subcollection for users in db;
 
 - Post gift actions:
+
   --- improve dialog forms: show info on how to send the gift and add a link to gifts page where all info about the gift will be shown;  
   --- Send notifications on dialog actions;
   --- Add rate limiting to actions;
@@ -23,8 +24,8 @@
 - Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
 
 - Finish post design:
-  -- Like posts (add ratelimit to it)
-  -- Save post
+  -- Like posts works as "Wish it" which reposts the wish (add ratelimit to it)
+
   -- Finish all the todos in the component;
   -- Add actions to post (report, delete, edit, hide?)
   In post actions for owner allow to select wishlists to add post to;
