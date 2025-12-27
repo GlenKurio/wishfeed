@@ -1,25 +1,18 @@
 - Gifting:
 
   -- Finsih send e-gift from design; Create a mutation in gift actions hook(separate mutationOptions and firebase function)
+  -- Finish all other dialogs and actions they allow
 
   ***
 
   -- Create gift card design;
-
-  -- Create Gifts page design:
-  --- DIsplay main adress in the header of the page, show amount of addresses and allow to edit adresses;
-  --- Create addresses page for adresses managementl
-  --- create forms to create/update/delete adresses, set address as main;
-  --- Include info about when and where addresses are being shared;
-  -- Create a separate shipping adress subcollection for users in db;
+  -- Create Gifts page design;
 
 - Post gift actions:
 
   --- improve dialog forms: show info on how to send the gift and add a link to gifts page where all info about the gift will be shown;  
   --- Send notifications on dialog actions;
   --- Add rate limiting to actions;
-
-- Create gifts page;
 
 - Posts in draft list on click have a 'Finish' cta. Clicking on which opens the create wish form with prefilled info for this wish so uer can finish it and post;
 
